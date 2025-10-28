@@ -1,0 +1,17 @@
+{
+  "short_name": "Агро Калькулятор",
+  "name": "Агрохімічний калькулятор добрив",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#f1f5f9",
+  "description": "Багатофункціональний калькулятор для розрахунку потреб у добривах."
+}

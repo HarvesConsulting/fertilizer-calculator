@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 // FIX: Import NutrientNeeds and CultureParams to resolve type errors.
 import type { CalculationResults, FormData, NutrientNeeds, CultureParams } from './types';
