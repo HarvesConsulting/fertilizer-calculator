@@ -1,0 +1,204 @@
+import React, { useEffect, useMemo } from 'react';
+import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
+import { FERTIGATION_CULTURES } from '../constants';
+import type { NutrientNeeds, CultureParams } from '../types';
+import { calculateFertigationPlan } from '../utils/fertigationCalculator';
+
+interface FertigationProgramProps {
+    initialNeeds: NutrientNeeds[];
+    culture: string;
+    cultureParams: CultureParams;
+    springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
+    setSpringFertilizer: React.Dispatch<React.SetStateAction<{ n: string; p: string; k: string; ca: string; mg: string; }>>;
+    nitrogenFertilizer: string;
+    setNitrogenFertilizer: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const NutrientInput: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ label, name, value, onChange }) => (
+    <div>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
+        <div className="mt-1 relative rounded-md shadow-sm">
+            <input
+                type="number"
+                name={name}
+                id={name}
+                value={value}
+                onChange={onChange}
+                className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0"
+                min="0"
+                step="0.1"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 sm:text-sm">%</span>
+            </div>
+        </div>
+    </div>
+);
+
+
+export const FertigationProgram: React.FC<FertigationProgramProps> = ({ 
+    initialNeeds, 
+    culture,
+    cultureParams,
+    springFertilizer,
+    setSpringFertilizer,
+    nitrogenFertilizer,
+    setNitrogenFertilizer
+}) => {
+    
+    useEffect(() => {
+        // Reset local state when initial needs change
+        setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '' });
+        setNitrogenFertilizer('ammonium-nitrate');
+    }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer]);
+
+
+    const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSpringFertilizer(prev => ({ ...prev, [name]: value }));
+    };
+    
+    const handleYaraMilaClick = () => {
+        setSpringFertilizer({
+            n: '11',
+            p: '11',
+            k: '21',
+            ca: '0',
+            mg: '2.6',
+        });
+    };
+
+    const findCultureKey = (cultureName: string) => {
+        return Object.keys(FERTIGATION_CULTURES).find(key => 
+            FERTIGATION_CULTURES[key as keyof typeof FERTIGATION_CULTURES].startsWith(cultureName)
+        );
+    };
+
+    const cultureKey = findCultureKey(culture);
+    
+    const { weeklyPlan, totals, fertilizerRate } = useMemo(() => {
+        if (!cultureKey) {
+             return { weeklyPlan: [], totals: {}, fertilizerRate: null };
+        }
+        return calculateFertigationPlan({
+            initialNeeds,
+            cultureKey,
+            cultureParams,
+            springFertilizer,
+            nitrogenFertilizer
+        });
+
+    }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer]);
+
+
+    if (!cultureKey || !FERTIGATION_SCHEDULES[cultureKey]) {
+        return (
+            <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                    <p className="font-bold">Увага</p>
+                    <p>Для культури "{culture}" не знайдено типового графіка фертигації.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (initialNeeds.every(need => need.norm === 0)) {
+         return (
+            <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
+                <p>Фертигація не потрібна на основі розрахунків.</p>
+            </div>
+        );
+    }
+
+    const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? 'Аміачна селітра' : 'Карбамід';
+
+    return (
+        <div>
+             <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
+            
+            <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
+                 <div className="flex justify-between items-center">
+                    <h4 className="text-lg font-semibold text-gray-800">1. Розрахунок весняного (стартового) добрива</h4>
+                    <button
+                        type="button"
+                        onClick={handleYaraMilaClick}
+                        className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors"
+                        title="Заповнити поля даними YaraMila CROPCARE 11-11-21"
+                    >
+                        YaraMila CROPCARE
+                    </button>
+                 </div>
+
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                     <NutrientInput label="Азот (N)" name="n" value={springFertilizer.n} onChange={handleFertilizerChange} />
+                     <NutrientInput label="Фосфор (P₂O₅)" name="p" value={springFertilizer.p} onChange={handleFertilizerChange} />
+                     <NutrientInput label="Калій (K₂O)" name="k" value={springFertilizer.k} onChange={handleFertilizerChange} />
+                     <NutrientInput label="Кальцій (CaO)" name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} />
+                     <NutrientInput label="Магній (MgO)" name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} />
+                 </div>
+                 {fertilizerRate !== null && (
+                    <div className="bg-blue-100 text-blue-800 p-3 rounded-lg">
+                        <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(2)} кг/га</span></p>
+                    </div>
+                 )}
+            </div>
+
+            <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
+                <h4 className="text-lg font-semibold text-gray-800">2. Вибір азотного добрива для фертигації</h4>
+                 <div>
+                    <label htmlFor="nitrogen-fertilizer" className="block text-sm font-medium text-gray-700">Азотне добриво</label>
+                    <select 
+                        id="nitrogen-fertilizer" 
+                        value={nitrogenFertilizer}
+                        onChange={(e) => setNitrogenFertilizer(e.target.value)}
+                        className="mt-1 block w-full md:w-1/3 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    >
+                        <option value="ammonium-nitrate">Аміачна селітра</option>
+                        <option value="urea">Карбамід</option>
+                    </select>
+                </div>
+            </div>
+
+            <h4 className="text-lg font-semibold mb-3 text-gray-800">3. Потижневий план внесення добрив (фізична вага)</h4>
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Тиждень</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">{nitrogenFertilizerName}</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ортофосфорна к-та</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Сульфат калію</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Нітрат кальцію</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Сульфат магнію</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {weeklyPlan.map(item => item && (
+                            <tr key={item.week}>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{item.week}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.nitrogen.toFixed(1)}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.phosphorus.toFixed(1)}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.potassium.toFixed(1)}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.calcium.toFixed(1)}</td>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.magnesium.toFixed(1)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                     <tfoot className="border-t-2 border-gray-300">
+                        <tr className="font-bold bg-gray-100">
+                            <td className="px-4 py-2 text-sm text-gray-800">Загальна кількість, кг/га</td>
+                            <td className="px-4 py-2 text-sm text-gray-800">{totals.nitrogen.toFixed(1)}</td>
+                            <td className="px-4 py-2 text-sm text-gray-800">{totals.phosphorus.toFixed(1)}</td>
+                            <td className="px-4 py-2 text-sm text-gray-800">{totals.potassium.toFixed(1)}</td>
+                            <td className="px-4 py-2 text-sm text-gray-800">{totals.calcium.toFixed(1)}</td>
+                            <td className="px-4 py-2 text-sm text-gray-800">{totals.magnesium.toFixed(1)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    );
+};
