@@ -133,7 +133,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         onChange={(e) => handleFertilizerChange(need.element, need.norm, e.target.value)}
                                         className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                                     >
-                                        <option value="">- Виберіть добриво -</option>
                                         {simpleFertilizersForElement.map(fert => (
                                             <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
                                         ))}
@@ -165,7 +164,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     onChange={handleAmendmentChange}
                                     className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                                 >
-                                    <option value="">- Виберіть меліорант -</option>
                                     {AMENDMENTS.map(amend => (
                                         <option key={amend.value} value={amend.value}>{amend.label}</option>
                                     ))}
@@ -201,7 +199,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                             onChange={(e) => handleFertilizerChange(need.element, need.norm, e.target.value)}
                                             className="w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                                         >
-                                            <option value="">- Виберіть добриво -</option>
                                             {simpleFertilizersForElement.map(fert => (
                                                 <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
                                             ))}
@@ -228,7 +225,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         onChange={handleAmendmentChange}
                                         className="w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                                     >
-                                        <option value="">- Виберіть меліорант -</option>
                                         {AMENDMENTS.map(amend => (
                                             <option key={amend.value} value={amend.value}>{amend.label}</option>
                                         ))}
