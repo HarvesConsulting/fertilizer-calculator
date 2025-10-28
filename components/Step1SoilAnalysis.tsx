@@ -19,10 +19,10 @@ const FormField: React.FC<{ label: string; name: string; value: string; onChange
                 onChange={onChange}
                 min={min}
                 step={step}
-                className="w-full pl-3 pr-16 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-3 pr-20 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
             />
-            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">{unit}</span>
+            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 text-sm">{unit}</span>
         </div>
     </div>
 );
@@ -50,8 +50,6 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
         setError(null);
 
         for (const value of Object.values(formData)) {
-            // FIX: Explicitly convert `value` to a string before using string methods or passing to functions expecting a string.
-            // TypeScript infers `value` as `unknown` from `Object.values`, so conversion is necessary.
             if (String(value).trim() === '' || isNaN(parseFloat(String(value)))) {
                 setError('Будь ласка, заповніть всі поля коректними числовими значеннями.');
                 return;
@@ -63,7 +61,7 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
     return (
          <form onSubmit={handleSubmit} className="space-y-8">
              <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Крок 1: Аналіз ґрунту</h2>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField label="Нітратний азот" name="nitrogenAnalysis" value={formData.nitrogenAnalysis} onChange={handleChange} unit="мг/кг" step="1"/>
                 <FormField label="Фосфор (P₂O₅)" name="phosphorus" value={formData.phosphorus} onChange={handleChange} unit="мг/кг" step="1"/>
                 <FormField label="Калій (K₂O)" name="potassium" value={formData.potassium} onChange={handleChange} unit="мг/кг" step="1"/>

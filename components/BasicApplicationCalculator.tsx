@@ -29,7 +29,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     const needsAmendment = ph && parseFloat(ph) <= 6.8;
 
     useEffect(() => {
-        // Reset component state if initial needs or soil data change
         setDisplayNeeds(needs);
         setSelectedAmendment('');
         setCalculations(initialState);
@@ -40,7 +39,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         const amendmentValue = e.target.value;
         setSelectedAmendment(amendmentValue);
 
-        // Reset fertilizer calculations for Ca and Mg regardless, as needs will change or reset
         setCalculations(prev => ({
             ...prev,
             'CaO': { selectedFertilizer: '', calculatedNorm: 0 },
@@ -48,7 +46,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         }));
 
         if (!amendmentValue) {
-            // If user deselects, reset to initial state
             setDisplayNeeds(needs);
             return;
         }
@@ -60,7 +57,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         const amendmentEffects = AMENDMENT_EFFECTS[amendmentValue as keyof typeof AMENDMENT_EFFECTS];
         const numericPh = parseFloat(soilData.ph);
 
-        // Find the original, un-amended needs for Ca and Mg from props.
         const initialCaNeed = needs.find(n => n.element === 'CaO')?.norm ?? 0;
         const initialMgNeed = needs.find(n => n.element === 'MgO')?.norm ?? 0;
 
@@ -70,7 +66,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         const calciumFromAmendment = amendmentEffects.calcium * amendmentRateTons;
         const magnesiumFromAmendment = amendmentEffects.magnesium * amendmentRateTons;
 
-        // Recalculate needs by subtracting the amendment's contribution from the initial needs
         const newCalciumRate = Math.round(Math.max(0, initialCaNeed - calciumFromAmendment));
         const newMagnesiumRate = Math.round(Math.max(0, initialMgNeed - magnesiumFromAmendment));
         
@@ -116,10 +111,73 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         );
     }
     
+    const nutrientNeeds = displayNeeds.filter(need => need.element !== 'Меліорант' && need.norm > 0);
+
     return (
         <div>
             <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Основне внесення</h3>
-            <div className="overflow-x-auto">
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {nutrientNeeds.map(need => {
+                    const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
+                    const calculation = calculations[need.element];
+                    return (
+                        <div key={need.element} className="bg-gray-50 p-4 rounded-lg shadow">
+                            <h4 className="font-bold text-lg text-gray-800">{need.element}</h4>
+                            <div className="mt-2 space-y-2">
+                                <p><span className="font-semibold">Потреба:</span> {need.norm} {renderUnit(need.element)}</p>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Добриво:</label>
+                                    <select
+                                        value={calculation.selectedFertilizer}
+                                        onChange={(e) => handleFertilizerChange(need.element, need.norm, e.target.value)}
+                                        className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                    >
+                                        <option value="">- Виберіть добриво -</option>
+                                        {simpleFertilizersForElement.map(fert => (
+                                            <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {calculation.calculatedNorm > 0 && (
+                                     <p className="font-semibold text-blue-600">Норма внесення: {calculation.calculatedNorm} кг/га</p>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+                {needsAmendment && (
+                    <div className="bg-blue-50 p-4 rounded-lg shadow">
+                        <h4 className="font-bold text-lg text-gray-800">Меліорант</h4>
+                        <div className="mt-2 space-y-2">
+                            <p>
+                                <span className="font-semibold">Потреба:</span> 
+                                <span className="ml-2 font-bold">
+                                {amendmentRowData && amendmentRowData.norm > 0 
+                                   ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
+                                   : 'Оберіть для розрахунку'}
+                                </span>
+                            </p>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Меліорант:</label>
+                                 <select
+                                    value={selectedAmendment}
+                                    onChange={handleAmendmentChange}
+                                    className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                >
+                                    <option value="">- Виберіть меліорант -</option>
+                                    {AMENDMENTS.map(amend => (
+                                        <option key={amend.value} value={amend.value}>{amend.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200">
                     <thead className="bg-gray-100">
                         <tr>
@@ -130,10 +188,9 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {displayNeeds.filter(need => need.element !== 'Меліорант' && need.norm > 0).map(need => {
+                        {nutrientNeeds.map(need => {
                             const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
                             const calculation = calculations[need.element];
-                            
                             return (
                                 <tr key={need.element}>
                                     <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{need.element}</td>
@@ -156,7 +213,6 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                 </tr>
                             );
                         })}
-
                         {needsAmendment && (
                              <tr className="bg-blue-50">
                                 <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Меліорант</td>

@@ -27,12 +27,12 @@ export const Stepper: React.FC<StepperProps> = ({ currentStep, steps }) => {
                             >
                                 {isCompleted ? '✓' : stepNumber}
                             </div>
-                            <p className={`mt-2 text-sm text-center ${isActive ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
+                            <p className={`mt-2 text-sm text-center hidden md:block ${isActive ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
                                 {step}
                             </p>
                         </div>
                         {stepNumber < steps.length && (
-                             <div className={`flex-1 h-1 mx-4 transition-colors duration-300 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                             <div className={`flex-1 h-1 mx-2 md:mx-4 transition-colors duration-300 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}></div>
                         )}
                     </React.Fragment>
                 );

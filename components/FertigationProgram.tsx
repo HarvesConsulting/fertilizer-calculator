@@ -48,7 +48,6 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
 }) => {
     
     useEffect(() => {
-        // Reset local state when initial needs change
         setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '' });
         setNitrogenFertilizer('ammonium-nitrate');
     }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer]);
@@ -114,25 +113,26 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     }
 
     const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? 'Аміачна селітра' : 'Карбамід';
+    const tableHeaders = [nitrogenFertilizerName, 'Ортофосфорна к-та', 'Сульфат калію', 'Нітрат кальцію', 'Сульфат магнію'];
 
     return (
         <div>
              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
             
             <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
-                 <div className="flex justify-between items-center">
+                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <h4 className="text-lg font-semibold text-gray-800">1. Розрахунок весняного (стартового) добрива</h4>
                     <button
                         type="button"
                         onClick={handleYaraMilaClick}
-                        className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors"
+                        className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors flex-shrink-0"
                         title="Заповнити поля даними YaraMila CROPCARE 11-11-21"
                     >
                         YaraMila CROPCARE
                     </button>
                  </div>
 
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                      <NutrientInput label="Азот (N)" name="n" value={springFertilizer.n} onChange={handleFertilizerChange} />
                      <NutrientInput label="Фосфор (P₂O₅)" name="p" value={springFertilizer.p} onChange={handleFertilizerChange} />
                      <NutrientInput label="Калій (K₂O)" name="k" value={springFertilizer.k} onChange={handleFertilizerChange} />
@@ -140,8 +140,8 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                      <NutrientInput label="Магній (MgO)" name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} />
                  </div>
                  {fertilizerRate !== null && (
-                    <div className="bg-blue-100 text-blue-800 p-3 rounded-lg">
-                        <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(2)} кг/га</span></p>
+                    <div className="bg-blue-100 text-blue-800 p-3 rounded-lg mt-4">
+                        <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(1)} кг/га</span></p>
                     </div>
                  )}
             </div>
@@ -163,16 +163,42 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             </div>
 
             <h4 className="text-lg font-semibold mb-3 text-gray-800">3. Потижневий план внесення добрив (фізична вага)</h4>
-            <div className="overflow-x-auto">
+            
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {weeklyPlan.map(item => item && (
+                    <div key={item.week} className="bg-gray-50 p-4 rounded-lg shadow">
+                        <h5 className="font-bold text-lg text-blue-600">Тиждень {item.week}</h5>
+                        <div className="mt-2 space-y-1 text-sm">
+                            <p><span className="font-semibold">{tableHeaders[0]}:</span> {item.nitrogen.toFixed(1)} кг/га</p>
+                            <p><span className="font-semibold">{tableHeaders[1]}:</span> {item.phosphorus.toFixed(1)} кг/га</p>
+                            <p><span className="font-semibold">{tableHeaders[2]}:</span> {item.potassium.toFixed(1)} кг/га</p>
+                            <p><span className="font-semibold">{tableHeaders[3]}:</span> {item.calcium.toFixed(1)} кг/га</p>
+                            <p><span className="font-semibold">{tableHeaders[4]}:</span> {item.magnesium.toFixed(1)} кг/га</p>
+                        </div>
+                    </div>
+                ))}
+                 <div className="bg-gray-800 text-white p-4 rounded-lg shadow mt-4">
+                    <h5 className="font-bold text-lg">Загальна кількість, кг/га</h5>
+                    <div className="mt-2 space-y-1 text-sm">
+                        <p><span className="font-semibold">{tableHeaders[0]}:</span> {totals.nitrogen.toFixed(1)}</p>
+                        <p><span className="font-semibold">{tableHeaders[1]}:</span> {totals.phosphorus.toFixed(1)}</p>
+                        <p><span className="font-semibold">{tableHeaders[2]}:</span> {totals.potassium.toFixed(1)}</p>
+                        <p><span className="font-semibold">{tableHeaders[3]}:</span> {totals.calcium.toFixed(1)}</p>
+                        <p><span className="font-semibold">{tableHeaders[4]}:</span> {totals.magnesium.toFixed(1)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200">
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Тиждень</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">{nitrogenFertilizerName}</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ортофосфорна к-та</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Сульфат калію</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Нітрат кальцію</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Сульфат магнію</th>
+                            {tableHeaders.map(header => (
+                                <th key={header} className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">{header}</th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">

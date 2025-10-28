@@ -21,7 +21,7 @@ const FormField: React.FC<{ label: string; name: string; value: string; onChange
                 onChange={onChange}
                 step={step}
                 min="0"
-                className="w-full pl-3 pr-12 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-3 pr-16 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
             />
             <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">{unit}</span>
@@ -96,17 +96,17 @@ export const Step2CropYield: React.FC<Step2Props> = ({ onBack, onCalculate, data
 
             {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">{error}</div>}
 
-            <div className="flex justify-between items-center pt-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-between items-center pt-4 gap-4">
                  <button
                     type="button"
                     onClick={onBack}
-                    className="bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300"
+                    className="w-full sm:w-auto bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300"
                 >
                     Назад
                 </button>
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
+                    className="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
                 >
                     Розрахувати
                 </button>
