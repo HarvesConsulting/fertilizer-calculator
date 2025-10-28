@@ -57,7 +57,7 @@ export const Step4Results: React.FC<Step4Props> = ({ onReset, results, type, for
                 {showFertigation && (
                     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                         {fertigationNeedsSummary.length > 0 && (
-                            <div className="mb-10">
+                            <div className="mb-10 hidden md:block">
                                 <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Початкова потреба для фертигації (д.р./га)</h3>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                                     {fertigationNeedsSummary.map(need => (
