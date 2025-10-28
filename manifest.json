@@ -3,10 +3,16 @@
   "name": "Агрохімічний калькулятор добрив",
   "icons": [
     {
-      "src": "logo.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
