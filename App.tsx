@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport } from './types';
+import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections } from './types';
 import { Stepper } from './components/Stepper';
 import { Step1SoilAnalysis } from './components/Step1SoilAnalysis';
 import { Step2CropYield } from './components/Step2CropYield';
@@ -22,18 +22,6 @@ const INITIAL_FORM_DATA: FormData = {
     amendment: '',
 };
 
-const SunIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-);
-
-const MoonIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-    </svg>
-);
-
 const CalculatorIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-2m-3 2v-6m-3 6v-2m12-4H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2z" />
@@ -46,31 +34,20 @@ const ReportsIcon = () => (
     </svg>
 );
 
-const ThemeSwitcher: React.FC<{ theme: 'light' | 'dark'; setTheme: (theme: 'light' | 'dark') => void; }> = ({ theme, setTheme }) => {
-    const toggleTheme = () => {
-        setTheme(theme === 'light' ? 'dark' : 'light');
-    };
-
-    return (
-        <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors"
-            aria-label="Toggle theme"
-        >
-            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
-        </button>
-    );
-};
-
-
 function App() {
     const [view, setView] = useState<'calculator' | 'reports'>('calculator');
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
     const [results, setResults] = useState<CalculationResults | null>(null);
     const [calculationType, setCalculationType] = useState<'basic' | 'fertigation' | 'full' | null>(null);
+    
+    // State for FertigationProgram
     const [springFertilizer, setSpringFertilizer] = useState({ n: '', p: '', k: '', ca: '', mg: '' });
     const [nitrogenFertilizer, setNitrogenFertilizer] = useState('ammonium-nitrate');
+
+    // State for BasicApplicationCalculator
+    const [basicFertilizers, setBasicFertilizers] = useState<BasicFertilizerSelections>({});
+    const [selectedAmendment, setSelectedAmendment] = useState('');
 
     const [reports, setReports] = useState<SavedReport[]>(() => {
         try {
@@ -82,23 +59,6 @@ function App() {
         }
     });
     const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null);
-
-    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            return 'dark';
-        }
-        return 'light';
-    });
-
-    useEffect(() => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        localStorage.setItem('theme', theme);
-    }, [theme]);
 
     useEffect(() => {
         try {
@@ -188,6 +148,8 @@ function App() {
         setCalculationType(null);
         setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '' });
         setNitrogenFertilizer('ammonium-nitrate');
+        setBasicFertilizers({});
+        setSelectedAmendment('');
     };
     
     const handleSaveReport = () => {
@@ -200,10 +162,12 @@ function App() {
             calculationType,
             springFertilizer,
             nitrogenFertilizer,
+            basicFertilizers,
+            selectedAmendment,
         };
         setReports(prev => [newReport, ...prev]);
-        // Ideally, show a toast notification here. For now, we can switch to reports view.
         setView('reports');
+        setSelectedReport(null);
     };
     
     const handleDeleteReport = (id: string) => {
@@ -235,6 +199,10 @@ function App() {
                                 setSpringFertilizer={setSpringFertilizer}
                                 nitrogenFertilizer={nitrogenFertilizer}
                                 setNitrogenFertilizer={setNitrogenFertilizer}
+                                basicFertilizers={basicFertilizers}
+                                setBasicFertilizers={setBasicFertilizers}
+                                selectedAmendment={selectedAmendment}
+                                setSelectedAmendment={setSelectedAmendment}
                            />;
                 default:
                     return null;
@@ -242,7 +210,7 @@ function App() {
         };
 
         return (
-            <main className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-xl shadow-lg">
+            <main className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
                 <Stepper currentStep={currentStep} steps={steps} />
                 <div className="mt-8">
                     {renderStep()}
@@ -263,15 +231,16 @@ function App() {
                         handleReset();
                         setView('calculator');
                     }}
+                    onBack={() => setView('calculator')}
                 />;
     };
 
 
     return (
-        <div className="container mx-auto p-4 md:p-8 font-sans bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="container mx-auto p-4 md:p-8 font-sans bg-gray-50 min-h-screen">
             <header className="text-center mb-10 relative">
-                <h1 className="text-3xl md:text-5xl font-bold text-gray-800 dark:text-gray-100">Агрохімічний калькулятор</h1>
-                <p className="text-md md:text-lg text-gray-600 dark:text-gray-400 mt-2">
+                <h1 className="text-3xl md:text-5xl font-bold text-gray-800">Агрохімічний калькулятор</h1>
+                <p className="text-md md:text-lg text-gray-600 mt-2">
                     {view === 'calculator' ? 'Розрахунок потреб у живленні для овочевих культур' : 'Збережені звіти'}
                 </p>
                 <div className="absolute top-0 right-0 flex items-center gap-2">
@@ -280,18 +249,17 @@ function App() {
                             setView(view === 'calculator' ? 'reports' : 'calculator');
                             setSelectedReport(null);
                         }}
-                        className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors"
+                        className="p-2 rounded-full text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500 transition-colors"
                         aria-label={view === 'calculator' ? "Переглянути збережені звіти" : "Перейти до калькулятора"}
                     >
                         {view === 'calculator' ? <ReportsIcon /> : <CalculatorIcon />}
                     </button>
-                    <ThemeSwitcher theme={theme} setTheme={setTheme} />
                 </div>
             </header>
             
             {view === 'calculator' ? renderCalculator() : renderReports()}
             
-            <footer className="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
+            <footer className="text-center mt-12 text-gray-500 text-sm">
                 <p>&copy; {new Date().getFullYear()} Агрохімічний калькулятор. Всі права захищено.</p>
             </footer>
         </div>

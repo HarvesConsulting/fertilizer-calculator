@@ -6,6 +6,7 @@ interface ReportsListProps {
     onView: (report: SavedReport) => void;
     onDelete: (id: string) => void;
     onNewCalculation: () => void;
+    onBack: () => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -18,13 +19,13 @@ const formatDate = (dateString: string) => {
     });
 };
 
-export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation }) => {
+export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onBack }) => {
 
     if (reports.length === 0) {
         return (
-            <div className="text-center bg-white dark:bg-gray-800 p-8 md:p-16 rounded-xl shadow-lg">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Збережених звітів немає</h2>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">
+            <div className="text-center bg-white p-8 md:p-16 rounded-xl shadow-lg">
+                <h2 className="text-2xl font-semibold text-gray-800">Збережених звітів немає</h2>
+                <p className="mt-4 text-gray-600">
                     У вас ще немає збережених розрахунків. Створіть свій перший!
                 </p>
                 <button
@@ -38,30 +39,41 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
     }
     
     return (
-        <div className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 border-b dark:border-gray-700 pb-4 mb-6">Мої звіти</h2>
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-6 gap-4">
+                <h2 className="text-2xl font-semibold text-gray-800">Мої звіти</h2>
+                <button
+                    onClick={onBack}
+                    className="w-full sm:w-auto bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center gap-2"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span>Назад до калькулятора</span>
+                </button>
+            </div>
             <div className="space-y-4">
                 {reports.map(report => (
-                    <div key={report.id} className="p-4 border dark:border-gray-700 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div key={report.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-gray-50 transition-colors">
                         <div className="flex-grow">
-                            <h3 className="font-bold text-lg text-blue-700 dark:text-blue-400">{report.formData.culture}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <h3 className="font-bold text-lg text-blue-700">{report.formData.culture}</h3>
+                            <p className="text-sm text-gray-600">
                                 Врожайність: {report.formData.plannedYield} т/га
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            <p className="text-xs text-gray-500 mt-1">
                                 Збережено: {formatDate(report.timestamp)}
                             </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0 w-full md:w-auto">
                             <button
                                 onClick={() => onView(report)}
-                                className="w-full md:w-auto flex-1 bg-blue-100 text-blue-700 dark:bg-blue-900/70 dark:text-blue-300 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/70 transition"
+                                className="w-full md:w-auto flex-1 bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 transition"
                             >
                                 Переглянути
                             </button>
                             <button
                                 onClick={() => onDelete(report.id)}
-                                className="w-auto bg-red-100 text-red-700 dark:bg-red-900/70 dark:text-red-300 p-2 rounded-lg hover:bg-red-200 dark:hover:bg-red-800/70 transition"
+                                className="w-auto bg-red-100 text-red-700 p-2 rounded-lg hover:bg-red-200 transition"
                                 aria-label="Видалити звіт"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

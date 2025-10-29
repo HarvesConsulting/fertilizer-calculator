@@ -29,6 +29,12 @@ export interface FormData {
     amendment: string;
 }
 
+export type BasicFertilizerSelections = {
+    [element: string]: {
+        selectedFertilizer: string;
+    };
+};
+
 export interface SavedReport {
   id: string;
   timestamp: string;
@@ -37,4 +43,6 @@ export interface SavedReport {
   calculationType: 'basic' | 'fertigation' | 'full';
   springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
   nitrogenFertilizer: string;
+  basicFertilizers: BasicFertilizerSelections;
+  selectedAmendment: string;
 }

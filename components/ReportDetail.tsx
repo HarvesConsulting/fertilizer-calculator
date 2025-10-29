@@ -11,8 +11,8 @@ interface ReportDetailProps {
 
 const InfoBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div>
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">{title}</h4>
-        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg space-y-2 text-gray-800 dark:text-gray-200">
+        <h4 className="text-lg font-semibold text-gray-700 mb-2">{title}</h4>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-800">
             {children}
         </div>
     </div>
@@ -25,26 +25,25 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
     const showBasic = calculationType === 'basic' || calculationType === 'full';
     const showFertigation = calculationType === 'fertigation' || calculationType === 'full';
     
-    // Create dummy state setters as FertigationProgram expects them, but they won't be used in readOnly mode
     const [springFert, setSpringFert] = useState(springFertilizer);
     const [nitroFert, setNitroFert] = useState(nitrogenFertilizer);
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-xl shadow-lg space-y-10">
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg space-y-10">
             <div>
                 <button
                     onClick={onBack}
-                    className="mb-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center gap-2"
+                    className="mb-6 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     До списку звітів
                 </button>
-                <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-100">
+                <h2 className="text-3xl font-bold text-center text-gray-800">
                     Звіт для "{results.culture}"
                 </h2>
-                <p className="text-center text-gray-500 dark:text-gray-400 text-sm mt-1">
+                <p className="text-center text-gray-500 text-sm mt-1">
                     Збережено: {new Date(report.timestamp).toLocaleString('uk-UA')}
                 </p>
             </div>
@@ -63,12 +62,20 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
 
             <div className="space-y-10">
                 {showBasic && (
-                    <div className="p-6 rounded-lg border dark:border-gray-700">
-                       <BasicApplicationCalculator needs={results.basic} soilData={formData} />
+                    <div className="p-6 rounded-lg border">
+                       <BasicApplicationCalculator 
+                           needs={results.basic} 
+                           soilData={formData}
+                           selections={report.basicFertilizers || {}}
+                           onSelectionsChange={() => {}}
+                           amendment={report.selectedAmendment || ''}
+                           onAmendmentChange={() => {}}
+                           readOnly={true}
+                       />
                     </div>
                 )}
                 {showFertigation && (
-                    <div className="p-6 rounded-lg border dark:border-gray-700">
+                    <div className="p-6 rounded-lg border">
                         <FertigationProgram 
                             initialNeeds={results.fertigation} 
                             culture={results.culture}
