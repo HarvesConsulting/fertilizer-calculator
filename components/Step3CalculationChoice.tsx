@@ -8,14 +8,14 @@ interface Step3Props {
 const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: string; isSelected: boolean; }> = ({ onClick, title, description, isSelected }) => (
     <button
         onClick={onClick}
-        className={`w-full text-left p-6 border rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+        className={`group w-full text-left p-6 border rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
             isSelected 
                 ? 'bg-green-50 border-green-500 ring-green-400' 
-                : 'border-gray-200 hover:bg-gray-50 hover:border-blue-500 focus:ring-blue-500'
+                : 'border-gray-200 hover:bg-green-50 hover:border-green-500 focus:bg-green-50 focus:border-green-500 focus:ring-green-400'
         }`}
     >
-        <h3 className={`text-xl font-bold transition-colors ${isSelected ? 'text-green-800' : 'text-gray-800'}`}>{title}</h3>
-        <p className={`mt-2 transition-colors ${isSelected ? 'text-green-700' : 'text-gray-600'}`}>{description}</p>
+        <h3 className={`text-xl font-bold transition-colors ${isSelected ? 'text-green-800' : 'text-gray-800 group-hover:text-green-800'}`}>{title}</h3>
+        <p className={`mt-2 transition-colors ${isSelected ? 'text-green-700' : 'text-gray-600 group-hover:text-green-700'}`}>{description}</p>
     </button>
 );
 

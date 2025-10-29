@@ -83,7 +83,8 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     
     const { weeklyPlan, totals, fertilizerRate } = useMemo(() => {
         if (!cultureKey) {
-             return { weeklyPlan: [], totals: {}, fertilizerRate: null };
+            // FIX: Provide a default `totals` object with all required properties to satisfy TypeScript.
+             return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate: null };
         }
         return calculateFertigationPlan({
             initialNeeds,

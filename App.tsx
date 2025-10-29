@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections } from './types';
 import { Stepper } from './components/Stepper';
 import { Step1SoilAnalysis } from './components/Step1SoilAnalysis';
@@ -59,6 +59,17 @@ function App() {
         }
     });
     const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null);
+
+    const [customLogoUrl, setCustomLogoUrl] = useState<string | null>(() => {
+        try {
+            return localStorage.getItem('custom-logo');
+        } catch (error) {
+            console.error("Failed to load custom logo from localStorage", error);
+            return null;
+        }
+    });
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
 
     useEffect(() => {
         try {
@@ -176,6 +187,40 @@ function App() {
             setSelectedReport(null);
         }
     };
+
+    const handleLogoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                try {
+                    localStorage.setItem('custom-logo', base64String);
+                    setCustomLogoUrl(base64String);
+                } catch (error) {
+                    console.error("Failed to save custom logo to localStorage", error);
+                    alert("Не вдалося зберегти логотип. Можливо, сховище переповнене.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleResetLogo = (e: React.MouseEvent) => {
+        e.stopPropagation(); 
+        if (window.confirm('Ви впевнені, що хочете видалити власний логотип і повернути стандартний?')) {
+            try {
+                localStorage.removeItem('custom-logo');
+                setCustomLogoUrl(null);
+            } catch (error) {
+                console.error("Failed to remove custom logo from localStorage", error);
+            }
+        }
+    };
     
     const renderCalculator = () => {
         const renderStep = () => {
@@ -238,9 +283,50 @@ function App() {
 
     return (
         <div className="container mx-auto p-4 md:p-8 font-sans bg-gray-50 min-h-screen">
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleLogoChange}
+                accept="image/*"
+                className="hidden"
+                aria-hidden="true"
+            />
             <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-4 md:p-6 rounded-xl shadow-2xl mb-10 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <img src="logo.svg" alt="Логотип калькулятора" className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md" />
+                     <div 
+                        className="relative group cursor-pointer" 
+                        onClick={handleLogoClick}
+                        title="Натисніть, щоб змінити логотип"
+                    >
+                        <img 
+                            src={customLogoUrl || "logo.svg"} 
+                            alt="Логотип калькулятора" 
+                            className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md object-cover"
+                             onError={() => {
+                                if (customLogoUrl) {
+                                    console.error("Failed to load custom logo from localStorage.");
+                                    localStorage.removeItem('custom-logo');
+                                    setCustomLogoUrl(null);
+                                }
+                             }}
+                        />
+                        {customLogoUrl && (
+                            <button
+                                onClick={handleResetLogo}
+                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Видалити власний логотип"
+                                aria-label="Видалити власний логотип"
+                            >
+                                &times;
+                            </button>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                    </div>
                     <div>
                         <h1 className="text-xl md:text-3xl font-bold tracking-tight">Агрохімічний калькулятор</h1>
                         <p className="text-sm md:text-base text-blue-200 mt-1 hidden sm:block">
