@@ -9,7 +9,7 @@ interface Step1Props {
 const FormField: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit: string; type?: string; step?: string; min?: string; max?: string }> = 
     ({ label, name, value, onChange, unit, type = 'number', step = "0.1", min = "0" }) => (
     <div className="flex flex-col">
-        <label htmlFor={name} className="mb-1 font-medium text-gray-700">{label}</label>
+        <label htmlFor={name} className="mb-1 font-medium text-gray-700 dark:text-gray-300">{label}</label>
         <div className="relative">
             <input
                 id={name}
@@ -19,10 +19,10 @@ const FormField: React.FC<{ label: string; name: string; value: string; onChange
                 onChange={onChange}
                 min={min}
                 step={step}
-                className="w-full pl-3 pr-20 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-3 pr-20 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                 required
             />
-            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 text-sm">{unit}</span>
+            <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 text-sm">{unit}</span>
         </div>
     </div>
 );
@@ -60,7 +60,7 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
 
     return (
          <form onSubmit={handleSubmit} className="space-y-8">
-             <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Крок 1: Аналіз ґрунту</h2>
+             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 border-b dark:border-gray-700 pb-4 mb-6">Крок 1: Аналіз ґрунту</h2>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField label="Нітратний азот" name="nitrogenAnalysis" value={formData.nitrogenAnalysis} onChange={handleChange} unit="мг/кг" step="1"/>
                 <FormField label="Фосфор (P₂O₅)" name="phosphorus" value={formData.phosphorus} onChange={handleChange} unit="мг/кг" step="1"/>
@@ -71,7 +71,7 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
                 <FormField label="ЄКО" name="cec" value={formData.cec} onChange={handleChange} unit="мг-екв/100г"/>
              </div>
 
-             {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">{error}</div>}
+             {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded dark:bg-red-900/50 dark:border-red-700 dark:text-red-300" role="alert">{error}</div>}
 
              <div className="text-center pt-4">
                 <button

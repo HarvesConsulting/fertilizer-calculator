@@ -8,10 +8,10 @@ interface Step3Props {
 const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: string; }> = ({ onClick, title, description }) => (
     <button
         onClick={onClick}
-        className="w-full text-left p-6 border rounded-lg hover:bg-gray-50 hover:border-blue-500 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full text-left p-6 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-blue-500 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-        <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-        <p className="mt-2 text-gray-600">{description}</p>
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h3>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
     </button>
 );
 
@@ -19,7 +19,7 @@ const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: 
 export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect }) => {
     return (
         <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Крок 3: Вибір розрахунку</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 border-b dark:border-gray-700 pb-4 mb-6">Крок 3: Вибір розрахунку</h2>
             <div className="space-y-4">
                 <ChoiceButton 
                     onClick={() => onSelect('basic')} 
@@ -41,7 +41,7 @@ export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect 
                  <button
                     type="button"
                     onClick={onBack}
-                    className="bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300"
+                    className="bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
                 >
                     Назад
                 </button>

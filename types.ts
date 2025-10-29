@@ -28,3 +28,13 @@ export interface FormData {
     cec: string;
     amendment: string;
 }
+
+export interface SavedReport {
+  id: string;
+  timestamp: string;
+  formData: FormData;
+  results: CalculationResults;
+  calculationType: 'basic' | 'fertigation' | 'full';
+  springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
+  nitrogenFertilizer: string;
+}
