@@ -70,9 +70,16 @@ function App() {
         }
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const isInitialMount = useRef(true);
 
 
     useEffect(() => {
+        // This effect now prevents writing to localStorage on the initial render,
+        // which makes the saving process more robust and prevents accidental data loss on load.
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
         try {
             localStorage.setItem('agro-reports', JSON.stringify(reports));
         } catch (error) {
@@ -177,14 +184,30 @@ function App() {
             basicFertilizers,
             selectedAmendment,
         };
-        setReports(prev => [newReport, ...prev]);
+        setReports(prev => {
+            const updatedReports = [newReport, ...prev];
+            try {
+                localStorage.setItem('agro-reports', JSON.stringify(updatedReports));
+            } catch (error) {
+                console.error("Failed to save reports to localStorage", error);
+            }
+            return updatedReports;
+        });
         setView('reports');
         setSelectedReport(null);
     };
     
     const handleDeleteReport = (id: string) => {
         if (window.confirm('Ви впевнені, що хочете видалити цей звіт?')) {
-            setReports(prev => prev.filter(report => report.id !== id));
+            setReports(prev => {
+                const updatedReports = prev.filter(report => report.id !== id);
+                try {
+                     localStorage.setItem('agro-reports', JSON.stringify(updatedReports));
+                } catch (error) {
+                    console.error("Failed to save reports to localStorage", error);
+                }
+                return updatedReports;
+            });
             setSelectedReport(null);
         }
     };
