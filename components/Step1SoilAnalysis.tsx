@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { FormData } from '../types';
 import { StyledFormField } from './StyledFormField';
 
@@ -8,7 +8,23 @@ interface Step1Props {
 }
 
 export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
+    const LOCAL_STORAGE_KEY = 'savedSoilAnalysisData';
     const [formData, setFormData] = useState(data);
+
+    // Load data from localStorage on component mount
+    useEffect(() => {
+        try {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                // Only update fields relevant to this step, preserving others
+                setFormData(prev => ({ ...prev, ...parsedData }));
+            }
+        } catch (error) {
+            console.error("Failed to load saved soil analysis data from localStorage", error);
+        }
+    }, []); // Empty array means run only once on mount
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -19,6 +35,27 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
         e.preventDefault();
         onNext(formData);
     };
+
+    // Save data to localStorage
+    const handleSaveData = () => {
+        try {
+            const dataToSave = {
+                nitrogenAnalysis: formData.nitrogenAnalysis,
+                phosphorus: formData.phosphorus,
+                potassium: formData.potassium,
+                calcium: formData.calcium,
+                magnesium: formData.magnesium,
+                ph: formData.ph,
+                cec: formData.cec,
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+            alert('Дані аналізу ґрунту збережено!');
+        } catch (error) {
+            console.error("Failed to save soil analysis data to localStorage", error);
+            alert('Не вдалося зберегти дані.');
+        }
+    };
+
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -32,10 +69,17 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, data }) => {
                 <StyledFormField label="Кислотність (pH)" name="ph" value={formData.ph} onChange={handleChange} unit="" step="0.1" max="14" />
                 <StyledFormField label="Ємність катіонного обміну (ЄКО)" name="cec" value={formData.cec} onChange={handleChange} unit="мг-екв/100г" />
             </div>
-            <div className="flex justify-end items-center pt-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-end items-center pt-4 gap-4">
+                 <button
+                    type="button"
+                    onClick={handleSaveData}
+                    className="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition duration-300"
+                >
+                    Запам'ятати введення
+                </button>
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
+                    className="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
                 >
                     Далі
                 </button>
