@@ -238,21 +238,29 @@ function App() {
 
     return (
         <div className="container mx-auto p-4 md:p-8 font-sans bg-gray-50 min-h-screen">
-            <header className="text-center mb-10 relative">
-                <h1 className="text-3xl md:text-5xl font-bold text-gray-800">Агрохімічний калькулятор</h1>
-                <p className="text-md md:text-lg text-gray-600 mt-2">
-                    {view === 'calculator' ? 'Розрахунок потреб у живленні для овочевих культур' : 'Збережені звіти'}
-                </p>
-                <div className="absolute top-0 right-0 flex items-center gap-2">
+            <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-4 md:p-6 rounded-xl shadow-2xl mb-10 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <img src="logo.svg" alt="Логотип калькулятора" className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md" />
+                    <div>
+                        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Агрохімічний калькулятор</h1>
+                        <p className="text-sm md:text-base text-blue-200 mt-1 hidden sm:block">
+                             {view === 'calculator' ? 'Розрахунок потреб у живленні для овочевих культур' : 'Збережені звіти'}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center">
                     <button
                         onClick={() => {
                             setView(view === 'calculator' ? 'reports' : 'calculator');
                             setSelectedReport(null);
                         }}
-                        className="p-2 rounded-full text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500 transition-colors"
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white"
                         aria-label={view === 'calculator' ? "Переглянути збережені звіти" : "Перейти до калькулятора"}
                     >
                         {view === 'calculator' ? <ReportsIcon /> : <CalculatorIcon />}
+                        <span className="hidden md:inline">
+                            {view === 'calculator' ? 'Звіти' : 'Калькулятор'}
+                        </span>
                     </button>
                 </div>
             </header>
