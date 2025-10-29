@@ -70,6 +70,7 @@ function App() {
         }
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const reportInputRef = useRef<HTMLInputElement>(null);
     const isInitialMount = useRef(true);
 
 
@@ -173,6 +174,7 @@ function App() {
     
     const handleSaveReport = () => {
         if (!results || !calculationType) return;
+        
         const newReport: SavedReport = {
             id: new Date().toISOString() + Math.random(),
             timestamp: new Date().toISOString(),
@@ -184,15 +186,27 @@ function App() {
             basicFertilizers,
             selectedAmendment,
         };
-        setReports(prev => {
-            const updatedReports = [newReport, ...prev];
-            try {
-                localStorage.setItem('agro-reports', JSON.stringify(updatedReports));
-            } catch (error) {
-                console.error("Failed to save reports to localStorage", error);
-            }
-            return updatedReports;
-        });
+
+        // 1. Add to state (which triggers localStorage update via useEffect)
+        setReports(prev => [newReport, ...prev]);
+
+        // 2. Trigger file download
+        const reportJson = JSON.stringify(newReport, null, 2);
+        const blob = new Blob([reportJson], { type: 'application/json;charset=utf-8' });
+        
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        const cultureName = formData.culture.replace(/ /g, '_');
+        const date = new Date().toISOString().split('T')[0];
+        link.setAttribute('href', url);
+        link.setAttribute('download', `report_${cultureName}_${date}.json`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // 3. Switch view to reports list
         setView('reports');
         setSelectedReport(null);
     };
@@ -210,6 +224,48 @@ function App() {
             });
             setSelectedReport(null);
         }
+    };
+
+    const handleLoadReport = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target?.result;
+                if (typeof text !== 'string') throw new Error("File content is not a string.");
+                
+                const loadedReport = JSON.parse(text) as SavedReport;
+
+                if (loadedReport.id && loadedReport.formData && loadedReport.results) {
+                    setReports(prev => {
+                        if (prev.some(r => r.id === loadedReport.id)) {
+                             alert('Цей звіт вже існує у списку.');
+                             return prev;
+                        }
+                        return [loadedReport, ...prev];
+                    });
+                } else {
+                    throw new Error("Invalid report file format.");
+                }
+            } catch (error) {
+                console.error("Failed to load or parse report file", error);
+                alert("Не вдалося завантажити звіт. Файл пошкоджено або має неправильний формат.");
+            } finally {
+                 if(event.target) event.target.value = '';
+            }
+        };
+        reader.onerror = () => {
+             console.error("Failed to read file", reader.error);
+             alert("Не вдалося прочитати файл.");
+             if(event.target) event.target.value = '';
+        }
+        reader.readAsText(file);
+    };
+    
+    const triggerLoadReport = () => {
+        reportInputRef.current?.click();
     };
 
     const handleLogoClick = () => {
@@ -301,6 +357,7 @@ function App() {
                         setView('calculator');
                     }}
                     onBack={() => setView('calculator')}
+                    onLoadReport={triggerLoadReport}
                 />;
     };
 
@@ -312,6 +369,14 @@ function App() {
                 ref={fileInputRef}
                 onChange={handleLogoChange}
                 accept="image/*"
+                className="hidden"
+                aria-hidden="true"
+            />
+             <input
+                type="file"
+                ref={reportInputRef}
+                onChange={handleLoadReport}
+                accept="application/json,.json"
                 className="hidden"
                 aria-hidden="true"
             />
@@ -350,7 +415,7 @@ function App() {
                         )}
                         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2-2H5a2 2 0 01-2-2V9z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>

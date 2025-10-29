@@ -7,6 +7,7 @@ interface ReportsListProps {
     onDelete: (id: string) => void;
     onNewCalculation: () => void;
     onBack: () => void;
+    onLoadReport: () => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -19,21 +20,29 @@ const formatDate = (dateString: string) => {
     });
 };
 
-export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onBack }) => {
+export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onBack, onLoadReport }) => {
 
     if (reports.length === 0) {
         return (
             <div className="text-center bg-white p-8 md:p-16 rounded-xl shadow-lg">
                 <h2 className="text-2xl font-semibold text-gray-800">Збережених звітів немає</h2>
                 <p className="mt-4 text-gray-600">
-                    У вас ще немає збережених розрахунків. Створіть свій перший!
+                    Створіть свій перший розрахунок або завантажте існуючий звіт.
                 </p>
-                <button
-                    onClick={onNewCalculation}
-                    className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
-                >
-                    Почати новий розрахунок
-                </button>
+                <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <button
+                        onClick={onNewCalculation}
+                        className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
+                    >
+                        Почати новий розрахунок
+                    </button>
+                     <button
+                        onClick={onLoadReport}
+                        className="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg"
+                    >
+                        Завантажити звіт
+                    </button>
+                </div>
             </div>
         );
     }
@@ -42,15 +51,28 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
         <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-6 gap-4">
                 <h2 className="text-2xl font-semibold text-gray-800">Мої звіти</h2>
-                <button
-                    onClick={onBack}
-                    className="w-full sm:w-auto bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center gap-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span>Назад до калькулятора</span>
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button
+                        onClick={onLoadReport}
+                        className="w-full sm:w-auto bg-green-100 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-200 transition flex items-center justify-center gap-2"
+                        title="Завантажити звіт з файлу"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span>Завантажити</span>
+                    </button>
+                    <button
+                        onClick={onBack}
+                        className="w-full sm:w-auto bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>До калькулятора</span>
+                    </button>
+                </div>
             </div>
             <div className="space-y-4">
                 {reports.map(report => (
