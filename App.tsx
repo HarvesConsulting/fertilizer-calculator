@@ -8,6 +8,7 @@ import { Step4Results } from './components/Step4Results';
 import { CULTURE_PARAMS } from './constants';
 import { ReportsList } from './components/ReportsList';
 import { ReportDetail } from './components/ReportDetail';
+import { Logo } from './components/Logo';
 
 const INITIAL_FORM_DATA: FormData = {
     culture: 'Томат',
@@ -298,18 +299,22 @@ function App() {
                         onClick={handleLogoClick}
                         title="Натисніть, щоб змінити логотип"
                     >
-                        <img 
-                            src={customLogoUrl || "logo.svg"} 
-                            alt="Логотип калькулятора" 
-                            className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md object-cover"
-                             onError={() => {
-                                if (customLogoUrl) {
-                                    console.error("Failed to load custom logo from localStorage.");
-                                    localStorage.removeItem('custom-logo');
-                                    setCustomLogoUrl(null);
-                                }
-                             }}
-                        />
+                        {customLogoUrl ? (
+                            <img 
+                                src={customLogoUrl} 
+                                alt="Логотип користувача" 
+                                className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md object-cover"
+                                 onError={() => {
+                                    if (customLogoUrl) {
+                                        console.error("Failed to load custom logo from localStorage.");
+                                        localStorage.removeItem('custom-logo');
+                                        setCustomLogoUrl(null);
+                                    }
+                                 }}
+                            />
+                        ) : (
+                            <Logo className="h-14 w-14 shadow-md" title="Логотип калькулятора" />
+                        )}
                         {customLogoUrl && (
                             <button
                                 onClick={handleResetLogo}
