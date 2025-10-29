@@ -14,7 +14,7 @@ const INITIAL_FORM_DATA: FormData = {
     nitrogenAnalysis: '5',
     ph: '7.0',
     phosphorus: '50',
-    potassium: '200',
+    potassium: '100',
     calcium: '2000',
     magnesium: '100',
     cec: '15',
