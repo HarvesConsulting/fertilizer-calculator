@@ -128,7 +128,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
                                         className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
                                         disabled={readOnly}
-                                        title="Оберіть добриво для розрахунку норми"
+                                        title="оберіть добриво"
                                     >
                                         <option value=""></option>
                                         {simpleFertilizersForElement.map(fert => (
@@ -162,7 +162,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     onChange={handleAmendmentChange}
                                     className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
                                     disabled={readOnly}
-                                    title="Оберіть меліорант для розрахунку норми"
+                                    title="оберіть меліорант"
                                 >
                                     <option value=""></option>
                                     {AMENDMENTS.map(amend => (
@@ -176,31 +176,31 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200">
-                    <thead className="bg-gray-100">
+            <div className="hidden md:block overflow-x-auto rounded-lg shadow-md border border-gray-200">
+                <table className="min-w-full bg-white">
+                    <thead className="bg-slate-100">
                         <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Елемент</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Потреба</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Добриво / Меліорант</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Норма внесення (фіз. вага)</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Елемент</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Потреба</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Добриво / Меліорант</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Норма внесення (фіз. вага)</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {nutrientNeeds.map(need => {
                             const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
-                             const calculatedNorm = getCalculatedNorm(need.element, need.norm);
+                            const calculatedNorm = getCalculatedNorm(need.element, need.norm);
                             return (
-                                <tr key={need.element}>
-                                    <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{need.element}</td>
-                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{need.norm} {renderUnit(need.element)}</td>
-                                    <td className="px-4 py-2 whitespace-nowrap">
+                                <tr key={need.element} className="hover:bg-sky-50 transition-colors">
+                                    <td className="py-4 px-6 whitespace-nowrap font-medium text-gray-800">{need.element}</td>
+                                    <td className="py-4 px-6 whitespace-nowrap text-gray-700">{need.norm} {renderUnit(need.element)}</td>
+                                    <td className="py-4 px-6 whitespace-nowrap">
                                         <select
                                             value={selections[need.element]?.selectedFertilizer || ''}
                                             onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
-                                            className="w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
                                             disabled={readOnly}
-                                            title="Оберіть добриво для розрахунку норми"
+                                            title="оберіть добриво"
                                         >
                                             <option value=""></option>
                                             {simpleFertilizersForElement.map(fert => (
@@ -208,28 +208,28 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                             ))}
                                         </select>
                                     </td>
-                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                                    <td className="py-4 px-6 whitespace-nowrap font-semibold text-blue-600">
                                         {calculatedNorm > 0 ? `${calculatedNorm} кг/га` : ''}
                                     </td>
                                 </tr>
                             );
                         })}
                         {needsAmendment && (
-                             <tr className="bg-blue-50">
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Меліорант</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 font-bold">
+                             <tr className="bg-sky-50/70 hover:bg-sky-100 transition-colors">
+                                <td className="py-4 px-6 whitespace-nowrap font-medium text-gray-800">Меліорант</td>
+                                <td className="py-4 px-6 whitespace-nowrap font-bold text-gray-700">
                                      {amendmentRowData && amendmentRowData.norm > 0 
                                         ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
                                         : 'Оберіть для розрахунку'
                                      }
                                 </td>
-                                <td className="px-4 py-2 whitespace-nowrap">
+                                <td className="py-4 px-6 whitespace-nowrap">
                                     <select
                                         value={amendment}
                                         onChange={handleAmendmentChange}
-                                        className="w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                        className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
                                         disabled={readOnly}
-                                        title="Оберіть меліорант для розрахунку норми"
+                                        title="оберіть меліорант"
                                     >
                                         <option value=""></option>
                                         {AMENDMENTS.map(amend => (
@@ -237,7 +237,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         ))}
                                     </select>
                                 </td>
-                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700"></td>
+                                 <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-700"></td>
                             </tr>
                         )}
                     </tbody>
