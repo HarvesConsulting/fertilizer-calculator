@@ -27,7 +27,7 @@ export const calculateFertigationPlan = ({
     let adjustedNeeds: NutrientNeeds[] = initialNeeds;
 
     if (kPercentage && kPercentage > 0 && initialKNeed > 0) {
-        const rate = (initialKNeed * 0.8 / kPercentage) * 100;
+        const rate = (initialKNeed * 0.5 / kPercentage) * 100;
         fertilizerRate = rate;
 
         const nSupplied = rate * (parseFloat(springFertilizer.n || '0') / 100);
