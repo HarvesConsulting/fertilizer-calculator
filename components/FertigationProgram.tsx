@@ -3,6 +3,7 @@ import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
 import { FERTIGATION_CULTURES } from '../constants';
 import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
 import { calculateFertigationPlan } from '../utils/fertigationCalculator';
+import { FertigationChart } from './FertigationChart';
 
 interface FertigationProgramProps {
     initialNeeds: NutrientNeeds[];
@@ -128,7 +129,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     }
 
     const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? 'Аміачна селітра' : 'Карбамід';
-    const tableHeaders = [nitrogenFertilizerName, 'Ортофосфорна к-та', 'Сульфат калію', 'Нітрат кальцію', 'Сульфат магнію'];
+    const chartLabels = [nitrogenFertilizerName, 'Ортофосфорна к-та', 'Сульфат калію', 'Нітрат кальцію', 'Сульфат магнію'];
 
     return (
         <div>
@@ -207,68 +208,42 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                 </div>
             </div>
 
-            <h4 className="text-lg font-semibold mb-3 text-gray-800">Потижневий план внесення добрив (фізична вага)</h4>
-            
-            {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-                {weeklyPlan.map(item => item && (
-                    <div key={item.week} className="bg-gray-50 p-4 rounded-lg shadow">
-                        <h5 className="font-bold text-lg text-blue-600">Тиждень {item.week}</h5>
-                        <div className="mt-2 space-y-1 text-sm">
-                            <p><span className="font-semibold">{tableHeaders[0]}:</span> {item.nitrogen.toFixed(1)} кг/га</p>
-                            <p><span className="font-semibold">{tableHeaders[1]}:</span> {item.phosphorus.toFixed(1)} кг/га</p>
-                            <p><span className="font-semibold">{tableHeaders[2]}:</span> {item.potassium.toFixed(1)} кг/га</p>
-                            <p><span className="font-semibold">{tableHeaders[3]}:</span> {item.calcium.toFixed(1)} кг/га</p>
-                            <p><span className="font-semibold">{tableHeaders[4]}:</span> {item.magnesium.toFixed(1)} кг/га</p>
+            <h4 className="text-lg font-semibold mb-4 text-gray-800">Потижневий план внесення добрив (фізична вага, кг/га)</h4>
+
+            {weeklyPlan && weeklyPlan.length > 0 ? (
+                <FertigationChart data={weeklyPlan} labels={chartLabels} />
+            ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600">Немає даних для побудови графіка.</p>
+                </div>
+            )}
+
+            <div className="mt-8">
+                 <h4 className="text-lg font-semibold mb-3 text-gray-800">Загальна кількість за сезон, кг/га</h4>
+                 <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
+                        <div>
+                            <div className="text-sm text-gray-300 truncate" title={chartLabels[0]}>{chartLabels[0]}</div>
+                            <div className="text-2xl font-bold text-blue-400">{totals.nitrogen.toFixed(1)}</div>
+                        </div>
+                         <div>
+                            <div className="text-sm text-gray-300 truncate" title={chartLabels[1]}>{chartLabels[1]}</div>
+                            <div className="text-2xl font-bold text-emerald-400">{totals.phosphorus.toFixed(1)}</div>
+                        </div>
+                         <div>
+                            <div className="text-sm text-gray-300 truncate" title={chartLabels[2]}>{chartLabels[2]}</div>
+                            <div className="text-2xl font-bold text-amber-400">{totals.potassium.toFixed(1)}</div>
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-300 truncate" title={chartLabels[3]}>{chartLabels[3]}</div>
+                            <div className="text-2xl font-bold text-violet-400">{totals.calcium.toFixed(1)}</div>
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-300 truncate" title={chartLabels[4]}>{chartLabels[4]}</div>
+                            <div className="text-2xl font-bold text-pink-400">{totals.magnesium.toFixed(1)}</div>
                         </div>
                     </div>
-                ))}
-                 <div className="bg-gray-800 text-white p-4 rounded-lg shadow mt-4">
-                    <h5 className="font-bold text-lg">Загальна кількість, кг/га</h5>
-                    <div className="mt-2 space-y-1 text-sm">
-                        <p><span className="font-semibold">{tableHeaders[0]}:</span> {totals.nitrogen.toFixed(1)}</p>
-                        <p><span className="font-semibold">{tableHeaders[1]}:</span> {totals.phosphorus.toFixed(1)}</p>
-                        <p><span className="font-semibold">{tableHeaders[2]}:</span> {totals.potassium.toFixed(1)}</p>
-                        <p><span className="font-semibold">{tableHeaders[3]}:</span> {totals.calcium.toFixed(1)}</p>
-                        <p><span className="font-semibold">{tableHeaders[4]}:</span> {totals.magnesium.toFixed(1)}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200">
-                    <thead className="bg-gray-100">
-                        <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Тиждень</th>
-                            {tableHeaders.map(header => (
-                                <th key={header} className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">{header}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {weeklyPlan.map(item => item && (
-                            <tr key={item.week}>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{item.week}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.nitrogen.toFixed(1)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.phosphorus.toFixed(1)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.potassium.toFixed(1)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.calcium.toFixed(1)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{item.magnesium.toFixed(1)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                     <tfoot className="border-t-2 border-gray-300">
-                        <tr className="font-bold bg-gray-100">
-                            <td className="px-4 py-2 text-sm text-gray-800">Загальна кількість, кг/га</td>
-                            <td className="px-4 py-2 text-sm text-gray-800">{totals.nitrogen.toFixed(1)}</td>
-                            <td className="px-4 py-2 text-sm text-gray-800">{totals.phosphorus.toFixed(1)}</td>
-                            <td className="px-4 py-2 text-sm text-gray-800">{totals.potassium.toFixed(1)}</td>
-                            <td className="px-4 py-2 text-sm text-gray-800">{totals.calcium.toFixed(1)}</td>
-                            <td className="px-4 py-2 text-sm text-gray-800">{totals.magnesium.toFixed(1)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
+                 </div>
             </div>
         </div>
     );
