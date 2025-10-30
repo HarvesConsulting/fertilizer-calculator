@@ -12,6 +12,13 @@ interface BasicApplicationCalculatorProps {
     readOnly?: boolean;
 }
 
+const DEFAULT_FERTILIZERS: Record<string, string> = {
+    'P2O5': '19', // Суперфосфат
+    'K2O': '60',  // Калій хлористий
+    'CaO': '35',  // Сульфат кальцію (гіпс)
+    'MgO': '16',  // Сульфат магнію
+};
+
 export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProps> = ({
     needs,
     soilData,
@@ -24,7 +31,16 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     
     useEffect(() => {
         if (!readOnly) {
-            onSelectionsChange({});
+            const initialSelections: BasicFertilizerSelections = {};
+            needs.forEach(need => {
+                // Set default only if there is a need for the element
+                if (need.norm > 0 && DEFAULT_FERTILIZERS[need.element]) {
+                    initialSelections[need.element] = {
+                        selectedFertilizer: DEFAULT_FERTILIZERS[need.element],
+                    };
+                }
+            });
+            onSelectionsChange(initialSelections);
             onAmendmentChange('');
         }
     }, [needs]);
