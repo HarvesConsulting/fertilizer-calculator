@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { SavedReport } from '../types';
+import type { SavedReport, ComplexFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
 import { CULTURE_PARAMS } from '../constants';
@@ -18,8 +18,12 @@ const InfoBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
     </div>
 );
 
+const defaultComplexFertilizer: ComplexFertilizer = {
+    n: '', p2o5: '', k2o: '', cao: '', mg: '', rate: '', enabled: false
+};
+
 export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) => {
-    const { formData, results, calculationType, springFertilizer, nitrogenFertilizer } = report;
+    const { formData, results, calculationType, springFertilizer, nitrogenFertilizer, complexFertilizer } = report;
     const cultureParams = CULTURE_PARAMS[formData.culture];
 
     const showBasic = calculationType === 'basic' || calculationType === 'full';
@@ -70,6 +74,8 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                            onSelectionsChange={() => {}}
                            amendment={report.selectedAmendment || ''}
                            onAmendmentChange={() => {}}
+                           complexFertilizer={complexFertilizer || defaultComplexFertilizer}
+                           onComplexFertilizerChange={() => {}}
                            readOnly={true}
                        />
                     </div>

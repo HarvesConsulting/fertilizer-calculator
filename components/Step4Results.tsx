@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections } from '../types';
+import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
 import { generateTxtReport } from '../utils/reportGenerator';
@@ -19,6 +19,8 @@ interface Step4Props {
     setBasicFertilizers: React.Dispatch<React.SetStateAction<BasicFertilizerSelections>>;
     selectedAmendment: string;
     setSelectedAmendment: React.Dispatch<React.SetStateAction<string>>;
+    complexFertilizer: ComplexFertilizer;
+    setComplexFertilizer: React.Dispatch<React.SetStateAction<ComplexFertilizer>>;
 }
 
 export const Step4Results: React.FC<Step4Props> = ({ 
@@ -35,7 +37,9 @@ export const Step4Results: React.FC<Step4Props> = ({
     basicFertilizers,
     setBasicFertilizers,
     selectedAmendment,
-    setSelectedAmendment
+    setSelectedAmendment,
+    complexFertilizer,
+    setComplexFertilizer
 }) => {
     
     const showBasic = type === 'basic' || type === 'full';
@@ -48,7 +52,8 @@ export const Step4Results: React.FC<Step4Props> = ({
             calculationType: type,
             cultureParams,
             springFertilizer,
-            nitrogenFertilizer
+            nitrogenFertilizer,
+            complexFertilizer
         });
 
         const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
@@ -79,6 +84,8 @@ export const Step4Results: React.FC<Step4Props> = ({
                            onSelectionsChange={setBasicFertilizers}
                            amendment={selectedAmendment}
                            onAmendmentChange={setSelectedAmendment}
+                           complexFertilizer={complexFertilizer}
+                           onComplexFertilizerChange={setComplexFertilizer}
                         />
                     </div>
                 )}

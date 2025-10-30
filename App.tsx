@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections } from './types';
+import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections, ComplexFertilizer } from './types';
 import { Stepper } from './components/Stepper';
 import { Step1SoilAnalysis } from './components/Step1SoilAnalysis';
 import { Step2CropYield } from './components/Step2CropYield';
@@ -23,6 +23,11 @@ const INITIAL_FORM_DATA: FormData = {
     amendment: '',
 };
 
+const INITIAL_COMPLEX_FERTILIZER: ComplexFertilizer = {
+    n: '', p2o5: '', k2o: '', cao: '', mg: '', rate: '', enabled: false
+};
+
+
 const CalculatorIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-2m-3 2v-6m-3 6v-2m12-4H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2z" />
@@ -31,7 +36,7 @@ const CalculatorIcon = () => (
 
 const ReportsIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
     </svg>
 );
 
@@ -49,6 +54,8 @@ function App() {
     // State for BasicApplicationCalculator
     const [basicFertilizers, setBasicFertilizers] = useState<BasicFertilizerSelections>({});
     const [selectedAmendment, setSelectedAmendment] = useState('');
+    const [complexFertilizer, setComplexFertilizer] = useState<ComplexFertilizer>(INITIAL_COMPLEX_FERTILIZER);
+
 
     const [reports, setReports] = useState<SavedReport[]>(() => {
         try {
@@ -170,6 +177,7 @@ function App() {
         setNitrogenFertilizer('ammonium-nitrate');
         setBasicFertilizers({});
         setSelectedAmendment('');
+        setComplexFertilizer(INITIAL_COMPLEX_FERTILIZER);
     };
     
     const handleSaveReport = () => {
@@ -185,6 +193,7 @@ function App() {
             nitrogenFertilizer,
             basicFertilizers,
             selectedAmendment,
+            complexFertilizer,
         };
 
         // 1. Add to state (which triggers localStorage update via useEffect)
@@ -328,6 +337,8 @@ function App() {
                                 setBasicFertilizers={setBasicFertilizers}
                                 selectedAmendment={selectedAmendment}
                                 setSelectedAmendment={setSelectedAmendment}
+                                complexFertilizer={complexFertilizer}
+                                setComplexFertilizer={setComplexFertilizer}
                            />;
                 default:
                     return null;

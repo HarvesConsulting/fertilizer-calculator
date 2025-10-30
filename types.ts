@@ -35,6 +35,16 @@ export type BasicFertilizerSelections = {
     };
 };
 
+export interface ComplexFertilizer {
+    n: string;
+    p2o5: string;
+    k2o: string;
+    cao: string;
+    mg: string;
+    rate: string;
+    enabled: boolean;
+}
+
 export interface SavedReport {
   id: string;
   timestamp: string;
@@ -45,4 +55,5 @@ export interface SavedReport {
   nitrogenFertilizer: string;
   basicFertilizers: BasicFertilizerSelections;
   selectedAmendment: string;
+  complexFertilizer?: ComplexFertilizer;
 }

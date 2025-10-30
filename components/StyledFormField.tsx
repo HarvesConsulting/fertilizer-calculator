@@ -10,6 +10,7 @@ interface StyledFormFieldProps {
     step?: string;
     min?: string;
     max?: string;
+    disabled?: boolean;
 }
 
 export const StyledFormField: React.FC<StyledFormFieldProps> = ({
@@ -21,7 +22,8 @@ export const StyledFormField: React.FC<StyledFormFieldProps> = ({
     type = 'number',
     step = "0.1",
     min = "0",
-    max
+    max,
+    disabled = false,
 }) => {
     return (
         <div className="relative group">
@@ -34,7 +36,8 @@ export const StyledFormField: React.FC<StyledFormFieldProps> = ({
                 step={step}
                 min={min}
                 max={max}
-                className="block w-full px-4 py-3 text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                disabled={disabled}
+                className="block w-full px-4 py-3 text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer disabled:bg-gray-200 disabled:cursor-not-allowed disabled:text-gray-500"
                 placeholder=" "
                 required
             />

@@ -1,4 +1,4 @@
-import type { FormData, CalculationResults, CultureParams, NutrientNeeds } from '../types';
+import type { FormData, CalculationResults, CultureParams, NutrientNeeds, ComplexFertilizer } from '../types';
 import { calculateFertigationPlan } from './fertigationCalculator';
 import { AMENDMENT_EFFECTS, FERTIGATION_CULTURES } from '../constants';
 
@@ -9,12 +9,13 @@ interface ReportData {
     cultureParams: CultureParams;
     springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
     nitrogenFertilizer: string;
+    complexFertilizer: ComplexFertilizer;
 }
 
 const pad = (str: string | number, length: number) => String(str).padEnd(length, ' ');
 
 export const generateTxtReport = (data: ReportData): string => {
-    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer } = data;
+    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer } = data;
     
     let report = `==================================================\n`;
     report += `   ЗВІТ АГРОХІМІЧНОГО РОЗРАХУНКУ\n`;
@@ -35,6 +36,13 @@ export const generateTxtReport = (data: ReportData): string => {
     
     if (calculationType === 'basic' || calculationType === 'full') {
         report += `---------- 1. ОСНОВНЕ ВНЕСЕННЯ ----------\n\n`;
+
+        if (complexFertilizer && complexFertilizer.enabled && parseFloat(complexFertilizer.rate) > 0) {
+            report += `Комплексне осіннє добриво:\n`;
+            report += `  - Склад: N:${complexFertilizer.n}% P₂O₅:${complexFertilizer.p2o5}% K₂O:${complexFertilizer.k2o}% CaO:${complexFertilizer.cao}% MgO:${complexFertilizer.mg}%\n`;
+            report += `  - Норма внесення: ${complexFertilizer.rate} кг/га\n\n`;
+            report += `Розрахунок потреби нижче враховує внесення цього добрива.\n\n`;
+        }
         
         const ph = parseFloat(formData.ph);
         const needsAmendment = ph <= 6.8;
