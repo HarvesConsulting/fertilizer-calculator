@@ -11,8 +11,8 @@ interface ReportDetailProps {
 
 const InfoBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <div>
-        <h4 className="text-lg font-semibold text-gray-700 mb-2">{title}</h4>
-        <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-800">
+        <h4 className="text-lg font-semibold text-slate-700 mb-2">{title}</h4>
+        <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-slate-800">
             {children}
         </div>
     </div>
@@ -37,17 +37,17 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
             <div>
                 <button
                     onClick={onBack}
-                    className="mb-6 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
+                    className="mb-6 bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition flex items-center gap-2"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     До списку звітів
                 </button>
-                <h2 className="text-3xl font-bold text-center text-gray-800">
+                <h2 className="text-3xl font-bold text-center text-slate-800">
                     Звіт для "{results.culture}"
                 </h2>
-                <p className="text-center text-gray-500 text-sm mt-1">
+                <p className="text-center text-slate-500 text-sm mt-1">
                     Збережено: {new Date(report.timestamp).toLocaleString('uk-UA')}
                 </p>
             </div>

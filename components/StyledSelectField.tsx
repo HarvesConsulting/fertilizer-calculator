@@ -21,7 +21,7 @@ export const StyledSelectField: React.FC<StyledSelectFieldProps> = ({
 }) => {
     return (
         <div className="relative">
-             <label htmlFor={name} className="absolute text-sm text-gray-500 bg-gray-50 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-blue-600 start-1">
+             <label htmlFor={name} className="absolute text-sm text-slate-500 bg-slate-50 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-indigo-600 start-1">
                 {label}
             </label>
             <select
@@ -30,7 +30,7 @@ export const StyledSelectField: React.FC<StyledSelectFieldProps> = ({
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className="block w-full px-4 py-3 text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-0 focus:border-blue-600 peer disabled:bg-gray-100"
+                className="block w-full px-4 py-3 text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-0 focus:border-indigo-600 peer disabled:bg-slate-100"
             >
                 <option value="">{placeholder}</option>
                 {options.map(option => (

@@ -27,7 +27,7 @@ export const Step2CropYield: React.FC<Step2Props> = ({ onBack, onCalculate, data
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
-            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Крок 2: Оберіть культуру та врожайність</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">Крок 2: Оберіть культуру та врожайність</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <StyledSelectField
                     label="Культура"
@@ -49,13 +49,13 @@ export const Step2CropYield: React.FC<Step2Props> = ({ onBack, onCalculate, data
                 <button
                     type="button"
                     onClick={onBack}
-                    className="bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300"
+                    className="bg-slate-300 text-slate-800 font-bold py-3 px-10 rounded-lg hover:bg-slate-400 transition duration-300"
                 >
                     Назад
                 </button>
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
+                    className="bg-indigo-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                 >
                     Розрахувати
                 </button>

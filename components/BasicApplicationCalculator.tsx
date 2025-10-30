@@ -2,6 +2,8 @@ import React, { useMemo, useEffect } from 'react';
 import type { FormData, NutrientNeeds, BasicFertilizerSelections, ComplexFertilizer } from '../types';
 import { SIMPLE_FERTILIZERS, AMENDMENTS, AMENDMENT_EFFECTS } from '../constants';
 import { StyledFormField } from './StyledFormField';
+import { Tooltip } from './Tooltip';
+import { InfoIcon } from './InfoIcon';
 
 interface BasicApplicationCalculatorProps {
     needs: NutrientNeeds[];
@@ -24,7 +26,7 @@ const DEFAULT_FERTILIZERS: Record<string, string> = {
 
 const ComplexFertilizerInput: React.FC<{ label: string, name: keyof Omit<ComplexFertilizer, 'rate' | 'enabled'>, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, disabled?: boolean }> = ({ label, name, value, onChange, disabled }) => (
     <div>
-        <label htmlFor={`complex-${name}`} className="block text-sm font-medium text-gray-700 text-center" dangerouslySetInnerHTML={{ __html: label }} />
+        <label htmlFor={`complex-${name}`} className="block text-sm font-medium text-slate-700 text-center" dangerouslySetInnerHTML={{ __html: label }} />
         <div className="mt-1 relative rounded-md shadow-sm">
             <input
                 type="number"
@@ -32,7 +34,7 @@ const ComplexFertilizerInput: React.FC<{ label: string, name: keyof Omit<Complex
                 id={`complex-${name}`}
                 value={value}
                 onChange={onChange}
-                className="w-full pl-2 pr-6 py-1.5 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                className="w-full pl-2 pr-6 py-1.5 border border-slate-300 rounded-md text-center focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100"
                 placeholder="0"
                 min="0"
                 max="100"
@@ -41,7 +43,7 @@ const ComplexFertilizerInput: React.FC<{ label: string, name: keyof Omit<Complex
                 aria-label={`Відсоток ${label}`}
             />
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">%</span>
+                <span className="text-slate-500 sm:text-sm">%</span>
             </div>
         </div>
     </div>
@@ -238,7 +240,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     if (!hasVisibleNeeds && !complexFertilizer.enabled) {
         return (
              <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Основне внесення</h3>
+                <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">Основне внесення</h3>
                 <p>Основне внесення не потрібне на основі розрахунків.</p>
             </div>
         );
@@ -257,13 +259,15 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             mg: '',
         });
     };
+    
+    const amendmentTooltipText = `При pH ґрунту 6.8 або нижче рекомендується внесення меліорантів (вапно, дефекат) для розкислення та покращення доступності елементів живлення для рослин.`;
 
     return (
         <div>
-            <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Основне внесення</h3>
+            <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">Основне внесення</h3>
 
             {elementsWithNeedCount >= 2 && (
-                 <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                 <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50">
                     <div className="relative flex items-start">
                         <div className="flex h-6 items-center">
                             <input
@@ -273,15 +277,15 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                             type="checkbox"
                             checked={complexFertilizer.enabled}
                             onChange={handleToggleComplexFertilizer}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
                             disabled={readOnly}
                             />
                         </div>
                         <div className="ml-3 text-sm leading-6">
-                            <label htmlFor="complex-toggle" className="font-medium text-gray-900 cursor-pointer">
+                            <label htmlFor="complex-toggle" className="font-medium text-slate-900 cursor-pointer">
                                 Додати комплексне осіннє добриво
                             </label>
-                            <p id="complex-description" className="text-gray-500">
+                            <p id="complex-description" className="text-slate-500">
                                 Внесіть склад для автоматичного розрахунку норми та перерахунку потреби.
                             </p>
                         </div>
@@ -290,14 +294,14 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             )}
 
             {complexFertilizer.enabled && (
-                <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
+                <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <h4 className="text-lg font-semibold text-gray-800">Склад та норма комплексного добрива</h4>
+                        <h4 className="text-lg font-semibold text-slate-800">Склад та норма комплексного добрива</h4>
                         {!readOnly && (
                             <button
                                 type="button"
                                 onClick={handleNitroammophoskaClick}
-                                className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors flex-shrink-0"
+                                className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0"
                                 title="Заповнити поля даними Нітроамофоски (16-16-16)"
                             >
                                 Нітроамофоска
@@ -331,16 +335,16 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                     const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
                     const calculatedNorm = getCalculatedNorm(need.element, need.norm);
                     return (
-                        <div key={need.element} className="bg-gray-50 p-4 rounded-lg shadow">
-                            <h4 className="font-bold text-lg text-gray-800">{need.element}</h4>
+                        <div key={need.element} className="bg-slate-50 p-4 rounded-lg shadow">
+                            <h4 className="font-bold text-lg text-slate-800">{need.element}</h4>
                             <div className="mt-2 space-y-2">
                                 <p><span className="font-semibold">{tableHeaderLabel}:</span> {need.norm} {renderUnit(need.element)}</p>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Добриво:</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Добриво:</label>
                                     <select
                                         value={selections[need.element]?.selectedFertilizer || ''}
                                         onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
-                                        className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                        className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
                                         disabled={readOnly}
                                         title="оберіть добриво"
                                     >
@@ -351,15 +355,20 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     </select>
                                 </div>
                                 {calculatedNorm > 0 && (
-                                     <p className="font-semibold text-blue-600">Норма внесення: {calculatedNorm} кг/га</p>
+                                     <p className="font-semibold text-indigo-600">Норма внесення: {calculatedNorm} кг/га</p>
                                 )}
                             </div>
                         </div>
                     );
                 })}
                 {needsAmendment && (
-                    <div className="bg-blue-50 p-4 rounded-lg shadow">
-                        <h4 className="font-bold text-lg text-gray-800">Меліорант</h4>
+                    <div className="bg-indigo-50 p-4 rounded-lg shadow">
+                         <h4 className="font-bold text-lg text-slate-800 flex items-center gap-1.5">
+                            Меліорант
+                            <Tooltip text={amendmentTooltipText}>
+                                <InfoIcon className="h-4 w-4" />
+                            </Tooltip>
+                        </h4>
                         <div className="mt-2 space-y-2">
                             <p>
                                 <span className="font-semibold">Потреба:</span> 
@@ -370,11 +379,11 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                 </span>
                             </p>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Меліорант:</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Меліорант:</label>
                                  <select
                                     value={amendment}
                                     onChange={handleAmendmentChange}
-                                    className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                    className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
                                     disabled={readOnly}
                                     title="оберіть меліорант"
                                 >
@@ -390,7 +399,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-lg shadow-md border border-gray-200">
+            <div className="hidden md:block overflow-x-auto rounded-lg shadow-md border border-slate-200">
                 <table className="min-w-full bg-white">
                     <thead className="bg-slate-100">
                         <tr>
@@ -400,19 +409,19 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                             <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Норма внесення (фіз. вага)</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-slate-200">
                         {nutrientNeeds.map(need => {
                             const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
                             const calculatedNorm = getCalculatedNorm(need.element, need.norm);
                             return (
-                                <tr key={need.element} className="hover:bg-sky-50 transition-colors">
-                                    <td className="py-4 px-6 whitespace-nowrap font-medium text-gray-800">{need.element}</td>
-                                    <td className="py-4 px-6 whitespace-nowrap text-gray-700">{need.norm} {renderUnit(need.element)}</td>
+                                <tr key={need.element} className="hover:bg-indigo-50 transition-colors">
+                                    <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">{need.element}</td>
+                                    <td className="py-4 px-6 whitespace-nowrap text-slate-700">{need.norm} {renderUnit(need.element)}</td>
                                     <td className="py-4 px-6 whitespace-nowrap">
                                         <select
                                             value={selections[need.element]?.selectedFertilizer || ''}
                                             onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
-                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                            className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
                                             disabled={readOnly}
                                             title="оберіть добриво"
                                         >
@@ -422,16 +431,23 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                             ))}
                                         </select>
                                     </td>
-                                    <td className="py-4 px-6 whitespace-nowrap font-semibold text-blue-600">
+                                    <td className="py-4 px-6 whitespace-nowrap font-semibold text-indigo-600">
                                         {calculatedNorm > 0 ? `${calculatedNorm} кг/га` : ''}
                                     </td>
                                 </tr>
                             );
                         })}
                         {needsAmendment && (
-                             <tr className="bg-sky-50/70 hover:bg-sky-100 transition-colors">
-                                <td className="py-4 px-6 whitespace-nowrap font-medium text-gray-800">Меліорант</td>
-                                <td className="py-4 px-6 whitespace-nowrap font-bold text-gray-700">
+                             <tr className="bg-indigo-50/70 hover:bg-indigo-100 transition-colors">
+                                <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">
+                                     <span className="flex items-center gap-1.5">
+                                        Меліорант
+                                        <Tooltip text={amendmentTooltipText}>
+                                            <InfoIcon className="h-4 w-4" />
+                                        </Tooltip>
+                                    </span>
+                                </td>
+                                <td className="py-4 px-6 whitespace-nowrap font-bold text-slate-700">
                                      {amendmentRowData && amendmentRowData.norm > 0 
                                         ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
                                         : 'Оберіть для розрахунку'
@@ -441,7 +457,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     <select
                                         value={amendment}
                                         onChange={handleAmendmentChange}
-                                        className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-100"
+                                        className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
                                         disabled={readOnly}
                                         title="оберіть меліорант"
                                     >
@@ -451,7 +467,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         ))}
                                     </select>
                                 </td>
-                                 <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-700"></td>
+                                 <td className="py-4 px-6 whitespace-nowrap text-sm text-slate-700"></td>
                             </tr>
                         )}
                     </tbody>

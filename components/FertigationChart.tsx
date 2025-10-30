@@ -14,7 +14,7 @@ interface FertigationChartProps {
     labels: string[];
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f97316', '#a855f7', '#ec4899'];
+const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#e11d48'];
 const KEYS: (keyof Omit<ChartData, 'week'>)[] = ['nitrogen', 'phosphorus', 'potassium', 'calcium', 'magnesium'];
 
 export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels }) => {
@@ -91,10 +91,10 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
         const ticks = 5;
         const tickValues = Array.from({ length: ticks + 1 }, (_, i) => maxVal / ticks * i);
         return (
-            <g className="text-gray-500 text-xs">
+            <g className="text-slate-500 text-xs">
                 {tickValues.map(value => (
                     <g key={value} transform={`translate(0, ${yScale(value)})`}>
-                        <line x1={0} x2={chartWidth} stroke="#e5e7eb" strokeDasharray="2,2" />
+                        <line x1={0} x2={chartWidth} stroke="#e2e8f0" strokeDasharray="2,2" />
                         <text x="-10" dy="0.32em" textAnchor="end">{Math.round(value)}</text>
                     </g>
                 ))}
@@ -106,7 +106,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
     };
 
     const renderXAxis = () => (
-        <g transform={`translate(0, ${chartHeight})`} className="text-gray-500 text-xs">
+        <g transform={`translate(0, ${chartHeight})`} className="text-slate-500 text-xs">
             {data.map((d, i) => (
                 <text key={d.week} x={i * bandWidth + bandWidth / 2} y="20" textAnchor="middle">{d.week}</text>
             ))}
@@ -119,7 +119,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
             {labels.map((label, i) => (
                 <g key={label} transform={`translate(${i * 120}, 0)`}>
                     <rect width="12" height="12" fill={COLORS[i]} y="3" />
-                    <text x="18" y="12" className="text-xs fill-current text-gray-600 truncate" style={{maxWidth: '100px'}}>{label}</text>
+                    <text x="18" y="12" className="text-xs fill-current text-slate-600 truncate" style={{maxWidth: '100px'}}>{label}</text>
                 </g>
             ))}
         </g>
@@ -129,7 +129,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
         <div ref={containerRef} className="relative w-full h-full">
             {tooltip?.visible && (
                 <div 
-                    className="absolute z-10 p-2 bg-white rounded-md shadow-lg pointer-events-none border border-gray-200"
+                    className="absolute z-10 p-2 bg-white rounded-md shadow-lg pointer-events-none border border-slate-200"
                     style={{ 
                         transform: `translate(${tooltip.x}px, ${tooltip.y}px) translateX(-50%) translateY(-100%)`,
                         minWidth: '200px'
@@ -156,7 +156,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
                                 y="0" 
                                 width={barWidth} 
                                 height={chartHeight} 
-                                fill={tooltip?.week === weekData.week ? "rgba(200, 220, 255, 0.3)" : "transparent"} 
+                                fill={tooltip?.week === weekData.week ? "rgba(99, 102, 241, 0.3)" : "transparent"} 
                             />
                             {KEYS.map((key, i) => {
                                 const barHeight = chartHeight - yScale(weekData[key]);

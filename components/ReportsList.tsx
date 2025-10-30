@@ -25,20 +25,20 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
     if (reports.length === 0) {
         return (
             <div className="text-center bg-white p-8 md:p-16 rounded-xl shadow-lg">
-                <h2 className="text-2xl font-semibold text-gray-800">Збережених звітів немає</h2>
-                <p className="mt-4 text-gray-600">
+                <h2 className="text-2xl font-semibold text-slate-800">Збережених звітів немає</h2>
+                <p className="mt-4 text-slate-600">
                     Створіть свій перший розрахунок або завантажте існуючий звіт.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button
                         onClick={onNewCalculation}
-                        className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg text-lg"
+                        className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                     >
                         Почати новий розрахунок
                     </button>
                      <button
                         onClick={onLoadReport}
-                        className="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 shadow-lg"
+                        className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-lg"
                     >
                         Завантажити звіт
                     </button>
@@ -50,11 +50,11 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
     return (
         <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-6 gap-4">
-                <h2 className="text-2xl font-semibold text-gray-800">Мої звіти</h2>
+                <h2 className="text-2xl font-semibold text-slate-800">Мої звіти</h2>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                         onClick={onLoadReport}
-                        className="w-full sm:w-auto bg-green-100 text-green-800 font-semibold py-2 px-4 rounded-lg hover:bg-green-200 transition flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto bg-emerald-100 text-emerald-800 font-semibold py-2 px-4 rounded-lg hover:bg-emerald-200 transition flex items-center justify-center gap-2"
                         title="Завантажити звіт з файлу"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -64,7 +64,7 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                     </button>
                     <button
                         onClick={onBack}
-                        className="w-full sm:w-auto bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition flex items-center justify-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -76,20 +76,20 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
             </div>
             <div className="space-y-4">
                 {reports.map(report => (
-                    <div key={report.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-gray-50 transition-colors">
+                    <div key={report.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-slate-50 transition-colors">
                         <div className="flex-grow">
-                            <h3 className="font-bold text-lg text-blue-700">{report.formData.culture}</h3>
-                            <p className="text-sm text-gray-600">
+                            <h3 className="font-bold text-lg text-indigo-700">{report.formData.culture}</h3>
+                            <p className="text-sm text-slate-600">
                                 Врожайність: {report.formData.plannedYield} т/га
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-slate-500 mt-1">
                                 Збережено: {formatDate(report.timestamp)}
                             </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0 w-full md:w-auto">
                             <button
                                 onClick={() => onView(report)}
-                                className="w-full md:w-auto flex-1 bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 transition"
+                                className="w-full md:w-auto flex-1 bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-200 transition"
                             >
                                 Переглянути
                             </button>

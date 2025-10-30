@@ -10,12 +10,12 @@ const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: 
         onClick={onClick}
         className={`group w-full text-left p-6 border rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
             isSelected 
-                ? 'bg-green-50 border-green-500 ring-green-400' 
-                : 'border-gray-200 hover:bg-green-50 hover:border-green-500 focus:bg-green-50 focus:border-green-500 focus:ring-green-400'
+                ? 'bg-emerald-50 border-emerald-500 ring-emerald-400' 
+                : 'border-slate-200 hover:bg-emerald-50 hover:border-emerald-500 focus:bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-400'
         }`}
     >
-        <h3 className={`text-xl font-bold transition-colors ${isSelected ? 'text-green-800' : 'text-gray-800 group-hover:text-green-800'}`}>{title}</h3>
-        <p className={`mt-2 transition-colors ${isSelected ? 'text-green-700' : 'text-gray-600 group-hover:text-green-700'}`}>{description}</p>
+        <h3 className={`text-xl font-bold transition-colors ${isSelected ? 'text-emerald-800' : 'text-slate-800 group-hover:text-emerald-800'}`}>{title}</h3>
+        <p className={`mt-2 transition-colors ${isSelected ? 'text-emerald-700' : 'text-slate-600 group-hover:text-emerald-700'}`}>{description}</p>
     </button>
 );
 
@@ -32,7 +32,7 @@ export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect 
 
     return (
         <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4 mb-6">Крок 3: Вибір розрахунку</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">Крок 3: Вибір розрахунку</h2>
             <div className="space-y-4">
                 <ChoiceButton 
                     onClick={() => handleSelect('basic')} 
@@ -57,7 +57,7 @@ export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect 
                  <button
                     type="button"
                     onClick={onBack}
-                    className="bg-gray-300 text-gray-800 font-bold py-3 px-10 rounded-lg hover:bg-gray-400 transition duration-300"
+                    className="bg-slate-300 text-slate-800 font-bold py-3 px-10 rounded-lg hover:bg-slate-400 transition duration-300"
                 >
                     Назад
                 </button>

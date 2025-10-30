@@ -65,10 +65,17 @@ function App() {
         try {
             const savedReports = localStorage.getItem('agro-reports');
             if (!savedReports) return [];
-            const parsedReports = JSON.parse(savedReports) as SavedReport[];
+            
+            const parsedReports = JSON.parse(savedReports);
+            if (!Array.isArray(parsedReports)) {
+                console.warn('Stored reports ("agro-reports") is not an array, removing.');
+                localStorage.removeItem('agro-reports');
+                return [];
+            }
             
             // Migration logic for older report formats
-            return parsedReports.map(report => {
+            return (parsedReports as SavedReport[]).map(report => {
+                if (!report || typeof report !== 'object') return null;
                 const migratedReport = { ...report };
                 // Migrate springFertilizer
                 if (migratedReport.springFertilizer && typeof (migratedReport.springFertilizer as any).enabled === 'undefined') {
@@ -88,10 +95,12 @@ function App() {
                     migratedReport.complexFertilizer = INITIAL_COMPLEX_FERTILIZER;
                 }
                 return migratedReport;
-            });
+            }).filter(Boolean) as SavedReport[];
 
         } catch (error) {
             console.error("Failed to load or migrate reports from localStorage", error);
+            // If parsing fails, remove the corrupted item
+            localStorage.removeItem('agro-reports');
             return [];
         }
     });
@@ -415,7 +424,7 @@ function App() {
 
 
     return (
-        <div className="container mx-auto p-4 md:p-8 font-sans bg-gray-50 min-h-screen">
+        <div className="container mx-auto p-4 md:p-8 font-sans bg-slate-50 min-h-screen">
             <input
                 type="file"
                 ref={fileInputRef}
@@ -432,7 +441,7 @@ function App() {
                 className="hidden"
                 aria-hidden="true"
             />
-            <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-4 md:p-6 rounded-xl shadow-2xl mb-10 flex justify-between items-center">
+            <header className="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white p-4 md:p-6 rounded-xl shadow-2xl mb-10 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                      <div 
                         className="relative group cursor-pointer" 
@@ -443,7 +452,7 @@ function App() {
                             <img 
                                 src={customLogoUrl} 
                                 alt="Логотип користувача" 
-                                className="h-14 w-14 bg-blue-50/90 p-1 rounded-full shadow-md object-cover"
+                                className="h-14 w-14 bg-indigo-50/90 p-1 rounded-full shadow-md object-cover"
                                  onError={() => {
                                     if (customLogoUrl) {
                                         console.error("Failed to load custom logo from localStorage.");
@@ -474,7 +483,7 @@ function App() {
                     </div>
                     <div>
                         <h1 className="text-xl md:text-3xl font-bold tracking-tight">Агрохімічний калькулятор</h1>
-                        <p className="text-sm md:text-base text-blue-200 mt-1 hidden sm:block">
+                        <p className="text-sm md:text-base text-indigo-200 mt-1 hidden sm:block">
                              {view === 'calculator' ? 'Розрахунок потреб у живленні для овочевих культур' : 'Збережені звіти'}
                         </p>
                     </div>
@@ -498,7 +507,7 @@ function App() {
             
             {view === 'calculator' ? renderCalculator() : renderReports()}
             
-            <footer className="text-center mt-12 text-gray-500 text-sm">
+            <footer className="text-center mt-12 text-slate-500 text-sm">
                 <p>&copy; {new Date().getFullYear()} Агрохімічний калькулятор. Всі права захищено.</p>
             </footer>
         </div>
