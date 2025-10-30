@@ -75,7 +75,7 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-slate-100">
                             <tr>
-                                <th className="sticky left-0 bg-slate-100 p-2 md:p-3"></th>
+                                <th className="sticky left-0 bg-slate-100 p-2 md:p-3 z-20"></th>
                                 {fertilizers.map(fert => (
                                     <th key={fert} className="p-2 md:p-3 text-xs md:text-sm font-semibold text-slate-600 tracking-wider align-bottom transform -rotate-45 h-32" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>
                                         <div className="whitespace-nowrap">{fert}</div>
@@ -84,6 +84,36 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
-                            {fertilizers.map((rowFert, rowIndex) => (
-                                <tr key={rowFert} className="hover:bg-indigo-50/50">
-                                    <td className="sticky left-0
+                            {fertilizers.map((rowFert) => (
+                                <tr key={rowFert} className="group hover:bg-indigo-50/50">
+                                    <td className="sticky left-0 bg-white group-hover:bg-indigo-50/50 p-2 md:p-3 text-sm font-semibold text-slate-700 whitespace-nowrap z-10">
+                                        {rowFert}
+                                    </td>
+                                    {fertilizers.map((colFert) => {
+                                        const incompatible = areIncompatible(rowFert, colFert);
+                                        return (
+                                            <td key={colFert} className="p-2 md:p-3 text-center">
+                                                <div className="flex justify-center items-center">
+                                                    {incompatible ? <XIcon /> : <CheckIcon />}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                 <div className="mt-6 flex justify-end">
+                     <button
+                        onClick={onClose}
+                        className="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Зрозуміло
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
