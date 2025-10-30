@@ -12,6 +12,7 @@ interface FertigationProgramProps {
     initialNeeds: NutrientNeeds[];
     culture: string;
     cultureParams: CultureParams;
+    fieldArea: string;
     springFertilizer: SpringFertilizer;
     setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
@@ -47,6 +48,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     initialNeeds, 
     culture,
     cultureParams,
+    fieldArea,
     springFertilizer,
     setSpringFertilizer,
     nitrogenFertilizer,
@@ -80,11 +82,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     const handleYaraMilaClick = () => {
         setSpringFertilizer(prev => ({
             ...prev,
-            n: '11',
-            p: '11',
-            k: '21',
-            ca: '0',
-            mg: '2.6',
+            n: '11', p: '11', k: '21', ca: '0', mg: '2.6',
         }));
     };
 
@@ -95,17 +93,14 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     };
 
     const cultureKey = findCultureKey(culture);
+    const area = parseFloat(fieldArea || '1') || 1;
     
     const { weeklyPlan, totals, fertilizerRate } = useMemo(() => {
         if (!cultureKey) {
              return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate: null };
         }
         return calculateFertigationPlan({
-            initialNeeds,
-            cultureKey,
-            cultureParams,
-            springFertilizer,
-            nitrogenFertilizer
+            initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer
         });
 
     }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer]);
@@ -143,16 +138,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
              <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50">
                 <div className="relative flex items-start">
                     <div className="flex h-6 items-center">
-                        <input
-                            id="spring-fert-toggle"
-                            aria-describedby="spring-fert-description"
-                            name="spring-fert-toggle"
-                            type="checkbox"
-                            checked={springFertilizer.enabled}
-                            onChange={handleToggleSpringFertilizer}
-                            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
-                            disabled={readOnly}
-                        />
+                        <input id="spring-fert-toggle" aria-describedby="spring-fert-description" name="spring-fert-toggle" type="checkbox" checked={springFertilizer.enabled} onChange={handleToggleSpringFertilizer} className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" disabled={readOnly} />
                     </div>
                     <div className="ml-3 text-sm leading-6">
                         <label htmlFor="spring-fert-toggle" className="font-medium text-slate-900 cursor-pointer">
@@ -170,12 +156,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">Склад та норма стартового добрива</h4>
                         {!readOnly && (
-                            <button
-                                type="button"
-                                onClick={handleYaraMilaClick}
-                                className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0"
-                                title="Заповнити поля даними YaraMila CROPCARE 11-11-21"
-                            >
+                            <button type="button" onClick={handleYaraMilaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними YaraMila CROPCARE 11-11-21">
                                 YaraMila CROPCARE
                             </button>
                         )}
@@ -189,11 +170,12 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                          <NutrientInput label="Магній (MgO)" name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
                      </div>
                      {fertilizerRate !== null && (
-                        <div className="bg-indigo-100 text-indigo-800 p-3 rounded-lg mt-4 flex items-center gap-2">
-                            <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(1)} кг/га</span></p>
-                            <Tooltip text={rateTooltipText}>
-                                <InfoIcon className="h-5 w-5 text-indigo-600/80" />
-                            </Tooltip>
+                        <div className="bg-indigo-100 text-indigo-800 p-3 rounded-lg mt-4 flex items-start gap-2">
+                            <div>
+                                <p className="font-semibold">Розрахункова норма: <span className="text-lg">{fertilizerRate.toFixed(1)} кг/га</span></p>
+                                <p className="text-sm font-medium">Всього на площу: <span className="font-bold">{(fertilizerRate * area).toFixed(1)} кг</span></p>
+                            </div>
+                            <Tooltip text={rateTooltipText}><InfoIcon className="h-5 w-5 text-indigo-600/80" /></Tooltip>
                         </div>
                      )}
                 </div>
@@ -203,13 +185,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                 <h4 className="text-lg font-semibold text-slate-800">Вибір азотного добрива для фертигації</h4>
                  <div>
                     <label htmlFor="nitrogen-fertilizer" className="block text-sm font-medium text-slate-700">Азотне добриво</label>
-                    <select 
-                        id="nitrogen-fertilizer" 
-                        value={nitrogenFertilizer}
-                        onChange={(e) => setNitrogenFertilizer(e.target.value)}
-                        className="mt-1 block w-full md:w-1/3 pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:bg-slate-100"
-                        disabled={readOnly}
-                    >
+                    <select id="nitrogen-fertilizer" value={nitrogenFertilizer} onChange={(e) => setNitrogenFertilizer(e.target.value)} className="mt-1 block w-full md:w-1/3 pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:bg-slate-100" disabled={readOnly}>
                         <option value="ammonium-nitrate">Аміачна селітра</option>
                         <option value="urea">Карбамід</option>
                     </select>
@@ -218,21 +194,15 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
 
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                  <h4 className="text-lg font-semibold text-slate-800">Потижневий план внесення добрив (фізична вага, кг/га)</h4>
-                 <button 
-                    type="button"
-                    onClick={() => setIsCompatibilityModalOpen(true)}
-                    className="flex-shrink-0 flex items-center gap-2 bg-white text-indigo-700 border-2 border-indigo-200 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 text-sm"
-                 >
-                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                     </svg>
+                 <button type="button" onClick={() => setIsCompatibilityModalOpen(true)} className="flex-shrink-0 flex items-center gap-2 bg-white text-indigo-700 border-2 border-indigo-200 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 text-sm">
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                      <span>Таблиця сумісності</span>
                  </button>
             </div>
 
 
             {weeklyPlan && weeklyPlan.length > 0 ? (
-                <FertigationChart data={weeklyPlan} labels={chartLabels} />
+                <FertigationChart data={weeklyPlan} labels={chartLabels} fieldArea={area} />
             ) : (
                 <div className="text-center py-8 bg-slate-50 rounded-lg">
                     <p className="text-slate-600">Немає даних для побудови графіка.</p>
@@ -240,7 +210,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             )}
 
             <div className="mt-8">
-                 <h4 className="text-lg font-semibold mb-4 text-slate-800">Загальна кількість за сезон, кг/га</h4>
+                 <h4 className="text-lg font-semibold mb-4 text-slate-800">Загальна кількість за сезон</h4>
                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                      {[
                          { label: chartLabels[0], value: totals.nitrogen, color: 'border-indigo-500' },
@@ -251,16 +221,13 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                      ].map(item => (
                         <div key={item.label} className={`bg-slate-50 p-4 rounded-lg shadow-sm border-t-4 ${item.color}`}>
                             <p className="text-sm text-slate-600 truncate" title={item.label}>{item.label}</p>
-                            <p className="text-2xl font-bold text-slate-800 mt-1">{item.value.toFixed(1)}</p>
+                            <p className="text-2xl font-bold text-slate-800 mt-1">{item.value.toFixed(1)} <span className="text-base font-medium text-slate-500">кг/га</span></p>
+                            <p className="text-sm font-semibold text-indigo-700">Всього: {(item.value * area).toFixed(1)} кг</p>
                         </div>
                      ))}
                  </div>
             </div>
-            <CompatibilityModal 
-                isOpen={isCompatibilityModalOpen}
-                onClose={() => setIsCompatibilityModalOpen(false)}
-                nitrogenFertilizerName={nitrogenFertilizerName}
-            />
+            <CompatibilityModal isOpen={isCompatibilityModalOpen} onClose={() => setIsCompatibilityModalOpen(false)} nitrogenFertilizerName={nitrogenFertilizerName}/>
         </div>
     );
 };

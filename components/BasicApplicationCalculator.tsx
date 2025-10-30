@@ -7,7 +7,7 @@ import { InfoIcon } from './InfoIcon';
 
 interface BasicApplicationCalculatorProps {
     needs: NutrientNeeds[];
-    soilData: Partial<FormData>;
+    formData: Partial<FormData>;
     selections: BasicFertilizerSelections;
     onSelectionsChange: (selections: BasicFertilizerSelections) => void;
     amendment: string;
@@ -52,7 +52,7 @@ const ComplexFertilizerInput: React.FC<{ label: string, name: keyof Omit<Complex
 
 export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProps> = ({
     needs,
-    soilData,
+    formData,
     selections,
     onSelectionsChange,
     amendment,
@@ -77,17 +77,18 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         }
     }, [needs, readOnly]);
 
+    const fieldArea = parseFloat(formData.fieldArea || '1') || 1;
 
-    const { ph } = soilData;
+    const { ph } = formData;
     const needsAmendment = ph && parseFloat(ph) <= 6.8;
 
     const displayNeeds = useMemo<NutrientNeeds[]>(() => {
-        if (!amendment || !needsAmendment || !soilData.ph) {
+        if (!amendment || !needsAmendment || !formData.ph) {
             return needs.map(need => need.element === 'Меліорант' ? { ...need, norm: 0 } : need);
         }
 
         const amendmentEffects = AMENDMENT_EFFECTS[amendment as keyof typeof AMENDMENT_EFFECTS];
-        const numericPh = parseFloat(soilData.ph);
+        const numericPh = parseFloat(formData.ph);
 
         const initialCaNeed = needs.find(n => n.element === 'CaO')?.norm ?? 0;
         const initialMgNeed = needs.find(n => n.element === 'MgO')?.norm ?? 0;
@@ -107,7 +108,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             if (need.element === 'MgO') return { ...need, norm: newMagnesiumRate };
             return need;
         });
-    }, [needs, amendment, needsAmendment, soilData.ph]);
+    }, [needs, amendment, needsAmendment, formData.ph]);
 
     const elementsWithNeedCount = useMemo(() => {
         return needs.filter(n => n.element !== 'Меліорант' && n.norm > 0).length;
@@ -147,21 +148,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
 
         const newRate = maxRate > 0 ? Math.round(maxRate).toString() : '';
         
-        // Prevent re-rendering if the rate is the same.
         if (newRate !== complexFertilizer.rate) {
             onComplexFertilizerChange({ ...complexFertilizer, rate: newRate });
         }
 
     }, [
-        complexFertilizer.enabled, 
-        complexFertilizer.p2o5, 
-        complexFertilizer.k2o, 
-        complexFertilizer.cao, 
-        complexFertilizer.mg, 
-        displayNeeds, 
-        readOnly, 
-        complexFertilizer.rate,
-        onComplexFertilizerChange
+        complexFertilizer.enabled, complexFertilizer.p2o5, complexFertilizer.k2o, complexFertilizer.cao, complexFertilizer.mg, 
+        displayNeeds, readOnly, complexFertilizer.rate, onComplexFertilizerChange
     ]);
 
     const handleToggleComplexFertilizer = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,15 +245,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     const handleNitroammophoskaClick = () => {
         onComplexFertilizerChange({
             ...complexFertilizer,
-            n: '16',
-            p2o5: '16',
-            k2o: '16',
-            cao: '',
-            mg: '',
+            n: '16', p2o5: '16', k2o: '16', cao: '', mg: '',
         });
     };
     
     const amendmentTooltipText = `При pH ґрунту 6.8 або нижче рекомендується внесення меліорантів (вапно, дефекат) для розкислення та покращення доступності елементів живлення для рослин.`;
+    
+    const complexFertilizerTotal = (parseFloat(complexFertilizer.rate) || 0) * fieldArea;
 
     return (
         <div>
@@ -298,12 +289,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">Склад та норма комплексного добрива</h4>
                         {!readOnly && (
-                            <button
-                                type="button"
-                                onClick={handleNitroammophoskaClick}
-                                className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0"
-                                title="Заповнити поля даними Нітроамофоски (16-16-16)"
-                            >
+                            <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними Нітроамофоски (16-16-16)">
                                 Нітроамофоска
                             </button>
                         )}
@@ -316,14 +302,8 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                        <ComplexFertilizerInput label="MgO" name="mg" value={complexFertilizer.mg} onChange={handleComplexFertilizerInputChange} disabled={readOnly} />
                     </div>
                      <div className="pt-2">
-                        <StyledFormField 
-                            label="Норма внесення (розрахована)" 
-                            name="rate" 
-                            value={complexFertilizer.rate}
-                            onChange={() => {}}
-                            unit="кг/га"
-                            disabled={true}
-                        />
+                        <StyledFormField label="Норма внесення (розрахована)" name="rate" value={complexFertilizer.rate} onChange={() => {}} unit="кг/га" disabled={true} />
+                        {complexFertilizerTotal > 0 && <p className="text-sm text-slate-600 mt-1 text-right font-medium">Всього на площу: <span className="font-bold text-indigo-700">{complexFertilizerTotal.toFixed(1)} кг</span></p>}
                     </div>
                 </div>
             )}
@@ -334,6 +314,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                 {nutrientNeeds.map(need => {
                     const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
                     const calculatedNorm = getCalculatedNorm(need.element, need.norm);
+                    const totalKg = calculatedNorm * fieldArea;
                     return (
                         <div key={need.element} className="bg-slate-50 p-4 rounded-lg shadow">
                             <h4 className="font-bold text-lg text-slate-800">{need.element}</h4>
@@ -341,13 +322,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                 <p><span className="font-semibold">{tableHeaderLabel}:</span> {need.norm} {renderUnit(need.element)}</p>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Добриво:</label>
-                                    <select
-                                        value={selections[need.element]?.selectedFertilizer || ''}
-                                        onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
-                                        className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
-                                        disabled={readOnly}
-                                        title="оберіть добриво"
-                                    >
+                                    <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть добриво">
                                         <option value=""></option>
                                         {simpleFertilizersForElement.map(fert => (
                                             <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
@@ -355,7 +330,10 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     </select>
                                 </div>
                                 {calculatedNorm > 0 && (
-                                     <p className="font-semibold text-indigo-600">Норма внесення: {calculatedNorm} кг/га</p>
+                                     <div className="font-semibold text-indigo-600 mt-2">
+                                        <p>Норма: {calculatedNorm} кг/га</p>
+                                        <p>Всього: {totalKg.toFixed(1)} кг на {fieldArea} га</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -364,29 +342,20 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                 {needsAmendment && (
                     <div className="bg-indigo-50 p-4 rounded-lg shadow">
                          <h4 className="font-bold text-lg text-slate-800 flex items-center gap-1.5">
-                            Меліорант
-                            <Tooltip text={amendmentTooltipText}>
-                                <InfoIcon className="h-4 w-4" />
-                            </Tooltip>
+                            Меліорант <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip>
                         </h4>
                         <div className="mt-2 space-y-2">
                             <p>
                                 <span className="font-semibold">Потреба:</span> 
                                 <span className="ml-2 font-bold">
                                 {amendmentRowData && amendmentRowData.norm > 0 
-                                   ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
+                                   ? `${amendmentRowData.norm} ${renderUnit('Меліорант')} (Всього: ${(amendmentRowData.norm * fieldArea).toFixed(0)} кг)`
                                    : 'Оберіть для розрахунку'}
                                 </span>
                             </p>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Меліорант:</label>
-                                 <select
-                                    value={amendment}
-                                    onChange={handleAmendmentChange}
-                                    className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
-                                    disabled={readOnly}
-                                    title="оберіть меліорант"
-                                >
+                                 <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть меліорант">
                                     <option value=""></option>
                                     {AMENDMENTS.map(amend => (
                                         <option key={amend.value} value={amend.value}>{amend.label}</option>
@@ -413,18 +382,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                         {nutrientNeeds.map(need => {
                             const simpleFertilizersForElement = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS] || [];
                             const calculatedNorm = getCalculatedNorm(need.element, need.norm);
+                            const totalKg = calculatedNorm * fieldArea;
                             return (
                                 <tr key={need.element} className="hover:bg-indigo-50 transition-colors">
                                     <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">{need.element}</td>
                                     <td className="py-4 px-6 whitespace-nowrap text-slate-700">{need.norm} {renderUnit(need.element)}</td>
                                     <td className="py-4 px-6 whitespace-nowrap">
-                                        <select
-                                            value={selections[need.element]?.selectedFertilizer || ''}
-                                            onChange={(e) => handleFertilizerChange(need.element, e.target.value)}
-                                            className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
-                                            disabled={readOnly}
-                                            title="оберіть добриво"
-                                        >
+                                        <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть добриво">
                                             <option value=""></option>
                                             {simpleFertilizersForElement.map(fert => (
                                                 <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
@@ -432,7 +396,12 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                         </select>
                                     </td>
                                     <td className="py-4 px-6 whitespace-nowrap font-semibold text-indigo-600">
-                                        {calculatedNorm > 0 ? `${calculatedNorm} кг/га` : ''}
+                                        {calculatedNorm > 0 && (
+                                            <div>
+                                                <p>{calculatedNorm} кг/га</p>
+                                                <p className="text-xs text-slate-600 font-medium">(Всього: {totalKg.toFixed(1)} кг)</p>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -440,34 +409,26 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                         {needsAmendment && (
                              <tr className="bg-indigo-50/70 hover:bg-indigo-100 transition-colors">
                                 <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">
-                                     <span className="flex items-center gap-1.5">
-                                        Меліорант
-                                        <Tooltip text={amendmentTooltipText}>
-                                            <InfoIcon className="h-4 w-4" />
-                                        </Tooltip>
-                                    </span>
+                                     <span className="flex items-center gap-1.5">Меліорант <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip></span>
                                 </td>
                                 <td className="py-4 px-6 whitespace-nowrap font-bold text-slate-700">
                                      {amendmentRowData && amendmentRowData.norm > 0 
                                         ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
-                                        : 'Оберіть для розрахунку'
-                                     }
+                                        : 'Оберіть для розрахунку'}
                                 </td>
                                 <td className="py-4 px-6 whitespace-nowrap">
-                                    <select
-                                        value={amendment}
-                                        onChange={handleAmendmentChange}
-                                        className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100"
-                                        disabled={readOnly}
-                                        title="оберіть меліорант"
-                                    >
+                                    <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть меліорант">
                                         <option value=""></option>
                                         {AMENDMENTS.map(amend => (
                                             <option key={amend.value} value={amend.value}>{amend.label}</option>
                                         ))}
                                     </select>
                                 </td>
-                                 <td className="py-4 px-6 whitespace-nowrap text-sm text-slate-700"></td>
+                                 <td className="py-4 px-6 whitespace-nowrap text-sm text-indigo-600 font-semibold">
+                                     {amendmentRowData && amendmentRowData.norm > 0 &&
+                                        `Всього: ${(amendmentRowData.norm * fieldArea).toFixed(0)} кг`
+                                     }
+                                 </td>
                             </tr>
                         )}
                     </tbody>

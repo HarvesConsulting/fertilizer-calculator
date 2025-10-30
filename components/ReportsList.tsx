@@ -6,7 +6,6 @@ interface ReportsListProps {
     onView: (report: SavedReport) => void;
     onDelete: (id: string) => void;
     onNewCalculation: () => void;
-    onBack: () => void;
     onLoadReport: () => void;
 }
 
@@ -20,7 +19,7 @@ const formatDate = (dateString: string) => {
     });
 };
 
-export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onBack, onLoadReport }) => {
+export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onLoadReport }) => {
 
     if (reports.length === 0) {
         return (
@@ -63,14 +62,14 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                         <span>Завантажити</span>
                     </button>
                     <button
-                        onClick={onBack}
+                        onClick={onNewCalculation}
                         className="w-full sm:w-auto bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition flex items-center justify-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 0a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100-4m0 4a2 2 0 110-4" />
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a2 2 0 100-4m0 4a2 2 0 110-4" />
                         </svg>
-                        <span>До калькулятора</span>
+                        <span>Новий розрахунок</span>
                     </button>
                 </div>
             </div>
@@ -78,9 +77,11 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                 {reports.map(report => (
                     <div key={report.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-slate-50 transition-colors">
                         <div className="flex-grow">
-                            <h3 className="font-bold text-lg text-indigo-700">{report.formData.culture}</h3>
+                            <h3 className="font-bold text-lg text-indigo-700">
+                                {report.formData.fieldName ? `${report.formData.fieldName} (${report.formData.culture})` : report.formData.culture}
+                            </h3>
                             <p className="text-sm text-slate-600">
-                                Врожайність: {report.formData.plannedYield} т/га
+                                Врожайність: {report.formData.plannedYield} т/га, Площа: {report.formData.fieldArea || 1} га
                             </p>
                             <p className="text-xs text-slate-500 mt-1">
                                 Збережено: {formatDate(report.timestamp)}

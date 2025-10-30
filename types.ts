@@ -19,6 +19,8 @@ export interface CultureParams {
 export interface FormData {
     culture: string;
     plannedYield: string;
+    fieldArea: string;
+    fieldName: string;
     nitrogenAnalysis: string;
     ph: string;
     phosphorus: string;

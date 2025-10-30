@@ -54,8 +54,10 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <InfoBlock title="Вхідні дані">
+                    {formData.fieldName && (<p><strong>Назва поля:</strong> {formData.fieldName}</p>)}
                     <p><strong>Культура:</strong> {formData.culture}</p>
                     <p><strong>Планована врожайність:</strong> {formData.plannedYield} т/га</p>
+                    <p><strong>Площа поля:</strong> {formData.fieldArea || 1} га</p>
                 </InfoBlock>
                 <InfoBlock title="Аналіз ґрунту">
                      <p><strong>N:</strong> {formData.nitrogenAnalysis} мг/кг, <strong>P₂O₅:</strong> {formData.phosphorus} мг/кг, <strong>K₂O:</strong> {formData.potassium} мг/кг, <strong>CaO:</strong> {formData.calcium} мг/кг, <strong>MgO:</strong> {formData.magnesium} мг/кг</p>
@@ -69,7 +71,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                     <div className="p-6 rounded-lg border">
                        <BasicApplicationCalculator 
                            needs={results.basic} 
-                           soilData={formData}
+                           formData={formData}
                            selections={report.basicFertilizers || {}}
                            onSelectionsChange={() => {}}
                            amendment={report.selectedAmendment || ''}
@@ -86,6 +88,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                             initialNeeds={results.fertigation} 
                             culture={results.culture}
                             cultureParams={cultureParams}
+                            fieldArea={formData.fieldArea}
                             springFertilizer={springFert}
                             setSpringFertilizer={setSpringFert}
                             nitrogenFertilizer={nitroFert}

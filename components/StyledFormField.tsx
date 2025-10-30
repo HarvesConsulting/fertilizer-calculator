@@ -14,6 +14,7 @@ interface StyledFormFieldProps {
     max?: string;
     disabled?: boolean;
     tooltipText?: string;
+    required?: boolean;
 }
 
 export const StyledFormField: React.FC<StyledFormFieldProps> = ({
@@ -28,6 +29,7 @@ export const StyledFormField: React.FC<StyledFormFieldProps> = ({
     max,
     disabled = false,
     tooltipText,
+    required = true,
 }) => {
     return (
         <div className="relative group">
@@ -43,7 +45,7 @@ export const StyledFormField: React.FC<StyledFormFieldProps> = ({
                 disabled={disabled}
                 className="block w-full px-4 py-3 text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-lg appearance-none focus:outline-none focus:ring-0 focus:border-indigo-600 peer disabled:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-500"
                 placeholder=" "
-                required
+                required={required}
             />
             <label
                 htmlFor={name}
@@ -58,11 +60,13 @@ export const StyledFormField: React.FC<StyledFormFieldProps> = ({
                     )}
                 </span>
             </label>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-1 pointer-events-none">
-                <span className="h-[calc(100%-2px)] flex items-center px-3 bg-slate-100 border-l-2 border-slate-200 text-slate-600 text-sm rounded-r-md group-focus-within:border-indigo-600">
-                    {unit}
-                </span>
-            </div>
+            {unit && (
+                <div className="absolute inset-y-0 right-0 flex items-center pr-1 pointer-events-none">
+                    <span className="h-[calc(100%-2px)] flex items-center px-3 bg-slate-100 border-l-2 border-slate-200 text-slate-600 text-sm rounded-r-md group-focus-within:border-indigo-600">
+                        {unit}
+                    </span>
+                </div>
+            )}
         </div>
     );
 };

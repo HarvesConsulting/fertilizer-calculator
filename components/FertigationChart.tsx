@@ -12,12 +12,13 @@ interface ChartData {
 interface FertigationChartProps {
     data: ChartData[];
     labels: string[];
+    fieldArea: number;
 }
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#e11d48'];
 const KEYS: (keyof Omit<ChartData, 'week'>)[] = ['nitrogen', 'phosphorus', 'potassium', 'calcium', 'magnesium'];
 
-export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels }) => {
+export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels, fieldArea }) => {
     const [tooltip, setTooltip] = useState<{
         visible: boolean;
         x: number;
@@ -65,7 +66,8 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
                     <div key={key} className="flex items-center">
                         <div className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: COLORS[i] }}></div>
                         <span className="flex-grow">{labels[i]}:</span>
-                        <span className="font-semibold">{weekData[key].toFixed(1)} кг</span>
+                        <span className="font-semibold">{weekData[key].toFixed(1)} кг/га</span>
+                        <span className="font-bold text-indigo-700 ml-2">({(weekData[key] * fieldArea).toFixed(1)} кг)</span>
                     </div>
                 ))}
             </div>
@@ -132,7 +134,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
                     className="absolute z-10 p-2 bg-white rounded-md shadow-lg pointer-events-none border border-slate-200"
                     style={{ 
                         transform: `translate(${tooltip.x}px, ${tooltip.y}px) translateX(-50%) translateY(-100%)`,
-                        minWidth: '200px'
+                        minWidth: '240px'
                     }}
                 >
                     {tooltip.content}
