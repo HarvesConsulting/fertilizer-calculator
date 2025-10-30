@@ -45,13 +45,22 @@ export interface ComplexFertilizer {
     enabled: boolean;
 }
 
+export interface SpringFertilizer {
+    n: string;
+    p: string;
+    k: string;
+    ca: string;
+    mg: string;
+    enabled: boolean;
+}
+
 export interface SavedReport {
   id: string;
   timestamp: string;
   formData: FormData;
   results: CalculationResults;
   calculationType: 'basic' | 'fertigation' | 'full';
-  springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
+  springFertilizer: SpringFertilizer;
   nitrogenFertilizer: string;
   basicFertilizers: BasicFertilizerSelections;
   selectedAmendment: string;

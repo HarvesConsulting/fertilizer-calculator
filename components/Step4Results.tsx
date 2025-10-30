@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer } from '../types';
+import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
 import { generateTxtReport } from '../utils/reportGenerator';
@@ -11,8 +11,8 @@ interface Step4Props {
     formData: FormData;
     cultureParams: CultureParams;
     onSave: () => void;
-    springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
-    setSpringFertilizer: React.Dispatch<React.SetStateAction<{ n: string; p: string; k: string; ca: string; mg: string; }>>;
+    springFertilizer: SpringFertilizer;
+    setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
     setNitrogenFertilizer: React.Dispatch<React.SetStateAction<string>>;
     basicFertilizers: BasicFertilizerSelections;
@@ -67,8 +67,6 @@ export const Step4Results: React.FC<Step4Props> = ({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     };
-    
-    const fertigationNeedsSummary = results.fertigation.filter(need => need.norm > 0);
 
     return (
         <div className="space-y-10">
@@ -91,19 +89,6 @@ export const Step4Results: React.FC<Step4Props> = ({
                 )}
                 {showFertigation && (
                     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                        {fertigationNeedsSummary.length > 0 && (
-                            <div className="mb-10 hidden md:block">
-                                <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Початкова потреба для фертигації (д.р./га)</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                                    {fertigationNeedsSummary.map(need => (
-                                        <div key={need.element} className="bg-gray-50 p-4 rounded-lg text-center shadow-sm">
-                                            <p className="text-base font-bold text-gray-800">{need.element}</p>
-                                            <p className="text-2xl font-semibold text-blue-600">{need.norm}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                         <FertigationProgram 
                             initialNeeds={results.fertigation} 
                             culture={results.culture}

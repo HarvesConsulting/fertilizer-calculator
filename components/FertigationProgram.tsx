@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo } from 'react';
 import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
 import { FERTIGATION_CULTURES } from '../constants';
-import type { NutrientNeeds, CultureParams } from '../types';
+import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
 import { calculateFertigationPlan } from '../utils/fertigationCalculator';
 
 interface FertigationProgramProps {
     initialNeeds: NutrientNeeds[];
     culture: string;
     cultureParams: CultureParams;
-    springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
-    setSpringFertilizer: React.Dispatch<React.SetStateAction<{ n: string; p: string; k: string; ca: string; mg: string; }>>;
+    springFertilizer: SpringFertilizer;
+    setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
     setNitrogenFertilizer: React.Dispatch<React.SetStateAction<string>>;
     readOnly?: boolean;
@@ -52,7 +52,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     
     useEffect(() => {
         if (!readOnly) {
-            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '' });
+            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
             setNitrogenFertilizer('ammonium-nitrate');
         }
     }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer, readOnly]);
@@ -62,15 +62,25 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         const { name, value } = e.target;
         setSpringFertilizer(prev => ({ ...prev, [name]: value }));
     };
+
+    const handleToggleSpringFertilizer = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isEnabled = e.target.checked;
+        if (isEnabled) {
+            setSpringFertilizer(prev => ({ ...prev, enabled: true }));
+        } else {
+            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
+        }
+    };
     
     const handleYaraMilaClick = () => {
-        setSpringFertilizer({
+        setSpringFertilizer(prev => ({
+            ...prev,
             n: '11',
             p: '11',
             k: '21',
             ca: '0',
             mg: '2.6',
-        });
+        }));
     };
 
     const findCultureKey = (cultureName: string) => {
@@ -83,7 +93,6 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     
     const { weeklyPlan, totals, fertilizerRate } = useMemo(() => {
         if (!cultureKey) {
-            // FIX: Provide a default `totals` object with all required properties to satisfy TypeScript.
              return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate: null };
         }
         return calculateFertigationPlan({
@@ -123,39 +132,66 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
 
     return (
         <div>
-             <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
+            <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Програма фертигації</h3>
             
-            <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
-                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h4 className="text-lg font-semibold text-gray-800">1. Розрахунок весняного (стартового) добрива</h4>
-                    {!readOnly && (
-                        <button
-                            type="button"
-                            onClick={handleYaraMilaClick}
-                            className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors flex-shrink-0"
-                            title="Заповнити поля даними YaraMila CROPCARE 11-11-21"
-                        >
-                            YaraMila CROPCARE
-                        </button>
-                    )}
-                 </div>
-
-                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                     <NutrientInput label="Азот (N)" name="n" value={springFertilizer.n} onChange={handleFertilizerChange} disabled={readOnly} />
-                     <NutrientInput label="Фосфор (P₂O₅)" name="p" value={springFertilizer.p} onChange={handleFertilizerChange} disabled={readOnly} />
-                     <NutrientInput label="Калій (K₂O)" name="k" value={springFertilizer.k} onChange={handleFertilizerChange} disabled={readOnly} />
-                     <NutrientInput label="Кальцій (CaO)" name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} disabled={readOnly} />
-                     <NutrientInput label="Магній (MgO)" name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
-                 </div>
-                 {fertilizerRate !== null && (
-                    <div className="bg-blue-100 text-blue-800 p-3 rounded-lg mt-4">
-                        <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(1)} кг/га</span></p>
+             <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                <div className="relative flex items-start">
+                    <div className="flex h-6 items-center">
+                        <input
+                            id="spring-fert-toggle"
+                            aria-describedby="spring-fert-description"
+                            name="spring-fert-toggle"
+                            type="checkbox"
+                            checked={springFertilizer.enabled}
+                            onChange={handleToggleSpringFertilizer}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                            disabled={readOnly}
+                        />
                     </div>
-                 )}
+                    <div className="ml-3 text-sm leading-6">
+                        <label htmlFor="spring-fert-toggle" className="font-medium text-gray-900 cursor-pointer">
+                            Розрахувати комплексне стартове добриво
+                        </label>
+                        <p id="spring-fert-description" className="text-gray-500">
+                            Внесіть склад для розрахунку норми весняного добрива.
+                        </p>
+                    </div>
+                </div>
             </div>
 
+            {springFertilizer.enabled && (
+                <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
+                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <h4 className="text-lg font-semibold text-gray-800">Склад та норма стартового добрива</h4>
+                        {!readOnly && (
+                            <button
+                                type="button"
+                                onClick={handleYaraMilaClick}
+                                className="bg-blue-100 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-blue-200 transition-colors flex-shrink-0"
+                                title="Заповнити поля даними YaraMila CROPCARE 11-11-21"
+                            >
+                                YaraMila CROPCARE
+                            </button>
+                        )}
+                     </div>
+
+                     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                         <NutrientInput label="Азот (N)" name="n" value={springFertilizer.n} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label="Фосфор (P₂O₅)" name="p" value={springFertilizer.p} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label="Калій (K₂O)" name="k" value={springFertilizer.k} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label="Кальцій (CaO)" name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label="Магній (MgO)" name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
+                     </div>
+                     {fertilizerRate !== null && (
+                        <div className="bg-blue-100 text-blue-800 p-3 rounded-lg mt-4">
+                            <p className="font-semibold">Розрахункова норма внесення добрива: <span className="text-lg">{fertilizerRate.toFixed(1)} кг/га</span></p>
+                        </div>
+                     )}
+                </div>
+            )}
+
             <div className="mb-8 p-4 border rounded-lg bg-gray-50 space-y-4">
-                <h4 className="text-lg font-semibold text-gray-800">2. Вибір азотного добрива для фертигації</h4>
+                <h4 className="text-lg font-semibold text-gray-800">Вибір азотного добрива для фертигації</h4>
                  <div>
                     <label htmlFor="nitrogen-fertilizer" className="block text-sm font-medium text-gray-700">Азотне добриво</label>
                     <select 
@@ -171,7 +207,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                 </div>
             </div>
 
-            <h4 className="text-lg font-semibold mb-3 text-gray-800">3. Потижневий план внесення добрив (фізична вага)</h4>
+            <h4 className="text-lg font-semibold mb-3 text-gray-800">Потижневий план внесення добрив (фізична вага)</h4>
             
             {/* Mobile Card View */}
             <div className="md:hidden space-y-4">

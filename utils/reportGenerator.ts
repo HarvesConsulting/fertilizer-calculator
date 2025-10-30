@@ -1,4 +1,4 @@
-import type { FormData, CalculationResults, CultureParams, NutrientNeeds, ComplexFertilizer } from '../types';
+import type { FormData, CalculationResults, CultureParams, NutrientNeeds, ComplexFertilizer, SpringFertilizer } from '../types';
 import { calculateFertigationPlan } from './fertigationCalculator';
 import { AMENDMENT_EFFECTS, FERTIGATION_CULTURES } from '../constants';
 
@@ -7,7 +7,7 @@ interface ReportData {
     results: CalculationResults;
     calculationType: 'basic' | 'fertigation' | 'full';
     cultureParams: CultureParams;
-    springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
+    springFertilizer: SpringFertilizer;
     nitrogenFertilizer: string;
     complexFertilizer: ComplexFertilizer;
 }
@@ -88,8 +88,7 @@ export const generateTxtReport = (data: ReportData): string => {
                 nitrogenFertilizer,
             });
 
-            const kPercentage = parseFloat(springFertilizer.k);
-            if (fertilizerRate && kPercentage > 0) {
+            if (springFertilizer.enabled && fertilizerRate && parseFloat(springFertilizer.k) > 0) {
                  report += `Весняне (стартове) добриво:\n`;
                  report += `  - Склад: N:${springFertilizer.n}% P:${springFertilizer.p}% K:${springFertilizer.k}% Ca:${springFertilizer.ca}% Mg:${springFertilizer.mg}%\n`;
                  report += `  - Розрахункова норма внесення: ${fertilizerRate.toFixed(1)} кг/га\n\n`;

@@ -1,11 +1,11 @@
 import { FERTIGATION_SCHEDULES } from '../components/FertigationSchedules';
-import type { NutrientNeeds, CultureParams } from '../types';
+import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
 
 interface FertigationPlanInputs {
     initialNeeds: NutrientNeeds[];
     cultureKey: string;
     cultureParams: CultureParams;
-    springFertilizer: { n: string; p: string; k: string; ca: string; mg: string; };
+    springFertilizer: SpringFertilizer;
     nitrogenFertilizer: string;
 }
 
@@ -19,14 +19,13 @@ export const calculateFertigationPlan = ({
 
     const { calciumFactor, magnesiumFactor } = cultureParams;
 
-    // 1. Calculate fertilizer rate and adjusted needs based on spring fertilizer
     const kPercentage = parseFloat(springFertilizer.k);
     const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
     
     let fertilizerRate: number | null = null;
-    let adjustedNeeds: NutrientNeeds[] = initialNeeds;
+    let adjustedNeeds: NutrientNeeds[] = [...initialNeeds];
 
-    if (kPercentage && kPercentage > 0 && initialKNeed > 0) {
+    if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
         const rate = (initialKNeed * 0.5 / kPercentage) * 100;
         fertilizerRate = rate;
 
@@ -37,11 +36,9 @@ export const calculateFertigationPlan = ({
         const mgSupplied = rate * (parseFloat(springFertilizer.mg || '0') / 100);
         
         const adjustedKNorm = Math.max(0, initialKNeed - kSupplied);
-        // Recalculate Ca and Mg based on the *remaining* K need
         const recalculatedCaNorm = adjustedKNorm * calciumFactor;
         const recalculatedMgNorm = adjustedKNorm * magnesiumFactor;
         
-        // Adjust Ca and Mg needs by what was supplied, but the base is the recalculated norm
         const finalCaNorm = Math.max(0, recalculatedCaNorm - caSupplied);
         const finalMgNorm = Math.max(0, recalculatedMgNorm - mgSupplied);
 
@@ -50,7 +47,6 @@ export const calculateFertigationPlan = ({
             if (need.element === 'N') return { ...need, norm: Math.max(0, need.norm - nSupplied) };
             if (need.element === 'P2O5') return { ...need, norm: Math.max(0, need.norm - pSupplied) };
             if (need.element === 'K2O') return { ...need, norm: adjustedKNorm };
-            // Use the final adjusted Ca/Mg norms, but make sure they don't fall below zero from the start
             if (need.element === 'CaO') return { ...need, norm: Math.max(0, finalCaNorm) };
             if (need.element === 'MgO') return { ...need, norm: Math.max(0, finalMgNorm) };
             return need;
@@ -58,7 +54,6 @@ export const calculateFertigationPlan = ({
 
     }
 
-    // 2. Calculate weekly plan based on adjusted needs
     const schedule = FERTIGATION_SCHEDULES[cultureKey];
     if (!schedule) {
          return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate, adjustedNeeds };

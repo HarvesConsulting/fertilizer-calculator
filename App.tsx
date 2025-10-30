@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections, ComplexFertilizer } from './types';
+import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from './types';
 import { Stepper } from './components/Stepper';
 import { Step1SoilAnalysis } from './components/Step1SoilAnalysis';
 import { Step2CropYield } from './components/Step2CropYield';
@@ -27,6 +27,10 @@ const INITIAL_COMPLEX_FERTILIZER: ComplexFertilizer = {
     n: '', p2o5: '', k2o: '', cao: '', mg: '', rate: '', enabled: false
 };
 
+const INITIAL_SPRING_FERTILIZER: SpringFertilizer = {
+    n: '', p: '', k: '', ca: '', mg: '', enabled: false
+};
+
 
 const CalculatorIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -48,7 +52,7 @@ function App() {
     const [calculationType, setCalculationType] = useState<'basic' | 'fertigation' | 'full' | null>(null);
     
     // State for FertigationProgram
-    const [springFertilizer, setSpringFertilizer] = useState({ n: '', p: '', k: '', ca: '', mg: '' });
+    const [springFertilizer, setSpringFertilizer] = useState<SpringFertilizer>(INITIAL_SPRING_FERTILIZER);
     const [nitrogenFertilizer, setNitrogenFertilizer] = useState('ammonium-nitrate');
 
     // State for BasicApplicationCalculator
@@ -60,9 +64,34 @@ function App() {
     const [reports, setReports] = useState<SavedReport[]>(() => {
         try {
             const savedReports = localStorage.getItem('agro-reports');
-            return savedReports ? JSON.parse(savedReports) : [];
+            if (!savedReports) return [];
+            const parsedReports = JSON.parse(savedReports) as SavedReport[];
+            
+            // Migration logic for older report formats
+            return parsedReports.map(report => {
+                const migratedReport = { ...report };
+                // Migrate springFertilizer
+                if (migratedReport.springFertilizer && typeof (migratedReport.springFertilizer as any).enabled === 'undefined') {
+                    const oldFert = migratedReport.springFertilizer as any;
+                    const hasValues = oldFert.n || oldFert.p || oldFert.k || oldFert.ca || oldFert.mg;
+                    migratedReport.springFertilizer = {
+                        n: oldFert.n || '',
+                        p: oldFert.p || '',
+                        k: oldFert.k || '',
+                        ca: oldFert.ca || '',
+                        mg: oldFert.mg || '',
+                        enabled: !!hasValues
+                    };
+                }
+                // Ensure complexFertilizer exists
+                if (!migratedReport.complexFertilizer) {
+                    migratedReport.complexFertilizer = INITIAL_COMPLEX_FERTILIZER;
+                }
+                return migratedReport;
+            });
+
         } catch (error) {
-            console.error("Failed to load reports from localStorage", error);
+            console.error("Failed to load or migrate reports from localStorage", error);
             return [];
         }
     });
@@ -173,7 +202,7 @@ function App() {
         setFormData(INITIAL_FORM_DATA);
         setResults(null);
         setCalculationType(null);
-        setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '' });
+        setSpringFertilizer(INITIAL_SPRING_FERTILIZER);
         setNitrogenFertilizer('ammonium-nitrate');
         setBasicFertilizers({});
         setSelectedAmendment('');
@@ -245,7 +274,19 @@ function App() {
                 const text = e.target?.result;
                 if (typeof text !== 'string') throw new Error("File content is not a string.");
                 
-                const loadedReport = JSON.parse(text) as SavedReport;
+                let loadedReport = JSON.parse(text) as SavedReport;
+
+                // Migration logic for file-loaded reports
+                if (loadedReport.springFertilizer && typeof (loadedReport.springFertilizer as any).enabled === 'undefined') {
+                    const oldFert = loadedReport.springFertilizer as any;
+                    const hasValues = oldFert.n || oldFert.p || oldFert.k || oldFert.ca || oldFert.mg;
+                    loadedReport.springFertilizer = {
+                        n: oldFert.n || '', p: oldFert.p || '', k: oldFert.k || '', ca: oldFert.ca || '', mg: oldFert.mg || '', enabled: !!hasValues
+                    };
+                }
+                if (!loadedReport.complexFertilizer) {
+                    loadedReport.complexFertilizer = INITIAL_COMPLEX_FERTILIZER;
+                }
 
                 if (loadedReport.id && loadedReport.formData && loadedReport.results) {
                     setReports(prev => {
