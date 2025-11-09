@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Language, t } from '../i18n';
 
 interface Step3Props {
     onBack: () => void;
     onSelect: (type: 'basic' | 'fertigation' | 'full') => void;
+    lang: Language;
 }
 
 const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: string; isSelected: boolean; }> = ({ onClick, title, description, isSelected }) => (
@@ -20,7 +22,7 @@ const ChoiceButton: React.FC<{ onClick: () => void; title: string; description: 
 );
 
 
-export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect }) => {
+export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect, lang }) => {
     const [selected, setSelected] = useState<'basic' | 'fertigation' | 'full' | null>(null);
 
     const handleSelect = (type: 'basic' | 'fertigation' | 'full') => {
@@ -32,24 +34,24 @@ export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect 
 
     return (
         <div className="space-y-8">
-            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">Крок 3: Вибір розрахунку</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">{t('step3Title', lang)}</h2>
             <div className="space-y-4">
                 <ChoiceButton 
                     onClick={() => handleSelect('basic')} 
-                    title="Основне внесення"
-                    description="Розрахунок потреби в добривах для основного внесення."
+                    title={t('basicApplicationTitle', lang)}
+                    description={t('basicApplicationDesc', lang)}
                     isSelected={selected === 'basic'}
                 />
                 <ChoiceButton 
                     onClick={() => handleSelect('fertigation')} 
-                    title="Програма фертигації"
-                    description="Детальний потижневий план внесення добрив через краплинне зрошення."
+                    title={t('fertigationProgramTitle', lang)}
+                    description={t('fertigationProgramDesc', lang)}
                     isSelected={selected === 'fertigation'}
                 />
                  <ChoiceButton 
                     onClick={() => handleSelect('full')} 
-                    title="Комплексна програма"
-                    description="Показати основне внесення та програму фертигації разом."
+                    title={t('fullProgramTitle', lang)}
+                    description={t('fullProgramDesc', lang)}
                     isSelected={selected === 'full'}
                 />
             </div>
@@ -59,7 +61,7 @@ export const Step3CalculationChoice: React.FC<Step3Props> = ({ onBack, onSelect 
                     onClick={onBack}
                     className="bg-slate-300 text-slate-800 font-bold py-3 px-10 rounded-lg hover:bg-slate-400 transition duration-300"
                 >
-                    Назад
+                    {t('backButton', lang)}
                 </button>
             </div>
         </div>

@@ -4,6 +4,7 @@ import { SIMPLE_FERTILIZERS, AMENDMENTS, AMENDMENT_EFFECTS } from '../constants'
 import { StyledFormField } from './StyledFormField';
 import { Tooltip } from './Tooltip';
 import { InfoIcon } from './InfoIcon';
+import { Language, t } from '../i18n';
 
 interface BasicApplicationCalculatorProps {
     needs: NutrientNeeds[];
@@ -15,6 +16,7 @@ interface BasicApplicationCalculatorProps {
     complexFertilizer: ComplexFertilizer;
     onComplexFertilizerChange: (fertilizer: ComplexFertilizer) => void;
     readOnly?: boolean;
+    lang: Language;
 }
 
 const DEFAULT_FERTILIZERS: Record<string, string> = {
@@ -60,6 +62,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     complexFertilizer,
     onComplexFertilizerChange,
     readOnly = false,
+    lang
 }) => {
     
     useEffect(() => {
@@ -224,7 +227,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
 
 
     const renderUnit = (element: string) => {
-        return element === 'Меліорант' ? 'кг/га' : 'кг д.р./га';
+        return element === 'Меліорант' ? 'kg/ha' : 'kg a.i./ha';
     };
 
     const hasVisibleNeeds = finalNeeds.some(need => need.norm > 0) || needsAmendment;
@@ -233,14 +236,14 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     if (!hasVisibleNeeds && !complexFertilizer.enabled) {
         return (
              <div>
-                <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">Основне внесення</h3>
-                <p>Основне внесення не потрібне на основі розрахунків.</p>
+                <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">{t('basicApplicationHeader', lang)}</h3>
+                <p>{t('basicApplicationNotNeeded', lang)}</p>
             </div>
         );
     }
     
     const nutrientNeeds = finalNeeds.filter(need => need.element !== 'Меліорант' && need.norm > 0);
-    const tableHeaderLabel = complexFertilizer.enabled ? 'Залишкова потреба' : 'Потреба';
+    const tableHeaderLabel = complexFertilizer.enabled ? t('remainingNeed', lang) : t('need', lang);
     
     const handleNitroammophoskaClick = () => {
         onComplexFertilizerChange({
@@ -249,13 +252,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         });
     };
     
-    const amendmentTooltipText = `При pH ґрунту 6.8 або нижче рекомендується внесення меліорантів (вапно, дефекат) для розкислення та покращення доступності елементів живлення для рослин.`;
+    const amendmentTooltipText = t('amendmentTooltip', lang);
     
     const complexFertilizerTotal = (parseFloat(complexFertilizer.rate) || 0) * fieldArea;
 
     return (
         <div>
-            <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">Основне внесення</h3>
+            <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">{t('basicApplicationHeader', lang)}</h3>
 
             {elementsWithNeedCount >= 2 && (
                  <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50">
@@ -274,10 +277,10 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                         </div>
                         <div className="ml-3 text-sm leading-6">
                             <label htmlFor="complex-toggle" className="font-medium text-slate-900 cursor-pointer">
-                                Додати комплексне осіннє добриво
+                                {t('addComplexFertilizer', lang)}
                             </label>
                             <p id="complex-description" className="text-slate-500">
-                                Внесіть склад для автоматичного розрахунку норми та перерахунку потреби.
+                                {t('addComplexFertilizerDesc', lang)}
                             </p>
                         </div>
                     </div>
@@ -287,10 +290,10 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             {complexFertilizer.enabled && (
                 <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <h4 className="text-lg font-semibold text-slate-800">Склад та норма комплексного добрива</h4>
+                        <h4 className="text-lg font-semibold text-slate-800">{t('complexFertilizerHeader', lang)}</h4>
                         {!readOnly && (
                             <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними Нітроамофоски (16-16-16)">
-                                Нітроамофоска
+                                {t('nitroammophoskaButton', lang)}
                             </button>
                         )}
                     </div>
@@ -302,8 +305,8 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                        <ComplexFertilizerInput label="MgO" name="mg" value={complexFertilizer.mg} onChange={handleComplexFertilizerInputChange} disabled={readOnly} />
                     </div>
                      <div className="pt-2">
-                        <StyledFormField label="Норма внесення (розрахована)" name="rate" value={complexFertilizer.rate} onChange={() => {}} unit="кг/га" disabled={true} />
-                        {complexFertilizerTotal > 0 && <p className="text-sm text-slate-600 mt-1 text-right font-medium">Всього на площу: <span className="font-bold text-indigo-700">{complexFertilizerTotal.toFixed(1)} кг</span></p>}
+                        <StyledFormField label={t('complexFertilizerRateLabel', lang)} name="rate" value={complexFertilizer.rate} onChange={() => {}} unit="kg/ha" disabled={true} />
+                        {complexFertilizerTotal > 0 && <p className="text-sm text-slate-600 mt-1 text-right font-medium">{t('totalForArea', lang)} <span className="font-bold text-indigo-700">{complexFertilizerTotal.toFixed(1)} kg</span></p>}
                     </div>
                 </div>
             )}
@@ -321,18 +324,18 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                             <div className="mt-2 space-y-2">
                                 <p><span className="font-semibold">{tableHeaderLabel}:</span> {need.norm} {renderUnit(need.element)}</p>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Добриво:</label>
-                                    <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть добриво">
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('fertilizerLabel', lang)}:</label>
+                                    <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title={t('chooseFertilizer', lang)}>
                                         <option value=""></option>
                                         {simpleFertilizersForElement.map(fert => (
-                                            <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
+                                            <option key={fert.label[lang]} value={fert.value}>{fert.label[lang]} ({fert.value}%)</option>
                                         ))}
                                     </select>
                                 </div>
                                 {calculatedNorm > 0 && (
                                      <div className="font-semibold text-indigo-600 mt-2">
-                                        <p>Норма: {calculatedNorm} кг/га</p>
-                                        <p>Всього: {totalKg.toFixed(1)} кг на {fieldArea} га</p>
+                                        <p>{t('applicationRate', lang)}: {calculatedNorm} kg/ha</p>
+                                        <p>{t('totalLabel', lang)} {totalKg.toFixed(1)} kg on {fieldArea} ha</p>
                                     </div>
                                 )}
                             </div>
@@ -342,23 +345,23 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                 {needsAmendment && (
                     <div className="bg-indigo-50 p-4 rounded-lg shadow">
                          <h4 className="font-bold text-lg text-slate-800 flex items-center gap-1.5">
-                            Меліорант <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip>
+                            {t('amendmentLabel', lang)} <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip>
                         </h4>
                         <div className="mt-2 space-y-2">
                             <p>
-                                <span className="font-semibold">Потреба:</span> 
+                                <span className="font-semibold">{t('need', lang)}:</span> 
                                 <span className="ml-2 font-bold">
                                 {amendmentRowData && amendmentRowData.norm > 0 
-                                   ? `${amendmentRowData.norm} ${renderUnit('Меліорант')} (Всього: ${(amendmentRowData.norm * fieldArea).toFixed(0)} кг)`
-                                   : 'Оберіть для розрахунку'}
+                                   ? `${amendmentRowData.norm} ${renderUnit('Меліорант')} (${t('totalLabel', lang)} ${(amendmentRowData.norm * fieldArea).toFixed(0)} kg)`
+                                   : t('chooseAmendment', lang)}
                                 </span>
                             </p>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Меліорант:</label>
-                                 <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть меліорант">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">{t('amendmentLabel', lang)}:</label>
+                                 <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title={t('chooseAmendment', lang)}>
                                     <option value=""></option>
                                     {AMENDMENTS.map(amend => (
-                                        <option key={amend.value} value={amend.value}>{amend.label}</option>
+                                        <option key={amend.value} value={amend.value}>{amend.label[lang]}</option>
                                     ))}
                                 </select>
                             </div>
@@ -372,10 +375,10 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                 <table className="min-w-full bg-white">
                     <thead className="bg-slate-100">
                         <tr>
-                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Елемент</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">{t('element', lang)}</th>
                             <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">{tableHeaderLabel}</th>
-                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Добриво / Меліорант</th>
-                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">Норма внесення (фіз. вага)</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">{t('fertilizerLabel', lang)} / {t('amendmentLabel', lang)}</th>
+                            <th className="py-3 px-6 text-left text-sm font-semibold uppercase text-slate-600 tracking-wider">{t('applicationRate', lang)}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -388,18 +391,18 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">{need.element}</td>
                                     <td className="py-4 px-6 whitespace-nowrap text-slate-700">{need.norm} {renderUnit(need.element)}</td>
                                     <td className="py-4 px-6 whitespace-nowrap">
-                                        <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть добриво">
+                                        <select value={selections[need.element]?.selectedFertilizer || ''} onChange={(e) => handleFertilizerChange(need.element, e.target.value)} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title={t('chooseFertilizer', lang)}>
                                             <option value=""></option>
                                             {simpleFertilizersForElement.map(fert => (
-                                                <option key={fert.label} value={fert.value}>{fert.label} ({fert.value}%)</option>
+                                                <option key={fert.label[lang]} value={fert.value}>{fert.label[lang]} ({fert.value}%)</option>
                                             ))}
                                         </select>
                                     </td>
                                     <td className="py-4 px-6 whitespace-nowrap font-semibold text-indigo-600">
                                         {calculatedNorm > 0 && (
                                             <div>
-                                                <p>{calculatedNorm} кг/га</p>
-                                                <p className="text-xs text-slate-600 font-medium">(Всього: {totalKg.toFixed(1)} кг)</p>
+                                                <p>{calculatedNorm} kg/ha</p>
+                                                <p className="text-xs text-slate-600 font-medium">({t('totalLabel', lang)} {totalKg.toFixed(1)} kg)</p>
                                             </div>
                                         )}
                                     </td>
@@ -409,24 +412,24 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                         {needsAmendment && (
                              <tr className="bg-indigo-50/70 hover:bg-indigo-100 transition-colors">
                                 <td className="py-4 px-6 whitespace-nowrap font-medium text-slate-800">
-                                     <span className="flex items-center gap-1.5">Меліорант <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip></span>
+                                     <span className="flex items-center gap-1.5">{t('amendmentLabel', lang)} <Tooltip text={amendmentTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip></span>
                                 </td>
                                 <td className="py-4 px-6 whitespace-nowrap font-bold text-slate-700">
                                      {amendmentRowData && amendmentRowData.norm > 0 
                                         ? `${amendmentRowData.norm} ${renderUnit('Меліорант')}` 
-                                        : 'Оберіть для розрахунку'}
+                                        : t('chooseAmendment', lang)}
                                 </td>
                                 <td className="py-4 px-6 whitespace-nowrap">
-                                    <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title="оберіть меліорант">
+                                    <select value={amendment} onChange={handleAmendmentChange} className="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm disabled:bg-slate-100" disabled={readOnly} title={t('chooseAmendment', lang)}>
                                         <option value=""></option>
                                         {AMENDMENTS.map(amend => (
-                                            <option key={amend.value} value={amend.value}>{amend.label}</option>
+                                            <option key={amend.value} value={amend.value}>{amend.label[lang]}</option>
                                         ))}
                                     </select>
                                 </td>
                                  <td className="py-4 px-6 whitespace-nowrap text-sm text-indigo-600 font-semibold">
                                      {amendmentRowData && amendmentRowData.norm > 0 &&
-                                        `Всього: ${(amendmentRowData.norm * fieldArea).toFixed(0)} кг`
+                                        `${t('totalLabel', lang)} ${(amendmentRowData.norm * fieldArea).toFixed(0)} kg`
                                      }
                                  </td>
                             </tr>

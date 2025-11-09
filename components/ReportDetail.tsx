@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import type { SavedReport, ComplexFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
-import { CULTURE_PARAMS } from '../constants';
+import { CULTURE_PARAMS, CULTURES } from '../constants';
+import { Language, t } from '../i18n';
 
 interface ReportDetailProps {
     report: SavedReport;
     onBack: () => void;
+    lang: Language;
 }
 
 const InfoBlock: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -22,7 +24,7 @@ const defaultComplexFertilizer: ComplexFertilizer = {
     n: '', p2o5: '', k2o: '', cao: '', mg: '', rate: '', enabled: false
 };
 
-export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) => {
+export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang }) => {
     const { formData, results, calculationType, springFertilizer, nitrogenFertilizer, complexFertilizer } = report;
     const cultureParams = CULTURE_PARAMS[formData.culture];
 
@@ -31,6 +33,8 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
     
     const [springFert, setSpringFert] = useState(springFertilizer);
     const [nitroFert, setNitroFert] = useState(nitrogenFertilizer);
+
+    const cultureName = CULTURES.find(c => c.key === results.culture)?.name[lang] || results.culture;
 
     return (
         <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg space-y-10">
@@ -42,26 +46,26 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    До списку звітів
+                    {t('backToList', lang)}
                 </button>
                 <h2 className="text-3xl font-bold text-center text-slate-800">
-                    Звіт для "{results.culture}"
+                    {t('reportFor', lang, { culture: cultureName })}
                 </h2>
                 <p className="text-center text-slate-500 text-sm mt-1">
-                    Збережено: {new Date(report.timestamp).toLocaleString('uk-UA')}
+                    {t('savedAt', lang)}: {new Date(report.timestamp).toLocaleString(lang === 'uk' ? 'uk-UA' : 'en-US')}
                 </p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <InfoBlock title="Вхідні дані">
-                    {formData.fieldName && (<p><strong>Назва поля:</strong> {formData.fieldName}</p>)}
-                    <p><strong>Культура:</strong> {formData.culture}</p>
-                    <p><strong>Планована врожайність:</strong> {formData.plannedYield} т/га</p>
-                    <p><strong>Площа поля:</strong> {formData.fieldArea || 1} га</p>
+                <InfoBlock title={t('inputData', lang)}>
+                    {formData.fieldName && (<p><strong>{t('fieldNameLabel', lang)}:</strong> {formData.fieldName}</p>)}
+                    <p><strong>{t('cultureLabel', lang)}:</strong> {cultureName}</p>
+                    <p><strong>{t('plannedYieldLabel', lang)}:</strong> {formData.plannedYield} t/ha</p>
+                    <p><strong>{t('fieldAreaLabel', lang)}:</strong> {formData.fieldArea || 1} ha</p>
                 </InfoBlock>
-                <InfoBlock title="Аналіз ґрунту">
-                     <p><strong>N:</strong> {formData.nitrogenAnalysis} мг/кг, <strong>P₂O₅:</strong> {formData.phosphorus} мг/кг, <strong>K₂O:</strong> {formData.potassium} мг/кг, <strong>CaO:</strong> {formData.calcium} мг/кг, <strong>MgO:</strong> {formData.magnesium} мг/кг</p>
-                     <p><strong>pH:</strong> {formData.ph}, <strong>ЄКО:</strong> {formData.cec} мг-екв/100г</p>
+                <InfoBlock title={t('soilAnalysis', lang)}>
+                     <p><strong>N:</strong> {formData.nitrogenAnalysis} mg/kg, <strong>P₂O₅:</strong> {formData.phosphorus} mg/kg, <strong>K₂O:</strong> {formData.potassium} mg/kg, <strong>CaO:</strong> {formData.calcium} mg/kg, <strong>MgO:</strong> {formData.magnesium} mg/kg</p>
+                     <p><strong>{t('phLabel', lang)}:</strong> {formData.ph}, <strong>{t('cecLabel', lang)}:</strong> {formData.cec} mg-eq/100g</p>
                 </InfoBlock>
             </div>
 
@@ -79,6 +83,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                            complexFertilizer={complexFertilizer || defaultComplexFertilizer}
                            onComplexFertilizerChange={() => {}}
                            readOnly={true}
+                           lang={lang}
                        />
                     </div>
                 )}
@@ -94,6 +99,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack }) =>
                             nitrogenFertilizer={nitroFert}
                             setNitrogenFertilizer={setNitroFert}
                             readOnly={true}
+                            lang={lang}
                         />
                     </div>
                 )}

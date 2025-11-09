@@ -1,6 +1,6 @@
 {
-  "short_name": "Агро Калькулятор",
-  "name": "Агрохімічний калькулятор добрив",
+  "short_name": "Agro Calculator",
+  "name": "Agrochemical Fertilizer Calculator",
   "icons": [
     {
       "src": "apple-touch-icon.png",
@@ -19,5 +19,5 @@
   "display": "standalone",
   "theme_color": "#2563eb",
   "background_color": "#f1f5f9",
-  "description": "Багатофункціональний калькулятор для розрахунку потреб у добривах."
+  "description": "A multifunctional calculator for determining fertilizer needs."
 }

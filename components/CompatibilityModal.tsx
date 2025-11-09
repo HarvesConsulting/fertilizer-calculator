@@ -1,9 +1,11 @@
 import React from 'react';
+import { Language, t } from '../i18n';
 
 interface CompatibilityModalProps {
     isOpen: boolean;
     onClose: () => void;
     nitrogenFertilizerName: string;
+    lang: Language;
 }
 
 const CheckIcon = () => (
@@ -19,23 +21,34 @@ const XIcon = () => (
 );
 
 
-export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, onClose, nitrogenFertilizerName }) => {
+export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, onClose, nitrogenFertilizerName, lang }) => {
     if (!isOpen) return null;
 
-    const fertilizers = [
+    let fertilizers = [
         nitrogenFertilizerName,
         'Ортофосфорна к-та',
         'Сульфат калію',
         'Нітрат кальцію',
         'Сульфат магнію'
     ];
+    if (lang === 'en') {
+        fertilizers[1] = 'Orthophosphoric acid';
+        fertilizers[2] = 'Potassium sulfate';
+        fertilizers[3] = 'Calcium nitrate';
+        fertilizers[4] = 'Magnesium sulfate';
+    }
 
-    // Key is the fertilizer, value is an array of incompatible fertilizers
+
     const compatibilityMap: Record<string, string[]> = {
         'Нітрат кальцію': ['Ортофосфорна к-та', 'Сульфат калію', 'Сульфат магнію'],
         'Ортофосфорна к-та': ['Нітрат кальцію'],
         'Сульфат калію': ['Нітрат кальцію'],
         'Сульфат магнію': ['Нітрат кальцію'],
+        // English keys
+        'Calcium nitrate': ['Orthophosphoric acid', 'Potassium sulfate', 'Magnesium sulfate'],
+        'Orthophosphoric acid': ['Calcium nitrate'],
+        'Potassium sulfate': ['Calcium nitrate'],
+        'Magnesium sulfate': ['Calcium nitrate'],
     };
 
     const areIncompatible = (fert1: string, fert2: string): boolean => {
@@ -55,11 +68,11 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h3 id="compatibility-modal-title" className="text-2xl font-bold text-slate-800">Таблиця сумісності добрив</h3>
+                    <h3 id="compatibility-modal-title" className="text-2xl font-bold text-slate-800">{t('compatibilityModalTitle', lang)}</h3>
                     <button 
                         onClick={onClose} 
                         className="p-2 rounded-full text-slate-500 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        aria-label="Закрити модальне вікно"
+                        aria-label={t('compatibilityModalClose', lang)}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -68,7 +81,7 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
                 </div>
 
                 <p className="text-sm text-slate-600 mb-6">
-                    Таблиця показує можливість змішування добрив в одному баковому розчині. Несумісні добрива слід вносити окремо, щоб уникнути випадання осаду та засмічення системи краплинного зрошення.
+                    {t('compatibilityModalDesc', lang)}
                 </p>
 
                 <div className="overflow-x-auto rounded-lg border border-slate-200">
@@ -110,7 +123,7 @@ export const CompatibilityModal: React.FC<CompatibilityModalProps> = ({ isOpen, 
                         onClick={onClose}
                         className="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        Зрозуміло
+                        {t('closeButton', lang)}
                     </button>
                 </div>
             </div>

@@ -2,12 +2,14 @@ import React from 'react';
 import type { FormData } from '../types';
 import { StyledFormField } from './StyledFormField';
 import { DropdownButton, DropdownAction } from './SaveButtonDropdown';
+import { Language, t } from '../i18n';
 
 interface Step1Props {
     onNext: () => void;
     onBack: () => void;
     data: FormData;
     onDataChange: (newData: Partial<FormData>) => void;
+    lang: Language;
 }
 
 const DataActionsIcon = () => (
@@ -18,7 +20,7 @@ const DataActionsIcon = () => (
 );
 
 
-export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, onDataChange }) => {
+export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, onDataChange, lang }) => {
     const LOCAL_STORAGE_KEY = 'savedSoilAnalysisData';
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,10 +45,10 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
                 cec: data.cec,
             };
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
-            alert('Дані аналізу ґрунту збережено!');
+            alert(t('dataSavedSuccess', lang));
         } catch (error) {
             console.error("Failed to save soil analysis data to localStorage", error);
-            alert('Не вдалося зберегти дані.');
+            alert(t('dataSaveError', lang));
         }
     };
     
@@ -57,32 +59,32 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
                 const parsedData = JSON.parse(savedData);
                 if (parsedData && typeof parsedData === 'object' && !Array.isArray(parsedData)) {
                     onDataChange(parsedData);
-                    alert('Збережені дані завантажено.');
+                    alert(t('dataLoadedSuccess', lang));
                 } else {
                      console.warn('Stored soil analysis data is not a valid object, removing.');
                      localStorage.removeItem(LOCAL_STORAGE_KEY);
-                     alert('Збережені дані пошкоджено або мають неправильний формат.');
+                     alert(t('dataLoadInvalid', lang));
                 }
             } else {
-                alert('Збережені дані не знайдено.');
+                alert(t('dataNotFound', lang));
             }
         } catch (error) {
             console.error("Failed to load saved soil analysis data from localStorage", error);
-            alert('Не вдалося завантажити дані.');
+            alert(t('dataLoadError', lang));
             localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
     };
 
-    const cecTooltip = "Ємність катіонного обміну (ЄКО) — це здатність ґрунту утримувати поживні речовини (катіони), такі як Кальцій, Магній та Калій, захищаючи їх від вимивання. Висока ЄКО означає, що ґрунт може зберігати більше поживних речовин.";
+    const cecTooltip = t('cecTooltip', lang);
     
     const dataActions: DropdownAction[] = [
         {
-            label: 'Завантажити збережені',
+            label: t('loadDataAction', lang),
             onClick: handleLoadData,
             iconType: 'upload'
         },
         {
-            label: `Запам'ятати введення`,
+            label: t('saveDataAction', lang),
             onClick: handleSaveData,
             iconType: 'save'
         }
@@ -90,20 +92,20 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
-            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">Крок 1: Введіть дані аналізу ґрунту</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">{t('step1Title', lang)}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <StyledFormField label="Нітратний азот" name="nitrogenAnalysis" value={data.nitrogenAnalysis} onChange={handleChange} unit="мг/кг" />
-                <StyledFormField label="Фосфор (P₂O₅)" name="phosphorus" value={data.phosphorus} onChange={handleChange} unit="мг/кг" />
-                <StyledFormField label="Калій (K₂O)" name="potassium" value={data.potassium} onChange={handleChange} unit="мг/кг" />
-                <StyledFormField label="Кальцій (CaO)" name="calcium" value={data.calcium} onChange={handleChange} unit="мг/кг" />
-                <StyledFormField label="Магній (MgO)" name="magnesium" value={data.magnesium} onChange={handleChange} unit="мг/кг" />
-                <StyledFormField label="Кислотність (pH)" name="ph" value={data.ph} onChange={handleChange} unit="" step="0.1" max="14" />
+                <StyledFormField label={t('nitrogenAnalysisLabel', lang)} name="nitrogenAnalysis" value={data.nitrogenAnalysis} onChange={handleChange} unit="mg/kg" />
+                <StyledFormField label={t('phosphorusLabel', lang)} name="phosphorus" value={data.phosphorus} onChange={handleChange} unit="mg/kg" />
+                <StyledFormField label={t('potassiumLabel', lang)} name="potassium" value={data.potassium} onChange={handleChange} unit="mg/kg" />
+                <StyledFormField label={t('calciumLabel', lang)} name="calcium" value={data.calcium} onChange={handleChange} unit="mg/kg" />
+                <StyledFormField label={t('magnesiumLabel', lang)} name="magnesium" value={data.magnesium} onChange={handleChange} unit="mg/kg" />
+                <StyledFormField label={t('phLabel', lang)} name="ph" value={data.ph} onChange={handleChange} unit="" step="0.1" max="14" />
                 <StyledFormField 
-                    label="Ємність катіонного обміну (ЄКО)" 
+                    label={t('cecLabel', lang)}
                     name="cec" 
                     value={data.cec} 
                     onChange={handleChange} 
-                    unit="мг-екв/100г"
+                    unit="mg-eq/100g"
                     tooltipText={cecTooltip}
                 />
             </div>
@@ -115,15 +117,15 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
                         onClick={onBack}
                         className="bg-slate-300 text-slate-800 font-bold py-3 px-6 sm:px-10 rounded-lg hover:bg-slate-400 transition duration-300"
                     >
-                        Назад
+                        {t('backButton', lang)}
                     </button>
-                    <DropdownButton actions={dataActions} buttonLabel="Дії з даними" buttonIcon={<DataActionsIcon />} />
+                    <DropdownButton actions={dataActions} buttonLabel={t('dataActionsButton', lang)} buttonIcon={<DataActionsIcon />} />
                 </div>
                 <button
                     type="submit"
                     className="bg-indigo-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                 >
-                    Далі
+                    {t('nextButton', lang)}
                 </button>
             </div>
         </form>

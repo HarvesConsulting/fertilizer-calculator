@@ -1,6 +1,7 @@
 import type { FormData, CalculationResults, CultureParams, ComplexFertilizer, SpringFertilizer, BasicFertilizerSelections } from '../types';
 import { calculateFertigationPlan } from './fertigationCalculator';
-import { AMENDMENTS, FERTIGATION_CULTURES, SIMPLE_FERTILIZERS, AMENDMENT_EFFECTS } from '../constants';
+import { AMENDMENTS, FERTIGATION_CULTURES, SIMPLE_FERTILIZERS, AMENDMENT_EFFECTS, CULTURES } from '../constants';
+import { Language } from '../i18n';
 
 interface ReportData {
     formData: FormData;
@@ -12,47 +13,130 @@ interface ReportData {
     complexFertilizer: ComplexFertilizer;
     basicFertilizers: BasicFertilizerSelections;
     selectedAmendment: string;
+    lang: Language;
 }
 
 const pad = (str: string | number, length: number) => String(str).padEnd(length, ' ');
 
+const reportStrings = {
+  en: {
+    reportTitle: "AGROCHEMICAL CALCULATION REPORT",
+    inputData: "INPUT DATA",
+    fieldName: "Field Name",
+    culture: "Crop",
+    plannedYield: "Planned Yield",
+    fieldArea: "Field Area",
+    soilAnalysis: "Soil Analysis",
+    nitrogen: "Nitrate Nitrogen",
+    phosphorus: "Phosphorus (P₂O₅)",
+    potassium: "Potassium (K₂O)",
+    calcium: "Calcium (CaO)",
+    magnesium: "Magnesium (MgO)",
+    ph: "Acidity (pH)",
+    cec: "CEC",
+    basicApplication: "1. BASIC APPLICATION",
+    complexFertilizer: "Complex Autumn Fertilizer",
+    composition: "Composition",
+    applicationRate: "Application Rate",
+    total: "Total",
+    needsAfterComplex: "Nutrient needs (after complex fertilizers and amendments):",
+    physRate: "phys. rate",
+    amendmentApplication: "Amendment Application",
+    fertigationProgram: "2. FERTIGATION PROGRAM",
+    springFertilizer: "Spring (Starter) Fertilizer",
+    calculatedRate: "Calculated Rate",
+    weeklyPlan: "Weekly Fertilizer Application Plan (physical weight, kg/ha):",
+    totalOnArea: `(Total for area of {fieldArea} ha)`,
+    week: "Week",
+    ammoniumNitrate: "Ammonium Nitrate",
+    urea: "Urea",
+    phosphoricAcid: "Orthophos. Acid",
+    potassiumSulfate: "Potassium Sulf.",
+    calciumNitrate: "Calcium Nitrate",
+    magnesiumSulfate: "Magnesium Sulf.",
+    totalHeader: "TOTAL:",
+    disclaimer: "The calculation is for recommendation purposes only.",
+  },
+  uk: {
+    reportTitle: "ЗВІТ АГРОХІМІЧНОГО РОЗРАХУНКУ",
+    inputData: "ВХІДНІ ДАНІ",
+    fieldName: "Назва поля",
+    culture: "Культура",
+    plannedYield: "Планована врожайність",
+    fieldArea: "Площа поля",
+    soilAnalysis: "Аналіз ґрунту",
+    nitrogen: "Нітратний азот",
+    phosphorus: "Фосфор (P₂O₅)",
+    potassium: "Калій (K₂O)",
+    calcium: "Кальцій (CaO)",
+    magnesium: "Магній (MgO)",
+    ph: "Кислотність (pH)",
+    cec: "ЄКО",
+    basicApplication: "1. ОСНОВНЕ ВНЕСЕННЯ",
+    complexFertilizer: "Комплексне осіннє добриво",
+    composition: "Склад",
+    applicationRate: "Норма внесення",
+    total: "Всього",
+    needsAfterComplex: "Потреба в елементах (після врахування комплексних добрив та меліоранта):",
+    physRate: "фіз. вага",
+    amendmentApplication: "Внесення меліоранта",
+    fertigationProgram: "2. ПРОГРАМА ФЕРТИГАЦІЇ",
+    springFertilizer: "Весняне (стартове) добриво",
+    calculatedRate: "Розрахункова норма",
+    weeklyPlan: "Потижневий план внесення добрив (фізична вага, кг/га):",
+    totalOnArea: `(В дужках вказана загальна кількість на площу {fieldArea} га)`,
+    week: "Тиждень",
+    ammoniumNitrate: "Аміачна селітра",
+    urea: "Карбамід",
+    phosphoricAcid: "Ортофосф. к-та",
+    potassiumSulfate: "Сульфат калію",
+    calciumNitrate: "Нітрат кальцію",
+    magnesiumSulfate: "Сульфат магнію",
+    totalHeader: "РАЗОМ:",
+    disclaimer: "Розрахунок носить рекомендаційний характер.",
+  },
+};
+
+
 export const generateTxtReport = (data: ReportData): string => {
-    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment } = data;
+    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, lang } = data;
     
+    const s = reportStrings[lang];
     const fieldArea = parseFloat(formData.fieldArea || '1') || 1;
+    const cultureName = CULTURES.find(c => c.key === formData.culture)?.name[lang] || formData.culture;
     
     let report = `==================================================\n`;
-    report += `   ЗВІТ АГРОХІМІЧНОГО РОЗРАХУНКУ\n`;
+    report += `   ${s.reportTitle}\n`;
     report += `==================================================\n\n`;
 
-    report += `---------- ВХІДНІ ДАНІ ----------\n`;
+    report += `---------- ${s.inputData} ----------\n`;
     if (formData.fieldName) {
-        report += `Назва поля: ${formData.fieldName}\n`;
+        report += `${s.fieldName}: ${formData.fieldName}\n`;
     }
-    report += `Культура: ${formData.culture}\n`;
-    report += `Планована врожайність: ${formData.plannedYield} т/га\n`;
-    report += `Площа поля: ${fieldArea} га\n\n`;
+    report += `${s.culture}: ${cultureName}\n`;
+    report += `${s.plannedYield}: ${formData.plannedYield} t/ha\n`;
+    report += `${s.fieldArea}: ${fieldArea} ha\n\n`;
     
-    report += `Аналіз ґрунту:\n`;
-    report += `  - Нітратний азот: ${formData.nitrogenAnalysis} мг/кг\n`;
-    report += `  - Фосфор (P₂O₅): ${formData.phosphorus} мг/кг\n`;
-    report += `  - Калій (K₂O): ${formData.potassium} мг/кг\n`;
-    report += `  - Кальцій (CaO): ${formData.calcium} мг/кг\n`;
-    report += `  - Магній (MgO): ${formData.magnesium} мг/кг\n`;
-    report += `  - Кислотність (pH): ${formData.ph}\n`;
-    report += `  - ЄКО: ${formData.cec} мг-екв/100г\n\n`;
+    report += `${s.soilAnalysis}:\n`;
+    report += `  - ${s.nitrogen}: ${formData.nitrogenAnalysis} mg/kg\n`;
+    report += `  - ${s.phosphorus}: ${formData.phosphorus} mg/kg\n`;
+    report += `  - ${s.potassium}: ${formData.potassium} mg/kg\n`;
+    report += `  - ${s.calcium}: ${formData.calcium} mg/kg\n`;
+    report += `  - ${s.magnesium}: ${formData.magnesium} mg/kg\n`;
+    report += `  - ${s.ph}: ${formData.ph}\n`;
+    report += `  - ${s.cec}: ${formData.cec} mg-eq/100g\n\n`;
     
     if (calculationType === 'basic' || calculationType === 'full') {
-        report += `---------- 1. ОСНОВНЕ ВНЕСЕННЯ ----------\n\n`;
+        report += `---------- ${s.basicApplication} ----------\n\n`;
         
         let finalBasicNeeds = [...results.basic];
 
         if (complexFertilizer && complexFertilizer.enabled && parseFloat(complexFertilizer.rate) > 0) {
             const rate = parseFloat(complexFertilizer.rate);
             const totalComplex = (rate * fieldArea).toFixed(1);
-            report += `Комплексне осіннє добриво:\n`;
-            report += `  - Склад: N:${complexFertilizer.n}% P₂O₅:${complexFertilizer.p2o5}% K₂O:${complexFertilizer.k2o}% CaO:${complexFertilizer.cao}% MgO:${complexFertilizer.mg}%\n`;
-            report += `  - Норма внесення: ${rate} кг/га (Всього: ${totalComplex} кг)\n\n`;
+            report += `${s.complexFertilizer}:\n`;
+            report += `  - ${s.composition}: N:${complexFertilizer.n}% P₂O₅:${complexFertilizer.p2o5}% K₂O:${complexFertilizer.k2o}% CaO:${complexFertilizer.cao}% MgO:${complexFertilizer.mg}%\n`;
+            report += `  - ${s.applicationRate}: ${rate} kg/ha (${s.total}: ${totalComplex} kg)\n\n`;
             
             const supplied = {
                 'P2O5': rate * (parseFloat(complexFertilizer.p2o5 || '0') / 100),
@@ -84,35 +168,35 @@ export const generateTxtReport = (data: ReportData): string => {
              });
         }
 
-        report += `Потреба в елементах (після врахування комплексних добрив та меліоранта):\n`;
+        report += `${s.needsAfterComplex}:\n`;
         finalBasicNeeds.forEach(need => {
             if (need.element !== 'Меліорант' && need.norm > 0) {
                 const selection = basicFertilizers[need.element];
                 let fertInfo = '';
                 if(selection && selection.selectedFertilizer) {
                     const percentage = parseFloat(selection.selectedFertilizer);
-                    const fertName = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS]?.find(f => f.value.toString() === selection.selectedFertilizer)?.label || '';
+                    const fertName = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS]?.find(f => f.value.toString() === selection.selectedFertilizer)?.label[lang] || '';
                     if (percentage > 0) {
                         const physRate = (need.norm / percentage) * 100;
                         const totalPhys = (physRate * fieldArea).toFixed(1);
-                        fertInfo = ` -> ${fertName} (${percentage}%): ${physRate.toFixed(1)} кг/га (Всього: ${totalPhys} кг)`;
+                        fertInfo = ` -> ${fertName} (${percentage}%): ${physRate.toFixed(1)} kg/ha (${s.total}: ${totalPhys} kg)`;
                     }
                 }
-                report += `  - ${pad(need.element, 6)}: ${need.norm} кг д.р./га ${fertInfo}\n`;
+                report += `  - ${pad(need.element, 6)}: ${need.norm} kg a.i./ha ${fertInfo}\n`;
             }
         });
         report += '\n';
 
         if (needsAmendment && selectedAmendment && amendmentRateKg > 0) {
-             const amendLabel = AMENDMENTS.find(a => a.value === selectedAmendment)?.label || selectedAmendment;
+             const amendLabel = AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment;
              const totalAmend = (amendmentRateKg * fieldArea).toFixed(0);
-             report += `Внесення меліоранта:\n`;
-             report += `  - ${amendLabel}: ${amendmentRateKg} кг/га (Всього: ${totalAmend} кг)\n\n`;
+             report += `${s.amendmentApplication}:\n`;
+             report += `  - ${amendLabel}: ${amendmentRateKg} kg/ha (${s.total}: ${totalAmend} kg)\n\n`;
         }
     }
 
     if (calculationType === 'fertigation' || calculationType === 'full') {
-        report += `---------- 2. ПРОГРАМА ФЕРТИГАЦІЇ ----------\n\n`;
+        report += `---------- ${s.fertigationProgram} ----------\n\n`;
         
         const findCultureKey = (cultureName: string) => {
             return Object.keys(FERTIGATION_CULTURES).find(key => 
@@ -128,17 +212,17 @@ export const generateTxtReport = (data: ReportData): string => {
 
             if (springFertilizer.enabled && fertilizerRate && parseFloat(springFertilizer.k) > 0) {
                  const totalSpring = (fertilizerRate * fieldArea).toFixed(1);
-                 report += `Весняне (стартове) добриво:\n`;
-                 report += `  - Склад: N:${springFertilizer.n}% P:${springFertilizer.p}% K:${springFertilizer.k}% Ca:${springFertilizer.ca}% Mg:${springFertilizer.mg}%\n`;
-                 report += `  - Розрахункова норма: ${fertilizerRate.toFixed(1)} кг/га (Всього: ${totalSpring} кг)\n\n`;
+                 report += `${s.springFertilizer}:\n`;
+                 report += `  - ${s.composition}: N:${springFertilizer.n}% P:${springFertilizer.p}% K:${springFertilizer.k}% Ca:${springFertilizer.ca}% Mg:${springFertilizer.mg}%\n`;
+                 report += `  - ${s.calculatedRate}: ${fertilizerRate.toFixed(1)} kg/ha (${s.total}: ${totalSpring} kg)\n\n`;
             }
             
-            const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? 'Аміачна селітра' : 'Карбамід';
-            const headers = ['Тиждень', nitrogenFertilizerName, 'Ортофосф. к-та', 'Сульфат калію', 'Нітрат кальцію', 'Сульфат магнію'];
+            const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? s.ammoniumNitrate : s.urea;
+            const headers = [s.week, nitrogenFertilizerName, s.phosphoricAcid, s.potassiumSulfate, s.calciumNitrate, s.magnesiumSulfate];
             const pads = [8, 18, 18, 16, 16, 16];
 
-            report += `Потижневий план внесення добрив (фізична вага, кг/га):\n`;
-            report += `(В дужках вказана загальна кількість на площу ${fieldArea} га)\n\n`;
+            report += `${s.weeklyPlan}\n`;
+            report += `${s.totalOnArea.replace('{fieldArea}', fieldArea.toString())}\n\n`;
             
             let headerLine = "|";
             let separatorLine = "|";
@@ -167,7 +251,7 @@ export const generateTxtReport = (data: ReportData): string => {
             });
             
             const totalRowData = [
-                'РАЗОМ:',
+                s.totalHeader,
                  `${totals.nitrogen.toFixed(1)} (${(totals.nitrogen * fieldArea).toFixed(1)})`,
                  `${totals.phosphorus.toFixed(1)} (${(totals.phosphorus * fieldArea).toFixed(1)})`,
                  `${totals.potassium.toFixed(1)} (${(totals.potassium * fieldArea).toFixed(1)})`,
@@ -184,7 +268,7 @@ export const generateTxtReport = (data: ReportData): string => {
     }
     
     report += `\n==================================================\n`;
-    report += `   Розрахунок носить рекомендаційний характер.\n`;
+    report += `   ${s.disclaimer}\n`;
     report += `==================================================\n`;
 
     return report;

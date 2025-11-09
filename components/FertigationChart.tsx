@@ -1,4 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
+import { Language, t } from '../i18n';
 
 interface ChartData {
     week: number;
@@ -13,12 +14,13 @@ interface FertigationChartProps {
     data: ChartData[];
     labels: string[];
     fieldArea: number;
+    lang: Language;
 }
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#e11d48'];
 const KEYS: (keyof Omit<ChartData, 'week'>)[] = ['nitrogen', 'phosphorus', 'potassium', 'calcium', 'magnesium'];
 
-export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels, fieldArea }) => {
+export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels, fieldArea, lang }) => {
     const [tooltip, setTooltip] = useState<{
         visible: boolean;
         x: number;
@@ -61,13 +63,13 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
 
         const content = (
             <div className="text-sm">
-                <div className="font-bold mb-1 border-b pb-1">Тиждень {weekData.week}</div>
+                <div className="font-bold mb-1 border-b pb-1">{t('chartWeekLabel', lang)} {weekData.week}</div>
                 {KEYS.map((key, i) => (
                     <div key={key} className="flex items-center">
                         <div className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: COLORS[i] }}></div>
                         <span className="flex-grow">{labels[i]}:</span>
-                        <span className="font-semibold">{weekData[key].toFixed(1)} кг/га</span>
-                        <span className="font-bold text-indigo-700 ml-2">({(weekData[key] * fieldArea).toFixed(1)} кг)</span>
+                        <span className="font-semibold">{weekData[key].toFixed(1)} kg/ha</span>
+                        <span className="font-bold text-indigo-700 ml-2">({(weekData[key] * fieldArea).toFixed(1)} kg)</span>
                     </div>
                 ))}
             </div>
@@ -101,7 +103,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
                     </g>
                 ))}
                 <text transform={`translate(-35, ${chartHeight / 2}) rotate(-90)`} textAnchor="middle" className="fill-current">
-                    кг/га
+                    {t('chartYAxisLabel', lang)}
                 </text>
             </g>
         );
@@ -112,7 +114,7 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
             {data.map((d, i) => (
                 <text key={d.week} x={i * bandWidth + bandWidth / 2} y="20" textAnchor="middle">{d.week}</text>
             ))}
-            <text x={chartWidth / 2} y="45" textAnchor="middle" className="fill-current">Тиждень</text>
+            <text x={chartWidth / 2} y="45" textAnchor="middle" className="fill-current">{t('chartXAxisLabel', lang)}</text>
         </g>
     );
 

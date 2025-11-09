@@ -11,6 +11,7 @@ import { ReportsList } from './components/ReportsList';
 import { ReportDetail } from './components/ReportDetail';
 import { Logo } from './components/Logo';
 import { generateTxtReport } from './utils/reportGenerator';
+import { t, Language } from './i18n';
 
 const INITIAL_FORM_DATA: FormData = {
     culture: '',
@@ -112,6 +113,10 @@ function App() {
     
     // State for group mode selections
     const [groupFertilizerSelections, setGroupFertilizerSelections] = useState<FertilizerSelections[]>([]);
+    
+    const [language, setLanguage] = useState<Language>(() => {
+        return (localStorage.getItem('agro-calc-lang') as Language) || 'uk';
+    });
 
 
     const [reports, setReports] = useState<SavedReport[]>(() => {
@@ -161,6 +166,13 @@ function App() {
             console.error("Failed to save reports to localStorage", error);
         }
     }, [reports]);
+    
+    useEffect(() => {
+        localStorage.setItem('agro-calc-lang', language);
+        document.documentElement.lang = language;
+        document.title = t('appTitle', language);
+    }, [language]);
+
 
     const updateCurrentAnalysis = (data: Partial<FormData>) => {
         setAnalyses(prev => {
@@ -326,7 +338,7 @@ function App() {
             }).filter((r): r is SavedReport => r !== null);
 
             if (groupReports.length === 0) {
-                alert("Немає даних для збереження звіту.");
+                alert(t('reportSaveError', language));
                 return;
             }
 
@@ -359,7 +371,7 @@ function App() {
             const cultureParams = CULTURE_PARAMS[formData.culture];
             
             if (!result || !selections || !cultureParams) {
-                return `---------- ПОМИЛКА: Не вдалося згенерувати звіт для аналізу #${index + 1} (${formData.fieldName || formData.culture}) ----------`;
+                return `---------- ERROR: Could not generate report for analysis #${index + 1} (${formData.fieldName || formData.culture}) ----------`;
             }
             
             const reportDataForGenerator = {
@@ -372,11 +384,12 @@ function App() {
                 basicFertilizers: selections.basicFertilizers,
                 selectedAmendment: selections.selectedAmendment,
                 complexFertilizer: selections.complexFertilizer,
+                lang: language
             };
     
             return generateTxtReport(reportDataForGenerator);
     
-        }).join('\n\n\n==================================================\n   НАСТУПНИЙ РОЗРАХУНОК\n==================================================\n\n\n');
+        }).join('\n\n\n==================================================\n   NEXT CALCULATION\n==================================================\n\n\n');
         
         const blob = new Blob([allReportsContent], { type: 'text/plain;charset=utf-8' });
         const link = document.createElement('a');
@@ -392,7 +405,7 @@ function App() {
     };
     
     const handleDeleteReport = (id: string) => {
-        if (window.confirm('Ви впевнені, що хочете видалити цей звіт?')) {
+        if (window.confirm(t('deleteConfirm', language))) {
             setReports(prev => {
                 const updatedReports = prev.filter(report => report.id !== id);
                 try {
@@ -438,27 +451,27 @@ function App() {
                 }
                 
                 if (newReports.length > 0) {
+                     if (skippedCount > 0) {
+                        alert(t('reportLoadSuccessMultiple', language, { count: newReports.length, skipped: skippedCount }));
+                     } else {
+                        alert(t('reportLoadSuccessOne', language));
+                     }
                     setReports(prev => [...newReports, ...prev]);
                 } else if (reportsToLoad.length > 0 && skippedCount === reportsToLoad.length) {
-                     alert('Всі звіти з цього файлу вже існують у списку.');
+                     alert(t('reportLoadSkippedAll', language));
                 } else {
                     throw new Error("Invalid report file format.");
                 }
-
-                if (skippedCount > 0) {
-                    alert(`${skippedCount} звіт(ів) вже існує у списку і був пропущений.`);
-                }
-
             } catch (error) {
                 console.error("Failed to load or parse report file", error);
-                alert("Не вдалося завантажити звіт. Файл пошкоджено або має неправильний формат.");
+                alert(t('reportLoadError', language));
             } finally {
                  if(event.target) event.target.value = '';
             }
         };
         reader.onerror = () => {
              console.error("Failed to read file", reader.error);
-             alert("Не вдалося прочитати файл.");
+             alert(t('reportLoadFileError', language));
              if(event.target) event.target.value = '';
         }
         reader.readAsText(file);
@@ -492,7 +505,7 @@ function App() {
 
     const handleResetLogo = (e: React.MouseEvent) => {
         e.stopPropagation(); 
-        if (window.confirm('Ви впевнені, що хочете видалити власний логотип і повернути стандартний?')) {
+        if (window.confirm(t('resetLogoConfirm', language))) {
             try {
                 localStorage.removeItem('custom-logo');
                 setCustomLogoUrl(null);
@@ -505,12 +518,16 @@ function App() {
     const handleActiveAnalysisChange = (index: number) => {
         setActiveAnalysisIndex(index);
     };
+    
+    const handleLanguageChange = (lang: Language) => {
+        setLanguage(lang);
+    };
 
     const renderLandingPage = () => (
         <main className="bg-white p-8 md:p-16 rounded-xl shadow-lg text-center">
-            <h2 className="text-3xl font-bold text-slate-800">Вітаємо!</h2>
+            <h2 className="text-3xl font-bold text-slate-800">{t('landingTitle', language)}</h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-                Оберіть режим роботи: створіть один детальний розрахунок для конкретного поля або керуйте кількома аналізами одночасно для порівняння.
+                {t('landingDescription', language)}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6">
                 <button
@@ -518,14 +535,14 @@ function App() {
                     className="w-full sm:w-64 bg-indigo-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg flex flex-col items-center gap-2"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-2m-3 2v-6m-3 6v-2m12-4H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2z" /></svg>
-                    <span>Один аналіз</span>
+                    <span>{t('singleAnalysis', language)}</span>
                 </button>
                 <button
                     onClick={() => { setAnalysisMode('group'); setMainView('calculator'); }}
                     className="w-full sm:w-64 bg-emerald-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-lg text-lg flex flex-col items-center gap-2"
                 >
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                    <span>Груповий аналіз</span>
+                    <span>{t('groupAnalysis', language)}</span>
                 </button>
             </div>
         </main>
@@ -533,14 +550,14 @@ function App() {
 
     const renderCalculator = () => {
         if (analysisMode === 'single') {
-            const steps = ['Аналіз ґрунту', 'Культура', 'Вибір', 'Результат'];
+            const steps = [t('step1', language), t('step2', language), t('step3', language), t('step4', language)];
             return (
                 <main className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
                     <Stepper currentStep={currentStep} steps={steps} />
                     <div className="mt-8">
-                        {currentStep === 1 && <Step1SoilAnalysis onNext={handleNext} onBack={handleReturnToLanding} data={currentFormData} onDataChange={updateCurrentAnalysis} />}
-                        {currentStep === 2 && <Step2CropYield onBack={handleBack} onCalculate={handleCalculate} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={false} isCalculationDisabled={false} />}
-                        {currentStep === 3 && <Step3CalculationChoice onBack={handleBack} onSelect={handleSelectCalculation} />}
+                        {currentStep === 1 && <Step1SoilAnalysis onNext={handleNext} onBack={handleReturnToLanding} data={currentFormData} onDataChange={updateCurrentAnalysis} lang={language} />}
+                        {currentStep === 2 && <Step2CropYield onBack={handleBack} onCalculate={handleCalculate} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={false} isCalculationDisabled={false} lang={language} />}
+                        {currentStep === 3 && <Step3CalculationChoice onBack={handleBack} onSelect={handleSelectCalculation} lang={language} />}
                         {currentStep === 4 && results && (
                             <Step4Results 
                                 onReset={handleReset} 
@@ -562,6 +579,7 @@ function App() {
                                 setComplexFertilizer={setComplexFertilizer}
                                 isGroupMode={false}
                                 onSaveAllTxt={() => {}}
+                                lang={language}
                            />
                         )}
                     </div>
@@ -570,15 +588,15 @@ function App() {
         }
 
         if (analysisMode === 'group') {
-            const steps = ['Аналіз ґрунту', 'Культура', 'Результати'];
+            const steps = [t('step1', language), t('step2', language), t('step3Group', language)];
             const isCalculationDisabled = analyses.some(a => !a.culture || !a.plannedYield || parseFloat(a.plannedYield) <= 0);
 
             const renderGroupStep = () => {
                 switch (currentStep) {
                     case 1:
-                        return <Step1SoilAnalysis onNext={handleNext} onBack={handleReturnToLanding} data={currentFormData} onDataChange={updateCurrentAnalysis} />;
+                        return <Step1SoilAnalysis onNext={handleNext} onBack={handleReturnToLanding} data={currentFormData} onDataChange={updateCurrentAnalysis} lang={language}/>;
                     case 2:
-                        return <Step2CropYield onBack={handleBack} onCalculate={handleCalculateAll} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={true} isCalculationDisabled={isCalculationDisabled} />;
+                        return <Step2CropYield onBack={handleBack} onCalculate={handleCalculateAll} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={true} isCalculationDisabled={isCalculationDisabled} lang={language} />;
                     case 3:
                         const currentResult = groupResults[activeAnalysisIndex];
                         const params = CULTURE_PARAMS[currentFormData.culture];
@@ -587,9 +605,9 @@ function App() {
                         if (!currentResult || !params || !currentSelections) {
                             return (
                                 <div className="text-center py-10">
-                                    <h3 className="text-xl font-semibold text-red-600">Помилка розрахунку</h3>
-                                    <p className="text-slate-600 mt-2">Не вдалося виконати розрахунок для цього аналізу. Будь ласка, перевірте вхідні дані.</p>
-                                    <button onClick={handleBack} className="mt-6 bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition">Повернутися</button>
+                                    <h3 className="text-xl font-semibold text-red-600">{t('calculationError', language)}</h3>
+                                    <p className="text-slate-600 mt-2">{t('calculationErrorDesc', language)}</p>
+                                    <button onClick={handleBack} className="mt-6 bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition">{t('backButton', language)}</button>
                                 </div>
                             );
                         }
@@ -624,6 +642,7 @@ function App() {
                                     setComplexFertilizer={createGroupSelectionSetter<ComplexFertilizer>('complexFertilizer')}
                                     isGroupMode={true}
                                     onSaveAllTxt={handleSaveAllTxtReport}
+                                    lang={language}
                                />;
                     default:
                         return null;
@@ -644,7 +663,7 @@ function App() {
                                             : 'text-slate-600 hover:bg-slate-200'
                                     }`}
                                 >
-                                    {analysis.fieldName || `Аналіз #${index + 1}`}
+                                    {analysis.fieldName || t('analysisTab', language, { index: index + 1 })}
                                 </button>
                             ))}
                             {currentStep < 3 && (
@@ -654,9 +673,9 @@ function App() {
                                         setActiveAnalysisIndex(analyses.length);
                                     }}
                                     className="py-2 px-4 rounded-lg text-sm font-semibold text-indigo-600 hover:bg-indigo-100"
-                                    title="Додати новий аналіз"
+                                    title={t('addAnalysisTooltip', language)}
                                 >
-                                    + Додати
+                                    + {t('addAnalysis', language)}
                                 </button>
                             )}
                         </div>
@@ -674,7 +693,7 @@ function App() {
     
     const renderReports = () => {
         if (selectedReport) {
-            return <ReportDetail report={selectedReport} onBack={() => setSelectedReport(null)} />;
+            return <ReportDetail report={selectedReport} onBack={() => setSelectedReport(null)} lang={language} />;
         }
         return <ReportsList 
                     reports={reports} 
@@ -682,6 +701,7 @@ function App() {
                     onDelete={handleDeleteReport}
                     onNewCalculation={handleReset}
                     onLoadReport={triggerLoadReport}
+                    lang={language}
                 />;
     };
     
@@ -704,7 +724,7 @@ function App() {
                      <div 
                         className="relative group cursor-pointer" 
                         onClick={handleLogoClick}
-                        title="Натисніть, щоб змінити логотип"
+                        title={t('changeLogoTooltip', language)}
                     >
                         {customLogoUrl ? (
                             <img 
@@ -726,8 +746,8 @@ function App() {
                             <button
                                 onClick={handleResetLogo}
                                 className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Видалити власний логотип"
-                                aria-label="Видалити власний логотип"
+                                title={t('resetLogoTooltip', language)}
+                                aria-label={t('resetLogoTooltip', language)}
                             >
                                 &times;
                             </button>
@@ -740,26 +760,40 @@ function App() {
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Агрохімічний калькулятор</h1>
+                        <h1 className="text-xl md:text-3xl font-bold tracking-tight">{t('headerTitle', language)}</h1>
                         <p className="text-sm md:text-base text-indigo-200 mt-1 hidden sm:block">
-                             {mainView === 'calculator' && 'Розрахунок потреб у живленні для овочевих культур'}
-                             {mainView === 'reports' && 'Збережені звіти'}
-                             {mainView === 'landing' && 'Багатофункціональний інструмент агронома'}
+                             {mainView === 'calculator' && t('headerSubtitleCalc', language)}
+                             {mainView === 'reports' && t('headerSubtitleReports', language)}
+                             {mainView === 'landing' && t('headerSubtitleLanding', language)}
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2 md:gap-4">
+                     <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg">
+                        <button 
+                            onClick={() => handleLanguageChange('uk')}
+                            className={`px-3 py-1 text-sm font-bold rounded-md transition ${language === 'uk' ? 'bg-white text-indigo-700' : 'bg-transparent text-white hover:bg-white/20'}`}
+                        >
+                            УКР
+                        </button>
+                        <button 
+                            onClick={() => handleLanguageChange('en')}
+                            className={`px-3 py-1 text-sm font-bold rounded-md transition ${language === 'en' ? 'bg-white text-indigo-700' : 'bg-transparent text-white hover:bg-white/20'}`}
+                        >
+                            ENG
+                        </button>
+                    </div>
                     <button
                         onClick={() => {
                             setMainView(mainView === 'reports' ? 'landing' : 'reports');
                             setSelectedReport(null);
                         }}
                         className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white"
-                        aria-label={mainView !== 'reports' ? "Переглянути збережені звіти" : "Перейти до калькулятора"}
+                        aria-label={mainView !== 'reports' ? t('viewReportsAria', language) : t('goToCalculatorAria', language)}
                     >
                         {mainView !== 'reports' ? <ReportsIcon /> : <CalculatorIcon />}
                         <span className="hidden md:inline">
-                            {mainView !== 'reports' ? 'Звіти' : 'Калькулятор'}
+                            {mainView !== 'reports' ? t('reports', language) : t('calculator', language)}
                         </span>
                     </button>
                 </div>
@@ -768,7 +802,7 @@ function App() {
             {renderContent()}
             
             <footer className="text-center mt-12 text-slate-500 text-sm">
-                <p>&copy; {new Date().getFullYear()} Агрохімічний калькулятор. Всі права захищено.</p>
+                <p>{t('footerText', language, { year: new Date().getFullYear() })}</p>
             </footer>
         </div>
     );

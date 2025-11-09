@@ -6,6 +6,8 @@ import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
 import { generateTxtReport } from '../utils/reportGenerator';
 import { DropdownButton, DropdownAction } from './SaveButtonDropdown';
+import { Language, t } from '../i18n';
+import { CULTURES } from '../constants';
 
 interface Step4Props {
     onReset: () => void;
@@ -27,6 +29,7 @@ interface Step4Props {
     setComplexFertilizer: React.Dispatch<React.SetStateAction<ComplexFertilizer>>;
     isGroupMode: boolean;
     onSaveAllTxt: () => void;
+    lang: Language;
 }
 
 const SaveReportIcon = () => (
@@ -56,7 +59,8 @@ export const Step4Results: React.FC<Step4Props> = ({
     complexFertilizer,
     setComplexFertilizer,
     isGroupMode,
-    onSaveAllTxt
+    onSaveAllTxt,
+    lang,
 }) => {
     
     const showBasic = type === 'basic' || type === 'full';
@@ -73,6 +77,7 @@ export const Step4Results: React.FC<Step4Props> = ({
             complexFertilizer,
             basicFertilizers,
             selectedAmendment,
+            lang,
         });
 
         const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
@@ -80,7 +85,7 @@ export const Step4Results: React.FC<Step4Props> = ({
         const url = URL.createObjectURL(blob);
         const fieldName = formData.fieldName ? `${formData.fieldName}_` : '';
         link.setAttribute('href', url);
-        link.setAttribute('download', `розрахунок_${fieldName}${formData.culture}.txt`);
+        link.setAttribute('download', `calculation_${fieldName}${formData.culture}.txt`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -91,38 +96,40 @@ export const Step4Results: React.FC<Step4Props> = ({
     const saveActions: DropdownAction[] = isGroupMode 
     ? [
         {
-            label: 'Зберегти все (TXT)',
+            label: t('saveAllTxtAction', lang),
             onClick: onSaveAllTxt,
             iconType: 'txt',
         },
         {
-            label: 'Зберегти все (JSON)',
+            label: t('saveAllJsonAction', lang),
             onClick: onSave,
             iconType: 'json',
         },
         {
-            label: 'Зберегти поточний (TXT)',
+            label: t('saveCurrentTxtAction', lang),
             onClick: handleSaveTxt,
             iconType: 'txt',
         }
     ] 
     : [
         {
-            label: 'Зберегти в TXT',
+            label: t('saveTxtAction', lang),
             onClick: handleSaveTxt,
             iconType: 'txt',
         },
         {
-            label: 'Зберегти звіт (JSON)',
+            label: t('saveJsonAction', lang),
             onClick: onSave,
             iconType: 'json',
         }
     ];
 
+    const cultureName = CULTURES.find(c => c.key === results.culture)?.name[lang] || results.culture;
+
     return (
         <div className="space-y-10">
             <h2 className="text-3xl font-bold text-center text-slate-800 mb-6">
-                Результати розрахунку для "{formData.fieldName || results.culture}"
+                {t('resultsTitle', lang, { cultureName: formData.fieldName || cultureName })}
             </h2>
             
             <div className="space-y-10">
@@ -137,6 +144,7 @@ export const Step4Results: React.FC<Step4Props> = ({
                            onAmendmentChange={setSelectedAmendment}
                            complexFertilizer={complexFertilizer}
                            onComplexFertilizerChange={setComplexFertilizer}
+                           lang={lang}
                         />
                     </div>
                 )}
@@ -151,6 +159,7 @@ export const Step4Results: React.FC<Step4Props> = ({
                             setSpringFertilizer={setSpringFertilizer}
                             nitrogenFertilizer={nitrogenFertilizer}
                             setNitrogenFertilizer={setNitrogenFertilizer}
+                            lang={lang}
                         />
                     </div>
                 )}
@@ -163,7 +172,7 @@ export const Step4Results: React.FC<Step4Props> = ({
                         className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-300 text-slate-800 font-semibold py-3 px-6 rounded-lg hover:bg-slate-400 transition-colors duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        <span>Назад</span>
+                        <span>{t('backButton', lang)}</span>
                     </button>
                     <button
                         onClick={onReset}
@@ -172,13 +181,13 @@ export const Step4Results: React.FC<Step4Props> = ({
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695V7.5a8.25 8.25 0 00-16.5 0v2.694" />
                         </svg>
-                        <span>Новий розрахунок</span>
+                        <span>{t('newCalculationButton', lang)}</span>
                     </button>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     <DropdownButton 
                         actions={saveActions} 
-                        buttonLabel="Зберегти звіт"
+                        buttonLabel={t('saveReportButton', lang)}
                         buttonIcon={<SaveReportIcon />}
                     />
                 </div>

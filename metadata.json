@@ -1,5 +1,5 @@
 {
-  "name": "Калькулятор добрив для овочів",
-  "description": "Багатофункціональний калькулятор для розрахунку потреб у добривах для різних овочевих культур на основі аналізу ґрунту, планової врожайності та програм фертигації.",
+  "name": "Agrochemical Fertilizer Calculator",
+  "description": "A multifunctional calculator for determining fertilizer needs for various vegetable crops based on soil analysis, planned yield, and fertigation programs.",
   "requestFramePermissions": []
 }

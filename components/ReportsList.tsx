@@ -1,5 +1,7 @@
 import React from 'react';
 import type { SavedReport } from '../types';
+import { Language, t } from '../i18n';
+import { CULTURES } from '../constants';
 
 interface ReportsListProps {
     reports: SavedReport[];
@@ -7,10 +9,11 @@ interface ReportsListProps {
     onDelete: (id: string) => void;
     onNewCalculation: () => void;
     onLoadReport: () => void;
+    lang: Language;
 }
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('uk-UA', {
+const formatDate = (dateString: string, lang: Language) => {
+    return new Date(dateString).toLocaleString(lang === 'uk' ? 'uk-UA' : 'en-US', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -19,27 +22,27 @@ const formatDate = (dateString: string) => {
     });
 };
 
-export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onLoadReport }) => {
+export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDelete, onNewCalculation, onLoadReport, lang }) => {
 
     if (reports.length === 0) {
         return (
             <div className="text-center bg-white p-8 md:p-16 rounded-xl shadow-lg">
-                <h2 className="text-2xl font-semibold text-slate-800">Збережених звітів немає</h2>
+                <h2 className="text-2xl font-semibold text-slate-800">{t('noReportsTitle', lang)}</h2>
                 <p className="mt-4 text-slate-600">
-                    Створіть свій перший розрахунок або завантажте існуючий звіт.
+                    {t('noReportsDesc', lang)}
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button
                         onClick={onNewCalculation}
                         className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                     >
-                        Почати новий розрахунок
+                        {t('startNewCalculation', lang)}
                     </button>
                      <button
                         onClick={onLoadReport}
                         className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-lg"
                     >
-                        Завантажити звіт
+                        {t('loadReport', lang)}
                     </button>
                 </div>
             </div>
@@ -49,17 +52,17 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
     return (
         <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-6 gap-4">
-                <h2 className="text-2xl font-semibold text-slate-800">Мої звіти</h2>
+                <h2 className="text-2xl font-semibold text-slate-800">{t('myReports', lang)}</h2>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                         onClick={onLoadReport}
                         className="w-full sm:w-auto bg-emerald-100 text-emerald-800 font-semibold py-2 px-4 rounded-lg hover:bg-emerald-200 transition flex items-center justify-center gap-2"
-                        title="Завантажити звіт з файлу"
+                        title={t('loadReport', lang)}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        <span>Завантажити</span>
+                        <span>{t('loadButton', lang)}</span>
                     </button>
                     <button
                         onClick={onNewCalculation}
@@ -69,22 +72,26 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 0a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100-4m0 4a2 2 0 110-4" />
                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a2 2 0 100-4m0 4a2 2 0 110-4" />
                         </svg>
-                        <span>Новий розрахунок</span>
+                        <span>{t('newCalculationButton', lang)}</span>
                     </button>
                 </div>
             </div>
             <div className="space-y-4">
-                {reports.map(report => (
+                {reports.map(report => {
+                    const cultureName = CULTURES.find(c => c.key === report.formData.culture)?.name[lang] || report.formData.culture;
+                    const title = report.formData.fieldName ? `${report.formData.fieldName} (${cultureName})` : cultureName;
+                    
+                    return (
                     <div key={report.id} className="p-4 border rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-slate-50 transition-colors">
                         <div className="flex-grow">
                             <h3 className="font-bold text-lg text-indigo-700">
-                                {report.formData.fieldName ? `${report.formData.fieldName} (${report.formData.culture})` : report.formData.culture}
+                                {title}
                             </h3>
                             <p className="text-sm text-slate-600">
-                                Врожайність: {report.formData.plannedYield} т/га, Площа: {report.formData.fieldArea || 1} га
+                                {t('yieldLabel', lang)}: {report.formData.plannedYield} t/ha, {t('areaLabel', lang)}: {report.formData.fieldArea || 1} ha
                             </p>
                             <p className="text-xs text-slate-500 mt-1">
-                                Збережено: {formatDate(report.timestamp)}
+                                {t('savedOn', lang)}: {formatDate(report.timestamp, lang)}
                             </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0 w-full md:w-auto">
@@ -92,12 +99,12 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                                 onClick={() => onView(report)}
                                 className="w-full md:w-auto flex-1 bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-200 transition"
                             >
-                                Переглянути
+                                {t('viewButton', lang)}
                             </button>
                             <button
                                 onClick={() => onDelete(report.id)}
                                 className="w-auto bg-red-100 text-red-700 p-2 rounded-lg hover:bg-red-200 transition"
-                                aria-label="Видалити звіт"
+                                aria-label={t('deleteButton', lang)}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -105,7 +112,7 @@ export const ReportsList: React.FC<ReportsListProps> = ({ reports, onView, onDel
                             </button>
                         </div>
                     </div>
-                ))}
+                )})}
             </div>
         </div>
     );
