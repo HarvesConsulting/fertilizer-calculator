@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
@@ -27,6 +25,8 @@ interface Step4Props {
     setSelectedAmendment: React.Dispatch<React.SetStateAction<string>>;
     complexFertilizer: ComplexFertilizer;
     setComplexFertilizer: React.Dispatch<React.SetStateAction<ComplexFertilizer>>;
+    springFertilizerRate: number | null;
+    setSpringFertilizerRate: (rate: number | null) => void;
     isGroupMode: boolean;
     onSaveAllTxt: () => void;
     lang: Language;
@@ -58,6 +58,8 @@ export const Step4Results: React.FC<Step4Props> = ({
     setSelectedAmendment,
     complexFertilizer,
     setComplexFertilizer,
+    springFertilizerRate,
+    setSpringFertilizerRate,
     isGroupMode,
     onSaveAllTxt,
     lang,
@@ -77,6 +79,7 @@ export const Step4Results: React.FC<Step4Props> = ({
             complexFertilizer,
             basicFertilizers,
             selectedAmendment,
+            springFertilizerRate,
             lang,
         });
 
@@ -159,6 +162,8 @@ export const Step4Results: React.FC<Step4Props> = ({
                             setSpringFertilizer={setSpringFertilizer}
                             nitrogenFertilizer={nitrogenFertilizer}
                             setNitrogenFertilizer={setNitrogenFertilizer}
+                            springFertilizerRate={springFertilizerRate}
+                            setSpringFertilizerRate={setSpringFertilizerRate}
                             lang={lang}
                         />
                     </div>

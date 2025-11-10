@@ -13,6 +13,7 @@ interface ReportData {
     complexFertilizer: ComplexFertilizer;
     basicFertilizers: BasicFertilizerSelections;
     selectedAmendment: string;
+    springFertilizerRate: number | null;
     lang: Language;
 }
 
@@ -44,7 +45,7 @@ const reportStrings = {
     amendmentApplication: "Amendment Application",
     fertigationProgram: "2. FERTIGATION PROGRAM",
     springFertilizer: "Spring (Starter) Fertilizer",
-    calculatedRate: "Calculated Rate",
+    calculatedRate: "Application Rate",
     weeklyPlan: "Weekly Fertilizer Application Plan (physical weight, kg/ha):",
     totalOnArea: `(Total for area of {fieldArea} ha)`,
     week: "Week",
@@ -82,7 +83,7 @@ const reportStrings = {
     amendmentApplication: "Внесення меліоранта",
     fertigationProgram: "2. ПРОГРАМА ФЕРТИГАЦІЇ",
     springFertilizer: "Весняне (стартове) добриво",
-    calculatedRate: "Розрахункова норма",
+    calculatedRate: "Норма внесення",
     weeklyPlan: "Потижневий план внесення добрив (фізична вага, кг/га):",
     totalOnArea: `(В дужках вказана загальна кількість на площу {fieldArea} га)`,
     week: "Тиждень",
@@ -99,7 +100,7 @@ const reportStrings = {
 
 
 export const generateTxtReport = (data: ReportData): string => {
-    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, lang } = data;
+    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, springFertilizerRate, lang } = data;
     
     const s = reportStrings[lang];
     const fieldArea = parseFloat(formData.fieldArea || '1') || 1;
@@ -206,15 +207,15 @@ export const generateTxtReport = (data: ReportData): string => {
         const cultureKey = findCultureKey(results.culture);
         
         if (cultureKey) {
-            const { weeklyPlan, totals, fertilizerRate } = calculateFertigationPlan({
-                initialNeeds: results.fertigation, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer,
+            const { weeklyPlan, totals } = calculateFertigationPlan({
+                initialNeeds: results.fertigation, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer, manualRate: springFertilizerRate
             });
 
-            if (springFertilizer.enabled && fertilizerRate && parseFloat(springFertilizer.k) > 0) {
-                 const totalSpring = (fertilizerRate * fieldArea).toFixed(1);
+            if (springFertilizer.enabled && springFertilizerRate && springFertilizerRate > 0) {
+                 const totalSpring = (springFertilizerRate * fieldArea).toFixed(1);
                  report += `${s.springFertilizer}:\n`;
                  report += `  - ${s.composition}: N:${springFertilizer.n}% P:${springFertilizer.p}% K:${springFertilizer.k}% Ca:${springFertilizer.ca}% Mg:${springFertilizer.mg}%\n`;
-                 report += `  - ${s.calculatedRate}: ${fertilizerRate.toFixed(1)} kg/ha (${s.total}: ${totalSpring} kg)\n\n`;
+                 report += `  - ${s.calculatedRate}: ${springFertilizerRate.toFixed(1)} kg/ha (${s.total}: ${totalSpring} kg)\n\n`;
             }
             
             const nitrogenFertilizerName = nitrogenFertilizer === 'ammonium-nitrate' ? s.ammoniumNitrate : s.urea;

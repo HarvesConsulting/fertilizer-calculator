@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { CalculationResults, FormData, NutrientNeeds, CultureParams, SavedReport, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from './types';
 import { Stepper } from './components/Stepper';
@@ -42,6 +41,7 @@ interface FertilizerSelections {
   basicFertilizers: BasicFertilizerSelections;
   selectedAmendment: string;
   complexFertilizer: ComplexFertilizer;
+  springFertilizerRate: number | null;
 }
 
 const INITIAL_FERTILIZER_SELECTIONS: FertilizerSelections = {
@@ -50,6 +50,7 @@ const INITIAL_FERTILIZER_SELECTIONS: FertilizerSelections = {
     basicFertilizers: {},
     selectedAmendment: '',
     complexFertilizer: INITIAL_COMPLEX_FERTILIZER,
+    springFertilizerRate: null,
 };
 
 
@@ -87,6 +88,10 @@ const migrateReport = (report: any): SavedReport | null => {
         migratedReport.complexFertilizer = INITIAL_COMPLEX_FERTILIZER;
     }
     
+    if (typeof migratedReport.springFertilizerRate === 'undefined') {
+        migratedReport.springFertilizerRate = null;
+    }
+    
     if (migratedReport.id && migratedReport.formData && migratedReport.results) {
         return migratedReport as SavedReport;
     }
@@ -110,6 +115,7 @@ function App() {
     const [basicFertilizers, setBasicFertilizers] = useState<BasicFertilizerSelections>({});
     const [selectedAmendment, setSelectedAmendment] = useState('');
     const [complexFertilizer, setComplexFertilizer] = useState<ComplexFertilizer>(INITIAL_COMPLEX_FERTILIZER);
+    const [springFertilizerRate, setSpringFertilizerRate] = useState<number | null>(null);
     
     // State for group mode selections
     const [groupFertilizerSelections, setGroupFertilizerSelections] = useState<FertilizerSelections[]>([]);
@@ -267,6 +273,7 @@ function App() {
         setBasicFertilizers({});
         setSelectedAmendment('');
         setComplexFertilizer(INITIAL_COMPLEX_FERTILIZER);
+        setSpringFertilizerRate(null);
     };
 
     const handleReset = () => {
@@ -300,6 +307,7 @@ function App() {
                 basicFertilizers,
                 selectedAmendment,
                 complexFertilizer,
+                springFertilizerRate,
             };
             setReports(prev => [newReport, ...prev]);
             const reportJson = JSON.stringify(newReport, null, 2);
@@ -384,6 +392,7 @@ function App() {
                 basicFertilizers: selections.basicFertilizers,
                 selectedAmendment: selections.selectedAmendment,
                 complexFertilizer: selections.complexFertilizer,
+                springFertilizerRate: selections.springFertilizerRate,
                 lang: language
             };
     
@@ -577,6 +586,8 @@ function App() {
                                 setSelectedAmendment={setSelectedAmendment}
                                 complexFertilizer={complexFertilizer}
                                 setComplexFertilizer={setComplexFertilizer}
+                                springFertilizerRate={springFertilizerRate}
+                                setSpringFertilizerRate={setSpringFertilizerRate}
                                 isGroupMode={false}
                                 onSaveAllTxt={() => {}}
                                 lang={language}
@@ -640,6 +651,8 @@ function App() {
                                     setSelectedAmendment={createGroupSelectionSetter<string>('selectedAmendment')}
                                     complexFertilizer={currentSelections.complexFertilizer}
                                     setComplexFertilizer={createGroupSelectionSetter<ComplexFertilizer>('complexFertilizer')}
+                                    springFertilizerRate={currentSelections.springFertilizerRate}
+                                    setSpringFertilizerRate={createGroupSelectionSetter<number | null>('springFertilizerRate')}
                                     isGroupMode={true}
                                     onSaveAllTxt={handleSaveAllTxtReport}
                                     lang={language}
@@ -799,6 +812,12 @@ function App() {
                 </div>
             </header>
             
+            <div className="bg-emerald-100 text-emerald-800 rounded-lg shadow-sm mb-8 overflow-hidden whitespace-nowrap">
+                <div className="marquee-content py-2">
+                    <span className="text-sm font-semibold italic px-4">Оновлено 10.11.2025</span>
+                </div>
+            </div>
+
             {renderContent()}
             
             <footer className="text-center mt-12 text-slate-500 text-sm">

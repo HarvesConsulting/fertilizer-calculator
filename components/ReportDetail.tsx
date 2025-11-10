@@ -33,6 +33,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang
     
     const [springFert, setSpringFert] = useState(springFertilizer);
     const [nitroFert, setNitroFert] = useState(nitrogenFertilizer);
+    const [springFertRate, setSpringFertRate] = useState(report.springFertilizerRate ?? null);
 
     const cultureName = CULTURES.find(c => c.key === results.culture)?.name[lang] || results.culture;
 
@@ -98,6 +99,8 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang
                             setSpringFertilizer={setSpringFert}
                             nitrogenFertilizer={nitroFert}
                             setNitrogenFertilizer={setNitroFert}
+                            springFertilizerRate={springFertRate}
+                            setSpringFertilizerRate={setSpringFertRate}
                             readOnly={true}
                             lang={lang}
                         />

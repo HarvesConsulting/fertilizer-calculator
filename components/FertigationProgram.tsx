@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
 import { FERTIGATION_CULTURES } from '../constants';
 import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
@@ -18,6 +18,8 @@ interface FertigationProgramProps {
     setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
     setNitrogenFertilizer: React.Dispatch<React.SetStateAction<string>>;
+    springFertilizerRate: number | null;
+    setSpringFertilizerRate: (rate: number | null) => void;
     readOnly?: boolean;
     lang: Language;
 }
@@ -55,6 +57,8 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     setSpringFertilizer,
     nitrogenFertilizer,
     setNitrogenFertilizer,
+    springFertilizerRate,
+    setSpringFertilizerRate,
     readOnly = false,
     lang,
 }) => {
@@ -64,30 +68,9 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         if (!readOnly) {
             setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
             setNitrogenFertilizer('ammonium-nitrate');
+            setSpringFertilizerRate(null);
         }
-    }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer, readOnly]);
-
-
-    const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setSpringFertilizer(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleToggleSpringFertilizer = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const isEnabled = e.target.checked;
-        if (isEnabled) {
-            setSpringFertilizer(prev => ({ ...prev, enabled: true }));
-        } else {
-            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
-        }
-    };
-    
-    const handleYaraMilaClick = () => {
-        setSpringFertilizer(prev => ({
-            ...prev,
-            n: '11', p: '11', k: '21', ca: '0', mg: '2.6',
-        }));
-    };
+    }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer, setSpringFertilizerRate, readOnly]);
 
     const findCultureKey = (cultureName: string) => {
         return Object.keys(FERTIGATION_CULTURES).find(key => 
@@ -98,15 +81,74 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     const cultureKey = findCultureKey(culture);
     const area = parseFloat(fieldArea || '1') || 1;
     
-    const { weeklyPlan, totals, fertilizerRate } = useMemo(() => {
-        if (!cultureKey) {
-             return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate: null };
+    const calculatedRate = useMemo(() => {
+        const kPercentage = parseFloat(springFertilizer.k);
+        const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
+        if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
+            return (initialKNeed * 0.5 / kPercentage) * 100;
         }
-        return calculateFertigationPlan({
-            initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer
-        });
+        return null;
+    }, [springFertilizer.enabled, springFertilizer.k, initialNeeds]);
+    
+    useEffect(() => {
+        if (!readOnly) {
+            setSpringFertilizerRate(calculatedRate);
+        }
+    }, [calculatedRate, setSpringFertilizerRate, readOnly]);
 
-    }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer]);
+
+    const planData = useMemo(() => {
+        if (!cultureKey) {
+            return {
+                weeklyPlan: [],
+                totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 },
+            };
+        }
+
+        const newPlanData = calculateFertigationPlan({
+            initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer,
+            manualRate: springFertilizerRate
+        });
+        
+        return {
+            weeklyPlan: newPlanData.weeklyPlan,
+            totals: newPlanData.totals,
+        }
+
+    }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer, springFertilizerRate]);
+    
+    const { weeklyPlan, totals } = planData;
+    
+    const handleToggleSpringFertilizer = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isEnabled = e.target.checked;
+        setSpringFertilizer(prev => {
+             if (isEnabled) {
+                return { ...prev, enabled: true };
+            }
+            return { n: '', p: '', k: '', ca: '', mg: '', enabled: false };
+        });
+    };
+    
+    const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSpringFertilizer(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleYaraMilaClick = () => {
+        setSpringFertilizer({
+            enabled: true,
+            n: '11', p: '11', k: '21', ca: '0', mg: '2.6',
+        });
+    };
+    
+    const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSpringFertilizerRate(value === '' ? null : parseFloat(value));
+    };
+
+    const handleAutoCalculateRate = () => {
+        setSpringFertilizerRate(calculatedRate);
+    };
 
 
     if (!cultureKey || !FERTIGATION_SCHEDULES[cultureKey]) {
@@ -179,15 +221,43 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                          <NutrientInput label={`${t('calciumLabel', lang)} (CaO)`} name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} disabled={readOnly} />
                          <NutrientInput label={`${t('magnesiumLabel', lang)} (MgO)`} name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
                      </div>
-                     {fertilizerRate !== null && (
-                        <div className="bg-indigo-100 text-indigo-800 p-3 rounded-lg mt-4 flex items-start gap-2">
-                            <div>
-                                <p className="font-semibold">{t('springFertilizerRateLabel', lang)} <span className="text-lg">{fertilizerRate.toFixed(1)} kg/ha</span></p>
-                                <p className="text-sm font-medium">{t('totalForArea', lang)} <span className="font-bold">{(fertilizerRate * area).toFixed(1)} kg</span></p>
+                     <div className="pt-2">
+                         <div className="bg-indigo-100/60 p-3 rounded-lg">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                 <label htmlFor="manual-rate" className="font-medium text-slate-800 flex items-center gap-1.5">
+                                     {t('applicationRate', lang)}
+                                     <Tooltip text={rateTooltipText}><InfoIcon className="h-4 w-4" /></Tooltip>
+                                 </label>
+                                 <div className="flex items-center gap-2">
+                                     {!readOnly && (
+                                         <button 
+                                             type="button" 
+                                             onClick={handleAutoCalculateRate} 
+                                             className="bg-indigo-200 text-indigo-800 text-xs font-semibold px-3 py-1.5 rounded-md hover:bg-indigo-300 transition"
+                                             title={t('autoCalculateTooltip', lang)}
+                                         >
+                                             {t('autoCalculateButton', lang)}
+                                         </button>
+                                     )}
+                                     <div className="relative">
+                                         <input
+                                            type="number"
+                                            id="manual-rate"
+                                            value={springFertilizerRate ?? ''}
+                                            onChange={handleRateChange}
+                                            disabled={readOnly}
+                                            className="w-32 text-right font-bold text-lg text-indigo-700 bg-white/50 border border-indigo-200 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                                            placeholder={calculatedRate?.toFixed(1) || '0.0'}
+                                            min="0"
+                                            step="0.1"
+                                         />
+                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">kg/ha</span>
+                                     </div>
+                                 </div>
                             </div>
-                            <Tooltip text={rateTooltipText}><InfoIcon className="h-5 w-5 text-indigo-600/80" /></Tooltip>
-                        </div>
-                     )}
+                             {(springFertilizerRate ?? 0) > 0 && <p className="text-sm text-slate-600 mt-2 text-right font-medium">{t('totalForArea', lang)} <span className="font-bold text-indigo-700">{(springFertilizerRate! * area).toFixed(1)} kg</span></p>}
+                         </div>
+                     </div>
                 </div>
             )}
 

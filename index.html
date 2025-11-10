@@ -30,6 +30,15 @@
         input[type='number'] {
             -moz-appearance: textfield;
         }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 15s linear infinite;
+            padding-left: 100%;
+        }
     </style>
 </head>
 <body class="bg-slate-100">

@@ -67,4 +67,5 @@ export interface SavedReport {
   basicFertilizers: BasicFertilizerSelections;
   selectedAmendment: string;
   complexFertilizer?: ComplexFertilizer;
+  springFertilizerRate?: number | null;
 }

@@ -45,7 +45,6 @@ const translations = {
     dataLoadedSuccess: "Saved data loaded.",
     dataLoadInvalid: "Saved data is corrupt or in the wrong format.",
     dataNotFound: "No saved data found.",
-    // FIX: Add missing translation key to resolve TypeScript error.
     dataLoadError: "Failed to load data.",
     // Step 2
     step2Title: "Step 2: Select Crop, Yield, and Area",
@@ -102,8 +101,9 @@ const translations = {
     addSpringFertilizerDesc: "Enter the composition to calculate the rate of spring fertilizer.",
     springFertilizerHeader: "Composition and Rate of Starter Fertilizer",
     yaraMilaButton: "YaraMila CROPCARE",
-    springFertilizerRateLabel: "Calculated rate:",
-    springFertilizerRateTooltip: "The rate is automatically calculated to cover 50% of the potassium (K₂O) need at the initial growth stages, which is key for root system development and overall plant resilience.",
+    autoCalculateButton: "Auto-calculate",
+    autoCalculateTooltip: "Click to revert to the automatically calculated rate based on fertilizer composition and crop needs.",
+    springFertilizerRateTooltip: "The rate is automatically calculated to cover 50% of the potassium (K₂O) need at the initial growth stages, which is key for root system development and overall plant resilience. You can adjust this value manually.",
     nitrogenFertilizerChoiceHeader: "Nitrogen Fertilizer Choice for Fertigation",
     nitrogenFertilizerLabel: "Nitrogen Fertilizer",
     ammoniumNitrate: "Ammonium Nitrate",
@@ -200,7 +200,6 @@ const translations = {
     dataLoadedSuccess: "Збережені дані завантажено.",
     dataLoadInvalid: "Збережені дані пошкоджено або мають неправильний формат.",
     dataNotFound: "Збережені дані не знайдено.",
-    // FIX: Add missing translation key to resolve TypeScript error.
     dataLoadError: "Не вдалося завантажити дані.",
     // Step 2
     step2Title: "Крок 2: Оберіть культуру, врожайність та площу",
@@ -257,8 +256,9 @@ const translations = {
     addSpringFertilizerDesc: "Внесіть склад для розрахунку норми весняного добрива.",
     springFertilizerHeader: "Склад та норма стартового добрива",
     yaraMilaButton: "YaraMila CROPCARE",
-    springFertilizerRateLabel: "Розрахункова норма:",
-    springFertilizerRateTooltip: "Норма розраховується автоматично для покриття 50% потреби в калії (K₂O) на початкових етапах росту, що є ключовим для розвитку кореневої системи та загальної стійкості рослини.",
+    autoCalculateButton: "Розрахувати авто",
+    autoCalculateTooltip: "Натисніть, щоб повернутися до автоматично розрахованої норми на основі складу добрива та потреб культури.",
+    springFertilizerRateTooltip: "Норма розраховується автоматично для покриття 50% потреби в калії (K₂O) на початкових етапах росту, що є ключовим для розвитку кореневої системи та загальної стійкості рослини. Ви можете відкоригувати це значення вручну.",
     nitrogenFertilizerChoiceHeader: "Вибір азотного добрива для фертигації",
     nitrogenFertilizerLabel: "Азотне добриво",
     ammoniumNitrate: "Аміачна селітра",

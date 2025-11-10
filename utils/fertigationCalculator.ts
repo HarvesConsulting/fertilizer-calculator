@@ -7,6 +7,7 @@ interface FertigationPlanInputs {
     cultureParams: CultureParams;
     springFertilizer: SpringFertilizer;
     nitrogenFertilizer: string;
+    manualRate: number | null;
 }
 
 export const calculateFertigationPlan = ({
@@ -14,26 +15,22 @@ export const calculateFertigationPlan = ({
     cultureKey,
     cultureParams,
     springFertilizer,
-    nitrogenFertilizer
+    nitrogenFertilizer,
+    manualRate,
 }: FertigationPlanInputs) => {
 
     const { calciumFactor, magnesiumFactor } = cultureParams;
-
-    const kPercentage = parseFloat(springFertilizer.k);
     const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
     
-    let fertilizerRate: number | null = null;
     let adjustedNeeds: NutrientNeeds[] = [...initialNeeds];
-
-    if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
-        const rate = (initialKNeed * 0.5 / kPercentage) * 100;
-        fertilizerRate = rate;
-
-        const nSupplied = rate * (parseFloat(springFertilizer.n || '0') / 100);
-        const pSupplied = rate * (parseFloat(springFertilizer.p || '0') / 100);
-        const kSupplied = rate * (parseFloat(springFertilizer.k || '0') / 100);
-        const caSupplied = rate * (parseFloat(springFertilizer.ca || '0') / 100);
-        const mgSupplied = rate * (parseFloat(springFertilizer.mg || '0') / 100);
+    const rateToUse = typeof manualRate === 'number' ? manualRate : 0;
+    
+    if (springFertilizer.enabled && rateToUse > 0) {
+        const nSupplied = rateToUse * (parseFloat(springFertilizer.n || '0') / 100);
+        const pSupplied = rateToUse * (parseFloat(springFertilizer.p || '0') / 100);
+        const kSupplied = rateToUse * (parseFloat(springFertilizer.k || '0') / 100);
+        const caSupplied = rateToUse * (parseFloat(springFertilizer.ca || '0') / 100);
+        const mgSupplied = rateToUse * (parseFloat(springFertilizer.mg || '0') / 100);
         
         const adjustedKNorm = Math.max(0, initialKNeed - kSupplied);
         const recalculatedCaNorm = adjustedKNorm * calciumFactor;
@@ -51,12 +48,11 @@ export const calculateFertigationPlan = ({
             if (need.element === 'MgO') return { ...need, norm: Math.max(0, finalMgNorm) };
             return need;
         });
-
     }
 
     const schedule = FERTIGATION_SCHEDULES[cultureKey];
     if (!schedule) {
-         return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, fertilizerRate, adjustedNeeds };
+         return { weeklyPlan: [], totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 }, adjustedNeeds };
     }
 
     const adjustedTotalsActive = adjustedNeeds.reduce((acc, curr) => {
@@ -104,5 +100,5 @@ export const calculateFertigationPlan = ({
         magnesium: totalMagnesiumSulfate,
     };
 
-    return { weeklyPlan, totals, fertilizerRate, adjustedNeeds };
+    return { weeklyPlan, totals, adjustedNeeds };
 };
