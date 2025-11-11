@@ -85,7 +85,8 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         const kPercentage = parseFloat(springFertilizer.k);
         const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
         if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
-            return (initialKNeed * 0.5 / kPercentage) * 100;
+            const rate = (initialKNeed * 0.5 / kPercentage) * 100;
+            return Math.round(rate);
         }
         return null;
     }, [springFertilizer.enabled, springFertilizer.k, initialNeeds]);
@@ -246,10 +247,10 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                                             value={springFertilizerRate ?? ''}
                                             onChange={handleRateChange}
                                             disabled={readOnly}
-                                            className="w-32 text-right font-bold text-lg text-indigo-700 bg-white/50 border border-indigo-200 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
-                                            placeholder={calculatedRate?.toFixed(1) || '0.0'}
+                                            className="w-32 text-right font-bold text-lg text-indigo-700 bg-white/50 border border-indigo-200 rounded-md py-1.5 pl-3 pr-14 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
+                                            placeholder={calculatedRate?.toString() || '0'}
                                             min="0"
-                                            step="0.1"
+                                            step="1"
                                          />
                                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">kg/ha</span>
                                      </div>

@@ -26,8 +26,6 @@ export const calculateFertigationPlan = ({
     const rateToUse = typeof manualRate === 'number' ? manualRate : 0;
     
     if (springFertilizer.enabled && rateToUse > 0) {
-        const nSupplied = rateToUse * (parseFloat(springFertilizer.n || '0') / 100);
-        const pSupplied = rateToUse * (parseFloat(springFertilizer.p || '0') / 100);
         const kSupplied = rateToUse * (parseFloat(springFertilizer.k || '0') / 100);
         const caSupplied = rateToUse * (parseFloat(springFertilizer.ca || '0') / 100);
         const mgSupplied = rateToUse * (parseFloat(springFertilizer.mg || '0') / 100);
@@ -41,8 +39,6 @@ export const calculateFertigationPlan = ({
 
 
         adjustedNeeds = initialNeeds.map(need => {
-            if (need.element === 'N') return { ...need, norm: Math.max(0, need.norm - nSupplied) };
-            if (need.element === 'P2O5') return { ...need, norm: Math.max(0, need.norm - pSupplied) };
             if (need.element === 'K2O') return { ...need, norm: adjustedKNorm };
             if (need.element === 'CaO') return { ...need, norm: Math.max(0, finalCaNorm) };
             if (need.element === 'MgO') return { ...need, norm: Math.max(0, finalMgNorm) };
