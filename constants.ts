@@ -18,30 +18,30 @@ interface SimpleFertilizer {
 
 
 export const CULTURES: Culture[] = [
-    { key: "Томат", name: { uk: "Томат", en: "Tomato" } },
-    { key: "Перець", name: { uk: "Перець", en: "Pepper" } },
-    { key: "Баклажан", name: { uk: "Баклажан", en: "Eggplant" } },
-    { key: "Цибуля ріпчаста", name: { uk: "Цибуля ріпчаста", en: "Onion" } },
-    { key: "Огірок", name: { uk: "Огірок", en: "Cucumber" } },
-    { key: "Кабачок", name: { uk: "Кабачок", en: "Zucchini" } },
-    { key: "Кавун", name: { uk: "Кавун", en: "Watermelon" } },
-    { key: "Диня", name: { uk: "Диня", en: "Melon" } },
-    { key: "Гарбуз", name: { uk: "Гарбуз", en: "Pumpkin" } },
-    { key: "Капуста білоголова", name: { uk: "Капуста білоголова", en: "White Cabbage" } },
-    { key: "Капуста цвітна", name: { uk: "Капуста цвітна", en: "Cauliflower" } },
-    { key: "Капуста броколі", name: { uk: "Капуста броколі", en: "Broccoli" } },
-    { key: "Капуста кольрабі", name: { uk: "Капуста кольрабі", en: "Kohlrabi" } },
-    { key: "Капуста брюссельська", name: { uk: "Капуста брюссельська", en: "Brussels Sprouts" } },
-    { key: "Капуста кале(кейл)", name: { uk: "Капуста кале(кейл)", en: "Kale" } },
-    { key: "Кукурудза солодка", name: { uk: "Кукурудза солодка", en: "Sweet Corn" } },
-    { key: "Часник", name: { uk: "Часник", en: "Garlic" } },
-    { key: "Морква", name: { uk: "Морква", en: "Carrot" } },
-    { key: "Буряк столовий", name: { uk: "Буряк столовий", en: "Beetroot" } },
-    { key: "Картопля", name: { uk: "Картопля", en: "Potato" } },
-    { key: "Салат Айсберг", name: { uk: "Салат Айсберг", en: "Iceberg Lettuce" } },
-    { key: "Салат Ромен", name: { uk: "Салат Ромен", en: "Romaine Lettuce" } },
-    { key: "Селера коренева", name: { uk: "Селера коренева", en: "Celeriac" } },
-    { key: "Цибуля порей", name: { uk: "Цибуля порей", en: "Leek" } }
+    { key: "Томат", name: { uk: "Томат", en: "Tomato", es: "Tomate", pt: "Tomate", fr: "Tomate", kk: "Қызанақ", sw: "Nyanya" } },
+    { key: "Перець", name: { uk: "Перець", en: "Pepper", es: "Pimiento", pt: "Pimentão", fr: "Poivron", kk: "Бұрыш", sw: "Pilipili" } },
+    { key: "Баклажан", name: { uk: "Баклажан", en: "Eggplant", es: "Berenjena", pt: "Beringela", fr: "Aubergine", kk: "Баклажан", sw: "Biringani" } },
+    { key: "Цибуля ріпчаста", name: { uk: "Цибуля ріпчаста", en: "Onion", es: "Cebolla", pt: "Cebola", fr: "Oignon", kk: "Пияз", sw: "Kitunguu" } },
+    { key: "Огірок", name: { uk: "Огірок", en: "Cucumber", es: "Pepino", pt: "Pepino", fr: "Concombre", kk: "Қияр", sw: "Tango" } },
+    { key: "Кабачок", name: { uk: "Кабачок", en: "Zucchini", es: "Calabacín", pt: "Abobrinha", fr: "Courgette", kk: "Кабачок", sw: "Boga" } },
+    { key: "Кавун", name: { uk: "Кавун", en: "Watermelon", es: "Sandía", pt: "Melancia", fr: "Pastèque", kk: "Қарбыз", sw: "Tikiti maji" } },
+    { key: "Диня", name: { uk: "Диня", en: "Melon", es: "Melón", pt: "Melão", fr: "Melon", kk: "Қауын", sw: "Tikiti" } },
+    { key: "Гарбуз", name: { uk: "Гарбуз", en: "Pumpkin", es: "Calabaza", pt: "Abóbora", fr: "Citrouille", kk: "Асқабақ", sw: "Boga" } },
+    { key: "Капуста білоголова", name: { uk: "Капуста білоголова", en: "White Cabbage", es: "Repollo Blanco", pt: "Repolho Branco", fr: "Chou Blanc", kk: "Ақ қауданды қырыққабат", sw: "Kabeji Nyeupe" } },
+    { key: "Капуста цвітна", name: { uk: "Капуста цвітна", en: "Cauliflower", es: "Coliflor", pt: "Couve-flor", fr: "Chou-fleur", kk: "Гүлді қырыққабат", sw: "Koliflawa" } },
+    { key: "Капуста броколі", name: { uk: "Капуста броколі", en: "Broccoli", es: "Brócoli", pt: "Brócolis", fr: "Brocoli", kk: "Брокколи", sw: "Brokoli" } },
+    { key: "Капуста кольрабі", name: { uk: "Капуста кольрабі", en: "Kohlrabi", es: "Colinabo", pt: "Couve-rábano", fr: "Chou-rave", kk: "Кольраби", sw: "Kolirabi" } },
+    { key: "Капуста брюссельська", name: { uk: "Капуста брюссельська", en: "Brussels Sprouts", es: "Coles de Bruselas", pt: "Couve de Bruxelas", fr: "Choux de Bruxelles", kk: "Брюссель қырыққабаты", sw: "Chipukizi za Brussels" } },
+    { key: "Капуста кале(кейл)", name: { uk: "Капуста кале(кейл)", en: "Kale", es: "Col rizada", pt: "Couve", fr: "Chou frisé", kk: "Кейл", sw: "Kale" } },
+    { key: "Кукурудза солодка", name: { uk: "Кукурудза солодка", en: "Sweet Corn", es: "Maíz Dulce", pt: "Milho Doce", fr: "Maïs Doux", kk: "Тәтті жүгері", sw: "Mahindi Matamu" } },
+    { key: "Часник", name: { uk: "Часник", en: "Garlic", es: "Ajo", pt: "Alho", fr: "Ail", kk: "Сарымсақ", sw: "Kitunguu saumu" } },
+    { key: "Морква", name: { uk: "Морква", en: "Carrot", es: "Zanahoria", pt: "Cenoura", fr: "Carotte", kk: "Сәбіз", sw: "Karoti" } },
+    { key: "Буряк столовий", name: { uk: "Буряк столовий", en: "Beetroot", es: "Remolacha", pt: "Beterraba", fr: "Betterave", kk: "Қызылша", sw: "Beetroot" } },
+    { key: "Картопля", name: { uk: "Картопля", en: "Potato", es: "Patata", pt: "Batata", fr: "Pomme de terre", kk: "Картоп", sw: "Kiazi" } },
+    { key: "Салат Айсберг", name: { uk: "Салат Айсберг", en: "Iceberg Lettuce", es: "Lechuga Iceberg", pt: "Alface Iceberg", fr: "Laitue Iceberg", kk: "Айсберг салаты", sw: "Saladi ya Iceberg" } },
+    { key: "Салат Ромен", name: { uk: "Салат Ромен", en: "Romaine Lettuce", es: "Lechuga Romana", pt: "Alface Romana", fr: "Laitue Romaine", kk: "Ромен салаты", sw: "Saladi ya Romaine" } },
+    { key: "Селера коренева", name: { uk: "Селера коренева", en: "Celeriac", es: "Apionabo", pt: "Aipo-rábano", fr: "Céleri-rave", kk: "Тамыржемісті балдыркөк", sw: "Celery ya Mizizi" } },
+    { key: "Цибуля порей", name: { uk: "Цибуля порей", en: "Leek", es: "Puerro", pt: "Alho-poró", fr: "Poireau", kk: "Порей пиязы", sw: "Giligilani" } }
 ];
 
 export const CULTURE_PARAMS: Record<string, CultureParams> = {
@@ -336,9 +336,9 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
 };
 
 export const AMENDMENTS: Amendment[] = [
-    { value: 'дефекат', label: { uk: 'Дефекат', en: 'Defecate' } },
-    { value: 'вапно', label: { uk: 'Вапно', en: 'Lime' } },
-    { value: 'доломітове борошно', label: { uk: 'Доломітове борошно', en: 'Dolomite flour' } },
+    { value: 'дефекат', label: { uk: 'Дефекат', en: 'Defecate', es: 'Defecado', pt: 'Defecado', fr: 'Défécat', kk: 'Дефекат', sw: 'Takataka' } },
+    { value: 'вапно', label: { uk: 'Вапно', en: 'Lime', es: 'Cal', pt: 'Cal', fr: 'Chaux', kk: 'Әк', sw: 'Chokaa' } },
+    { value: 'доломітове борошно', label: { uk: 'Доломітове борошно', en: 'Dolomite flour', es: 'Harina de dolomita', pt: 'Farinha de dolomita', fr: 'Farine de dolomie', kk: 'Доломит ұны', sw: 'Unga wa Dolomite' } },
 ];
 
 export const AMENDMENT_EFFECTS = {
@@ -375,19 +375,19 @@ export const FERTIGATION_CULTURES: Record<string, string> = {
 
 export const SIMPLE_FERTILIZERS: Record<string, SimpleFertilizer[]> = {
     'P2O5': [
-        { label: { uk: 'Суперфосфат', en: 'Superphosphate' }, value: 19 },
-        { label: { uk: 'Подвійний суперфосфат', en: 'Double superphosphate' }, value: 46 },
-        { label: { uk: 'Амофос', en: 'Ammonium phosphate' }, value: 52 },
+        { label: { uk: 'Суперфосфат', en: 'Superphosphate', es: 'Superfosfato', pt: 'Superfosfato', fr: 'Superphosphate', kk: 'Суперфосфат', sw: 'Superfosfati' }, value: 19 },
+        { label: { uk: 'Подвійний суперфосфат', en: 'Double superphosphate', es: 'Superfosfato doble', pt: 'Superfosfato duplo', fr: 'Superphosphate double', kk: 'Қос суперфосфат', sw: 'Superfosfati maradufu' }, value: 46 },
+        { label: { uk: 'Амофос', en: 'Ammonium phosphate', es: 'Fosfato de amonio', pt: 'Fosfato de amônio', fr: 'Phosphate d\'ammonium', kk: 'Аммофос', sw: 'Fosfati ya Amonia' }, value: 52 },
     ],
     'K2O': [
-        { label: { uk: 'Калій хлористий', en: 'Potassium chloride' }, value: 60 },
-        { label: { uk: 'Сульфат калію', en: 'Potassium sulfate' }, value: 52 },
+        { label: { uk: 'Калій хлористий', en: 'Potassium chloride', es: 'Cloruro de potasio', pt: 'Cloreto de potássio', fr: 'Chlorure de potassium', kk: 'Калий хлориді', sw: 'Kloridi ya Potasiamu' }, value: 60 },
+        { label: { uk: 'Сульфат калію', en: 'Potassium sulfate', es: 'Sulfato de potasio', pt: 'Sulfato de potássio', fr: 'Sulfate de potassium', kk: 'Калий сульфаты', sw: 'Sulfate ya Potasiamu' }, value: 52 },
     ],
     'CaO': [
-        { label: { uk: 'Нітрат кальцію', en: 'Calcium nitrate' }, value: 26 },
-        { label: { uk: 'Сульфат кальцію (гіпс)', en: 'Calcium sulfate (gypsum)' }, value: 35 },
+        { label: { uk: 'Нітрат кальцію', en: 'Calcium nitrate', es: 'Nitrato de calcio', pt: 'Nitrato de cálcio', fr: 'Nitrate de calcium', kk: 'Кальций нитраты', sw: 'Nitrati ya Kalisi' }, value: 26 },
+        { label: { uk: 'Сульфат кальцію (гіпс)', en: 'Calcium sulfate (gypsum)', es: 'Sulfato de calcio (yeso)', pt: 'Sulfato de cálcio (gesso)', fr: 'Sulfate de calcium (gypse)', kk: 'Кальций сульфаты (гипс)', sw: 'Sulfate ya Kalisi (jasi)' }, value: 35 },
     ],
     'MgO': [
-        { label: { uk: 'Сульфат магнію', en: 'Magnesium sulfate' }, value: 16 },
+        { label: { uk: 'Сульфат магнію', en: 'Magnesium sulfate', es: 'Sulfato de magnesio', pt: 'Sulfato de magnésio', fr: 'Sulfate de magnésium', kk: 'Магний сульфаты', sw: 'Sulfate ya Magnesiamu' }, value: 16 },
     ],
 };

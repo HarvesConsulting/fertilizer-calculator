@@ -98,6 +98,16 @@ const migrateReport = (report: any): SavedReport | null => {
     return null;
 }
 
+const LANGUAGES: { code: Language; name: string; flag: string }[] = [
+    { code: 'uk', name: 'Українська', flag: '🇺🇦' },
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'pt', name: 'Português', flag: '🇵🇹' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'kk', name: 'Қазақша', flag: '🇰🇿' },
+    { code: 'sw', name: 'Kiswahili', flag: '🇹🇿' }
+];
+
 function App() {
     const [mainView, setMainView] = useState<'landing' | 'calculator' | 'reports'>('landing');
     const [analysisMode, setAnalysisMode] = useState<'single' | 'group' | null>(null);
@@ -121,8 +131,16 @@ function App() {
     const [groupFertilizerSelections, setGroupFertilizerSelections] = useState<FertilizerSelections[]>([]);
     
     const [language, setLanguage] = useState<Language>(() => {
-        return (localStorage.getItem('agro-calc-lang') as Language) || 'uk';
+        const savedLang = localStorage.getItem('agro-calc-lang');
+        const validLangs = LANGUAGES.map(l => l.code);
+        if (savedLang && validLangs.includes(savedLang as Language)) {
+            return savedLang as Language;
+        }
+        return 'uk';
     });
+
+    const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+    const langDropdownRef = useRef<HTMLDivElement>(null);
 
 
     const [reports, setReports] = useState<SavedReport[]>(() => {
@@ -178,6 +196,19 @@ function App() {
         document.documentElement.lang = language;
         document.title = t('appTitle', language);
     }, [language]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+                setIsLangDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
 
     const updateCurrentAnalysis = (data: Partial<FormData>) => {
@@ -530,7 +561,10 @@ function App() {
     
     const handleLanguageChange = (lang: Language) => {
         setLanguage(lang);
+        setIsLangDropdownOpen(false);
     };
+
+    const currentLangDetails = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
     const renderLandingPage = () => (
         <main className="bg-white p-8 md:p-16 rounded-xl shadow-lg text-center">
@@ -782,19 +816,31 @@ function App() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 md:gap-4">
-                     <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg">
-                        <button 
-                            onClick={() => handleLanguageChange('uk')}
-                            className={`px-3 py-1 text-sm font-bold rounded-md transition ${language === 'uk' ? 'bg-white text-indigo-700' : 'bg-transparent text-white hover:bg-white/20'}`}
+                     <div className="relative" ref={langDropdownRef}>
+                        <button
+                            onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-3 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white"
                         >
-                            УКР
+                            <span>{currentLangDetails.flag}</span>
+                            <span className="hidden md:inline">{currentLangDetails.name}</span>
+                            <svg className="h-5 w-5 text-white/80 hidden sm:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                            </svg>
                         </button>
-                        <button 
-                            onClick={() => handleLanguageChange('en')}
-                            className={`px-3 py-1 text-sm font-bold rounded-md transition ${language === 'en' ? 'bg-white text-indigo-700' : 'bg-transparent text-white hover:bg-white/20'}`}
-                        >
-                            ENG
-                        </button>
+                        {isLangDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5">
+                                {LANGUAGES.map(lang => (
+                                    <button
+                                        key={lang.code}
+                                        onClick={() => handleLanguageChange(lang.code)}
+                                        className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                                    >
+                                        <span>{lang.flag}</span>
+                                        <span>{lang.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <button
                         onClick={() => {
@@ -814,7 +860,7 @@ function App() {
             
             <div className="bg-emerald-100 text-emerald-800 rounded-lg shadow-sm mb-8 overflow-hidden whitespace-nowrap">
                 <div className="marquee-content py-2">
-                    <span className="text-sm font-semibold italic px-4">Оновлено 10.11.2025</span>
+                    <span className="text-sm font-semibold italic px-4">Оновлено 11.11.2025</span>
                 </div>
             </div>
 
