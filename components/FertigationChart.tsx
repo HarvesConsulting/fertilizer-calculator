@@ -15,12 +15,25 @@ interface FertigationChartProps {
     labels: string[];
     fieldArea: number;
     lang: Language;
+    sowingDate?: string;
 }
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#0ea5e9', '#e11d48'];
 const KEYS: (keyof Omit<ChartData, 'week'>)[] = ['nitrogen', 'phosphorus', 'potassium', 'calcium', 'magnesium'];
 
-export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels, fieldArea, lang }) => {
+const getWeekDateRange = (sowingDate: Date, week: number): string => {
+    const startDate = new Date(sowingDate);
+    startDate.setDate(startDate.getDate() + (week - 1) * 7);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+
+    const formatOptions: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit' };
+    const locale = 'default';
+    
+    return `${startDate.toLocaleDateString(locale, formatOptions)} - ${endDate.toLocaleDateString(locale, formatOptions)}`;
+};
+
+export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels, fieldArea, lang, sowingDate }) => {
     const [tooltip, setTooltip] = useState<{
         visible: boolean;
         x: number;
@@ -31,6 +44,11 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
     
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
+
+    const parsedSowingDate = sowingDate ? new Date(sowingDate) : null;
+    if (parsedSowingDate && isNaN(parsedSowingDate.getTime())) {
+      console.error("Invalid sowingDate provided to FertigationChart");
+    }
 
     useLayoutEffect(() => {
         const updateSize = () => {
@@ -61,9 +79,16 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
         const svgRect = target.closest('svg')?.getBoundingClientRect();
         if (!svgRect) return;
 
+        const dateRange = parsedSowingDate && !isNaN(parsedSowingDate.getTime())
+            ? getWeekDateRange(parsedSowingDate, weekData.week)
+            : '';
+
         const content = (
             <div className="text-sm">
-                <div className="font-bold mb-1 border-b pb-1">{t('chartWeekLabel', lang)} {weekData.week}</div>
+                <div className="font-bold mb-1 border-b pb-1">
+                    {t('chartWeekLabel', lang)} {weekData.week}
+                    {dateRange && <span className="font-normal text-slate-600 ml-2">({dateRange})</span>}
+                </div>
                 {KEYS.map((key, i) => (
                     <div key={key} className="flex items-center">
                         <div className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: COLORS[i] }}></div>
@@ -112,7 +137,12 @@ export const FertigationChart: React.FC<FertigationChartProps> = ({ data, labels
     const renderXAxis = () => (
         <g transform={`translate(0, ${chartHeight})`} className="text-slate-500 text-xs">
             {data.map((d, i) => (
-                <text key={d.week} x={i * bandWidth + bandWidth / 2} y="20" textAnchor="middle">{d.week}</text>
+                <text key={d.week} x={i * bandWidth + bandWidth / 2} y="20" textAnchor="middle">
+                    {parsedSowingDate && !isNaN(parsedSowingDate.getTime())
+                        ? getWeekDateRange(parsedSowingDate, d.week).split(' - ')[0] // Show only start date for brevity
+                        : d.week
+                    }
+                </text>
             ))}
             <text x={chartWidth / 2} y="45" textAnchor="middle" className="fill-current">{t('chartXAxisLabel', lang)}</text>
         </g>

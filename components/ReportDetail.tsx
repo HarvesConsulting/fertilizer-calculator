@@ -61,6 +61,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang
                 <InfoBlock title={t('inputData', lang)}>
                     {formData.fieldName && (<p><strong>{t('fieldNameLabel', lang)}:</strong> {formData.fieldName}</p>)}
                     <p><strong>{t('cultureLabel', lang)}:</strong> {cultureName}</p>
+                    {formData.sowingDate && (<p><strong>{t('sowingDateLabel', lang)}:</strong> {new Date(formData.sowingDate).toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-US')}</p>)}
                     <p><strong>{t('plannedYieldLabel', lang)}:</strong> {formData.plannedYield} t/ha</p>
                     <p><strong>{t('fieldAreaLabel', lang)}:</strong> {formData.fieldArea || 1} ha</p>
                 </InfoBlock>
@@ -94,7 +95,7 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang
                             initialNeeds={results.fertigation} 
                             culture={results.culture}
                             cultureParams={cultureParams}
-                            fieldArea={formData.fieldArea}
+                            formData={formData}
                             springFertilizer={springFert}
                             setSpringFertilizer={setSpringFert}
                             nitrogenFertilizer={nitroFert}

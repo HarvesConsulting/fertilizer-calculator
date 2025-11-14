@@ -19,6 +19,7 @@ export interface CultureParams {
 export interface FormData {
     culture: string;
     plannedYield: string;
+    sowingDate: string;
     fieldArea: string;
     fieldName: string;
     nitrogenAnalysis: string;

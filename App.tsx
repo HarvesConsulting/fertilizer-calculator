@@ -9,12 +9,14 @@ import { CULTURE_PARAMS } from './constants';
 import { ReportsList } from './components/ReportsList';
 import { ReportDetail } from './components/ReportDetail';
 import { Logo } from './components/Logo';
-import { generateTxtReport } from './utils/reportGenerator';
+import { generateTxtReport, generateXlsxReport } from './utils/reportGenerator';
 import { t, Language } from './i18n';
+import { SaveConfirmationModal } from './components/SaveConfirmationModal';
 
 const INITIAL_FORM_DATA: FormData = {
     culture: '',
     plannedYield: '',
+    sowingDate: '',
     fieldArea: '1',
     fieldName: '',
     nitrogenAnalysis: '5',
@@ -77,6 +79,9 @@ const migrateReport = (report: any): SavedReport | null => {
     if (typeof migratedReport.formData.fieldName === 'undefined') {
         migratedReport.formData.fieldName = '';
     }
+    if (typeof migratedReport.formData.sowingDate === 'undefined') {
+        migratedReport.formData.sowingDate = '';
+    }
     if (migratedReport.springFertilizer && typeof (migratedReport.springFertilizer as any).enabled === 'undefined') {
         const oldFert = migratedReport.springFertilizer as any;
         const hasValues = oldFert.n || oldFert.p || oldFert.k || oldFert.ca || oldFert.mg;
@@ -129,6 +134,8 @@ function App() {
     
     // State for group mode selections
     const [groupFertilizerSelections, setGroupFertilizerSelections] = useState<FertilizerSelections[]>([]);
+    const [recordedIndices, setRecordedIndices] = useState<Set<number>>(new Set());
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     
     const [language, setLanguage] = useState<Language>(() => {
         const savedLang = localStorage.getItem('agro-calc-lang');
@@ -229,7 +236,7 @@ function App() {
     
     const runCalculation = (formData: FormData): CalculationResults | null => {
         const numericData = Object.entries(formData)
-            .filter(([key]) => !['culture', 'amendment', 'fieldName'].includes(key))
+            .filter(([key]) => !['culture', 'amendment', 'fieldName', 'sowingDate'].includes(key))
             .reduce((acc, [key, value]) => ({ ...acc, [key]: parseFloat(value as string) }), {} as Record<string, number>);
 
         const params = CULTURE_PARAMS[formData.culture];
@@ -316,6 +323,7 @@ function App() {
         setCalculationType(null);
         resetFertilizerSelections();
         setGroupFertilizerSelections([]);
+        setRecordedIndices(new Set());
         setMainView('landing');
         setAnalysisMode(null);
     };
@@ -324,85 +332,106 @@ function App() {
         handleReset();
     };
 
-    const handleSaveReport = () => {
-        if (analysisMode === 'single') {
-            if (!results || !calculationType) return;
-            const newReport: SavedReport = {
-                id: new Date().toISOString() + Math.random(),
-                timestamp: new Date().toISOString(),
-                formData: currentFormData,
-                results: results,
-                calculationType: calculationType,
-                springFertilizer,
-                nitrogenFertilizer,
-                basicFertilizers,
-                selectedAmendment,
-                complexFertilizer,
-                springFertilizerRate,
-            };
-            setReports(prev => [newReport, ...prev]);
-            const reportJson = JSON.stringify(newReport, null, 2);
-            const blob = new Blob([reportJson], { type: 'application/json;charset=utf-8' });
-            
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const cultureName = currentFormData.culture.replace(/ /g, '_');
-            const date = new Date().toISOString().split('T')[0];
-            link.setAttribute('href', url);
-            link.setAttribute('download', `report_${cultureName}_${date}.json`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } else if (analysisMode === 'group') {
-            const date = new Date();
-            const timestamp = date.toISOString();
-            const dateString = timestamp.split('T')[0];
-
-            // Fix: Explicitly type the return of the map function to `SavedReport | null` to ensure correct type inference.
-            const groupReports: SavedReport[] = analyses.map((formData, index): SavedReport | null => {
-                const result = groupResults[index];
-                const selections = groupFertilizerSelections[index];
-                if (!result || !selections) return null;
-
-                return {
-                    id: `${timestamp}_${index}`,
-                    timestamp,
-                    formData,
-                    results: result,
-                    calculationType: 'full',
-                    ...selections
-                };
-            }).filter((r): r is SavedReport => r !== null);
-
-            if (groupReports.length === 0) {
-                alert(t('reportSaveError', language));
-                return;
-            }
-
-            setReports(prev => [...groupReports, ...prev]);
-
-            const reportJson = JSON.stringify(groupReports, null, 2);
-            const blob = new Blob([reportJson], { type: 'application/json;charset=utf-8' });
-            
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `group_report_${dateString}.json`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+    const handleSaveReport = () => { // For single mode JSON save
+        if (analysisMode !== 'single' || !results || !calculationType) return;
+        
+        const newReport: SavedReport = {
+            id: new Date().toISOString() + Math.random(),
+            timestamp: new Date().toISOString(),
+            formData: currentFormData,
+            results: results,
+            calculationType: calculationType,
+            springFertilizer,
+            nitrogenFertilizer,
+            basicFertilizers,
+            selectedAmendment,
+            complexFertilizer,
+            springFertilizerRate,
+        };
+        setReports(prev => [newReport, ...prev]);
+        const reportJson = JSON.stringify(newReport, null, 2);
+        const blob = new Blob([reportJson], { type: 'application/json;charset=utf-8' });
+        
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        const cultureName = currentFormData.culture.replace(/ /g, '_');
+        const date = new Date().toISOString().split('T')[0];
+        link.setAttribute('href', url);
+        link.setAttribute('download', `report_${cultureName}_${date}.json`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
         setMainView('reports');
         setSelectedReport(null);
     };
 
+    const handleRecordCalculation = () => {
+        setRecordedIndices(prev => {
+            const newSet = new Set(prev);
+            newSet.add(activeAnalysisIndex);
+            return newSet;
+        });
+    };
+
+    const handleContinue = () => {
+        // Add a new analysis form
+        setAnalyses(prev => [...prev, { ...INITIAL_FORM_DATA, culture: 'Томат', plannedYield: '100' }]);
+        // Set the new form as active
+        setActiveAnalysisIndex(analyses.length);
+        // Go back to the first step
+        setCurrentStep(1);
+    };
+
+    const handleOpenSaveModal = () => {
+        if (recordedIndices.size === 0) {
+            alert(t('reportSaveError', language));
+            return;
+        }
+        setIsSaveModalOpen(true);
+    };
+
+    const handleConfirmSave = (selectedIndices: number[]) => {
+        if (selectedIndices.length === 0) {
+            alert(t('reportSaveError', language));
+            return;
+        }
+
+        const reportsToSave = selectedIndices.map(index => {
+            const formData = analyses[index];
+            const result = groupResults[index];
+            const selections = groupFertilizerSelections[index];
+            const cultureParams = CULTURE_PARAMS[formData.culture];
+
+            if (!formData || !result || !selections || !cultureParams || !calculationType) {
+                return null;
+            }
+            
+            return {
+                formData,
+                results: result,
+                calculationType,
+                cultureParams,
+                springFertilizer: selections.springFertilizer,
+                nitrogenFertilizer: selections.nitrogenFertilizer,
+                basicFertilizers: selections.basicFertilizers,
+                selectedAmendment: selections.selectedAmendment,
+                complexFertilizer: selections.complexFertilizer,
+                springFertilizerRate: selections.springFertilizerRate,
+                lang: language
+            };
+        }).filter((r): r is NonNullable<typeof r> => r !== null);
+        
+        if (reportsToSave.length > 0) {
+            generateXlsxReport(reportsToSave, language);
+        }
+        setIsSaveModalOpen(false);
+    };
+
     const handleSaveAllTxtReport = () => {
-        if (analysisMode !== 'group' || analyses.length === 0) return;
+        if (analysisMode !== 'group' || analyses.length === 0 || !calculationType) return;
     
         const allReportsContent = analyses.map((formData, index) => {
             const result = groupResults[index];
@@ -416,7 +445,7 @@ function App() {
             const reportDataForGenerator = {
                 formData,
                 results: result,
-                calculationType: 'full' as const,
+                calculationType,
                 cultureParams,
                 springFertilizer: selections.springFertilizer,
                 nitrogenFertilizer: selections.nitrogenFertilizer,
@@ -601,12 +630,12 @@ function App() {
                         {currentStep === 1 && <Step1SoilAnalysis onNext={handleNext} onBack={handleReturnToLanding} data={currentFormData} onDataChange={updateCurrentAnalysis} lang={language} />}
                         {currentStep === 2 && <Step2CropYield onBack={handleBack} onCalculate={handleCalculate} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={false} isCalculationDisabled={false} lang={language} />}
                         {currentStep === 3 && <Step3CalculationChoice onBack={handleBack} onSelect={handleSelectCalculation} lang={language} />}
-                        {currentStep === 4 && results && (
+                        {currentStep === 4 && results && calculationType && (
                             <Step4Results 
                                 onReset={handleReset} 
                                 onBack={handleBack}
                                 results={results} 
-                                type={calculationType!} 
+                                type={calculationType} 
                                 formData={currentFormData} 
                                 cultureParams={CULTURE_PARAMS[currentFormData.culture]}
                                 onSave={handleSaveReport}
@@ -633,7 +662,7 @@ function App() {
         }
 
         if (analysisMode === 'group') {
-            const steps = [t('step1', language), t('step2', language), t('step3Group', language)];
+            const steps = [t('step1', language), t('step2', language), t('step3', language), t('step4', language)];
             const isCalculationDisabled = analyses.some(a => !a.culture || !a.plannedYield || parseFloat(a.plannedYield) <= 0);
 
             const renderGroupStep = () => {
@@ -643,11 +672,13 @@ function App() {
                     case 2:
                         return <Step2CropYield onBack={handleBack} onCalculate={handleCalculateAll} data={currentFormData} onDataChange={updateCurrentAnalysis} isGroupMode={true} isCalculationDisabled={isCalculationDisabled} lang={language} />;
                     case 3:
+                        return <Step3CalculationChoice onBack={handleBack} onSelect={handleSelectCalculation} lang={language} />;
+                    case 4:
                         const currentResult = groupResults[activeAnalysisIndex];
                         const params = CULTURE_PARAMS[currentFormData.culture];
                         const currentSelections = groupFertilizerSelections[activeAnalysisIndex];
 
-                        if (!currentResult || !params || !currentSelections) {
+                        if (!currentResult || !params || !currentSelections || !calculationType) {
                             return (
                                 <div className="text-center py-10">
                                     <h3 className="text-xl font-semibold text-red-600">{t('calculationError', language)}</h3>
@@ -671,10 +702,10 @@ function App() {
                                     onReset={handleReset} 
                                     onBack={handleBack}
                                     results={currentResult} 
-                                    type={'full'} 
+                                    type={calculationType} 
                                     formData={currentFormData} 
                                     cultureParams={params}
-                                    onSave={handleSaveReport}
+                                    onSave={()=>{}}
                                     springFertilizer={currentSelections.springFertilizer}
                                     setSpringFertilizer={createGroupSelectionSetter<SpringFertilizer>('springFertilizer')}
                                     nitrogenFertilizer={currentSelections.nitrogenFertilizer}
@@ -690,6 +721,11 @@ function App() {
                                     isGroupMode={true}
                                     onSaveAllTxt={handleSaveAllTxtReport}
                                     lang={language}
+                                    onRecord={handleRecordCalculation}
+                                    onOpenSaveModal={handleOpenSaveModal}
+                                    recordedIndices={recordedIndices}
+                                    onContinue={handleContinue}
+                                    activeAnalysisIndex={activeAnalysisIndex}
                                />;
                     default:
                         return null;
@@ -764,6 +800,16 @@ function App() {
 
     return (
         <div className="container mx-auto p-4 md:p-8 font-sans bg-slate-50 min-h-screen">
+            {isSaveModalOpen && (
+                <SaveConfirmationModal
+                    isOpen={isSaveModalOpen}
+                    onClose={() => setIsSaveModalOpen(false)}
+                    onConfirm={handleConfirmSave}
+                    analyses={analyses}
+                    recordedIndices={recordedIndices}
+                    lang={language}
+                />
+            )}
             <input type="file" ref={fileInputRef} onChange={handleLogoChange} accept="image/*" className="hidden" aria-hidden="true" />
             <input type="file" ref={reportInputRef} onChange={handleLoadReport} accept="application/json,.json" className="hidden" aria-hidden="true" />
             <header className="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white p-4 md:p-6 rounded-xl shadow-2xl mb-10 flex justify-between items-center">

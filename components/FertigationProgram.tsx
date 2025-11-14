@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
 import { FERTIGATION_CULTURES } from '../constants';
-import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
+import type { NutrientNeeds, CultureParams, SpringFertilizer, FormData } from '../types';
 import { calculateFertigationPlan } from '../utils/fertigationCalculator';
 import { FertigationChart } from './FertigationChart';
 import { Tooltip } from './Tooltip';
@@ -13,7 +13,7 @@ interface FertigationProgramProps {
     initialNeeds: NutrientNeeds[];
     culture: string;
     cultureParams: CultureParams;
-    fieldArea: string;
+    formData: Partial<FormData>;
     springFertilizer: SpringFertilizer;
     setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
@@ -22,6 +22,7 @@ interface FertigationProgramProps {
     setSpringFertilizerRate: (rate: number | null) => void;
     readOnly?: boolean;
     lang: Language;
+    isGroupMode?: boolean;
 }
 
 const NutrientInput: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; disabled?: boolean; }> = ({ label, name, value, onChange, disabled }) => (
@@ -52,7 +53,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     initialNeeds, 
     culture,
     cultureParams,
-    fieldArea,
+    formData,
     springFertilizer,
     setSpringFertilizer,
     nitrogenFertilizer,
@@ -61,16 +62,19 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     setSpringFertilizerRate,
     readOnly = false,
     lang,
+    isGroupMode = false,
 }) => {
     const [isCompatibilityModalOpen, setIsCompatibilityModalOpen] = useState(false);
+    const [isRateManuallySet, setIsRateManuallySet] = useState(false);
     
     useEffect(() => {
-        if (!readOnly) {
+        if (!readOnly && !isGroupMode) {
             setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
             setNitrogenFertilizer('ammonium-nitrate');
             setSpringFertilizerRate(null);
+            setIsRateManuallySet(false);
         }
-    }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer, setSpringFertilizerRate, readOnly]);
+    }, [initialNeeds, setSpringFertilizer, setNitrogenFertilizer, setSpringFertilizerRate, readOnly, isGroupMode]);
 
     const findCultureKey = (cultureName: string) => {
         return Object.keys(FERTIGATION_CULTURES).find(key => 
@@ -79,7 +83,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     };
 
     const cultureKey = findCultureKey(culture);
-    const area = parseFloat(fieldArea || '1') || 1;
+    const area = parseFloat(formData.fieldArea || '1') || 1;
     
     const calculatedRate = useMemo(() => {
         const kPercentage = parseFloat(springFertilizer.k);
@@ -92,10 +96,10 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     }, [springFertilizer.enabled, springFertilizer.k, initialNeeds]);
     
     useEffect(() => {
-        if (!readOnly) {
+        if (!readOnly && !isRateManuallySet) {
             setSpringFertilizerRate(calculatedRate);
         }
-    }, [calculatedRate, setSpringFertilizerRate, readOnly]);
+    }, [calculatedRate, readOnly, isRateManuallySet, setSpringFertilizerRate]);
 
 
     const planData = useMemo(() => {
@@ -105,10 +109,12 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                 totals: { nitrogen: 0, phosphorus: 0, potassium: 0, calcium: 0, magnesium: 0 },
             };
         }
+        
+        const rateToUse = springFertilizerRate ?? calculatedRate;
 
         const newPlanData = calculateFertigationPlan({
             initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer,
-            manualRate: springFertilizerRate
+            manualRate: rateToUse
         });
         
         return {
@@ -116,7 +122,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             totals: newPlanData.totals,
         }
 
-    }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer, springFertilizerRate]);
+    }, [initialNeeds, cultureKey, cultureParams, springFertilizer, nitrogenFertilizer, springFertilizerRate, calculatedRate]);
     
     const { weeklyPlan, totals } = planData;
     
@@ -128,11 +134,13 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             }
             return { n: '', p: '', k: '', ca: '', mg: '', enabled: false };
         });
+        setIsRateManuallySet(false);
     };
     
     const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setSpringFertilizer(prev => ({ ...prev, [name]: value }));
+        setIsRateManuallySet(false);
     };
 
     const handleYaraMilaClick = () => {
@@ -140,15 +148,18 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             enabled: true,
             n: '11', p: '11', k: '21', ca: '0', mg: '2.6',
         });
+        setIsRateManuallySet(false);
     };
     
     const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSpringFertilizerRate(value === '' ? null : parseFloat(value));
+        setIsRateManuallySet(true);
     };
 
     const handleAutoCalculateRate = () => {
         setSpringFertilizerRate(calculatedRate);
+        setIsRateManuallySet(false);
     };
 
 
@@ -283,7 +294,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
 
 
             {weeklyPlan && weeklyPlan.length > 0 ? (
-                <FertigationChart data={weeklyPlan} labels={chartLabels} fieldArea={area} lang={lang} />
+                <FertigationChart data={weeklyPlan} labels={chartLabels} fieldArea={area} lang={lang} sowingDate={formData.sowingDate} />
             ) : (
                 <div className="text-center py-8 bg-slate-50 rounded-lg">
                     <p className="text-slate-600">Немає даних для побудови графіка.</p>

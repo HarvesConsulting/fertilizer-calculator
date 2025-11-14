@@ -33,15 +33,25 @@ export const Step2CropYield: React.FC<Step2Props> = ({ onBack, onCalculate, data
         <form onSubmit={handleSubmit} className="space-y-8">
             <h2 className="text-2xl font-semibold text-slate-800 border-b pb-4 mb-6">{t('step2Title', lang)}</h2>
             <div className="space-y-6">
-                <StyledFormField
-                    label={t('fieldNameLabel', lang)}
-                    name="fieldName"
-                    value={data.fieldName || ''}
-                    onChange={handleChange}
-                    unit=""
-                    type="text"
-                    required={false}
-                />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StyledFormField
+                        label={t('fieldNameLabel', lang)}
+                        name="fieldName"
+                        value={data.fieldName || ''}
+                        onChange={handleChange}
+                        unit=""
+                        type="text"
+                        required={false}
+                    />
+                    <StyledFormField
+                        label={t('sowingDateLabel', lang)}
+                        name="sowingDate"
+                        value={data.sowingDate}
+                        onChange={handleChange}
+                        unit=""
+                        type="date"
+                    />
+                </div>
                 <StyledSelectField
                     label={t('cultureLabel', lang)}
                     name="culture"
