@@ -54,7 +54,8 @@ export const SaveConfirmationModal: React.FC<SaveConfirmationModalProps> = ({
         onConfirm(Array.from(selected));
     };
     
-    const recordedAnalyses = Array.from(recordedIndices).map(index => ({
+    // FIX: Explicitly type `index` as `number` to fix type inference issue where it was being treated as `unknown`.
+    const recordedAnalyses = Array.from(recordedIndices).map((index: number) => ({
         index,
         data: analyses[index]
     }));

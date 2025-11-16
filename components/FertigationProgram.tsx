@@ -140,7 +140,6 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setSpringFertilizer(prev => ({ ...prev, [name]: value }));
-        setIsRateManuallySet(false);
     };
 
     const handleYaraMilaClick = () => {

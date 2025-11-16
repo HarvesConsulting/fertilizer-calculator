@@ -50,6 +50,7 @@ export const Step2CropYield: React.FC<Step2Props> = ({ onBack, onCalculate, data
                         onChange={handleChange}
                         unit=""
                         type="date"
+                        required={false}
                     />
                 </div>
                 <StyledSelectField
