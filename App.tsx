@@ -906,7 +906,7 @@ function App() {
             
             <div className="bg-emerald-100 text-emerald-800 rounded-lg shadow-sm mb-8 overflow-hidden whitespace-nowrap">
                 <div className="marquee-content py-2">
-                    <span className="text-sm font-semibold italic px-4">Оновлено 11.11.2025</span>
+                    <span className="text-sm font-semibold italic px-4">Оновлено 16.11.2025</span>
                 </div>
             </div>
 
