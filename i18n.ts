@@ -1,4 +1,6 @@
 
+export type Language = 'en' | 'uk' | 'es' | 'pt' | 'fr' | 'kk' | 'sw';
+
 const translations = {
   en: {
     // App
@@ -111,6 +113,7 @@ const translations = {
     addSpringFertilizerDesc: "Enter the composition to calculate the rate of spring fertilizer.",
     springFertilizerHeader: "Composition and Rate of Starter Fertilizer",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Auto-calculate",
     autoCalculateTooltip: "Click to revert to the automatically calculated rate based on fertilizer composition and crop needs.",
     springFertilizerRateTooltip: "The rate is automatically calculated to cover 50% of the potassium (K₂O) need at the initial growth stages, which is key for root system development and overall plant resilience. You can adjust this value manually.",
@@ -301,6 +304,7 @@ const translations = {
     addSpringFertilizerDesc: "Внесіть склад для розрахунку норми весняного добрива.",
     springFertilizerHeader: "Склад та норма стартового добрива",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "РОСАФЕРТ 12-12-17",
     autoCalculateButton: "Розрахувати авто",
     autoCalculateTooltip: "Натисніть, щоб повернутися до автоматично розрахованої норми на основі складу добрива та потреб культури.",
     springFertilizerRateTooltip: "Норма розраховується автоматично для покриття 50% потреби в калії (K₂O) на початкових етапах росту, що є ключовим для розвитку кореневої системи та загальної стійкості рослини. Ви можете відкоригувати це значення вручну.",
@@ -365,7 +369,7 @@ const translations = {
     detailsSheet: "Детальні розрахунки",
     preSeasonFertilizersHeader: "Добрива для основного та стартового внесення",
     fertilizerNameHeader: "Назва добрива",
-    totalNeededKgHeader: "Загальна потреба, кг",
+    totalNeededKgHeader: "Жалпы қажеттілік, кг",
     monthlyNeedsHeader: "Помісячна потреба для фертигації, кг",
     basicApplicationSection: "1. Основне внесення",
     fertigationProgramSection: "2. Фертигация бағдарламасы",
@@ -482,6 +486,7 @@ const translations = {
     addSpringFertilizerDesc: "Introduzca la composición para calcular la dosis del fertilizante de primavera.",
     springFertilizerHeader: "Composición y Dosis del Fertilizante de Arranque",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Autocalcular",
     autoCalculateTooltip: "Haga clic para volver a la dosis calculada automáticamente según la composición del fertilizante y las necesidades del cultivo.",
     springFertilizerRateTooltip: "La dosis se calcula automáticamente para cubrir el 50% de la necesidad de potasio (K₂O) en las etapas iniciales de crecimiento, lo cual es clave para el desarrollo del sistema radicular y la resiliencia general de la planta. Puede ajustar este valor manualmente.",
@@ -655,6 +660,7 @@ const translations = {
     addSpringFertilizerDesc: "Insira a composição para calcular a taxa de fertilizante de primavera.",
     springFertilizerHeader: "Composição e Taxa do Fertilizante de Arranque",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Autocalcular",
     autoCalculateTooltip: "Clique para reverter para a taxa calculada automaticamente com base na composição do fertilizante e nas necessidades da cultura.",
     springFertilizerRateTooltip: "A taxa é calculada automaticamente para cobrir 50% da necessidade de potássio (K₂O) nos estágios iniciais de crescimento, o que é fundamental para o desenvolvimento do sistema radicular e a resiliência geral da planta. Você pode ajustar este valor manualmente.",
@@ -758,7 +764,7 @@ const translations = {
     magnesiumLabel: "Magnésium (MgO)",
     phLabel: "Acidité (pH)",
     cecLabel: "Capacité d'Échange Cationique (CEC)",
-    cecTooltip: "La Capacité d'Échange Cationique (CEC) est la capacité du sol à retenir les nutriments (cations) comme le Calcium, le Magnésium et le Potassium, les protégeant du lessivage. Une CEC plus élevée signifie que le sol peut stocker plus de nutriments.",
+    cecTooltip: "La Capacité d'Échange Cationique (CEC) est la capacité du sol à retenir les nutriments (cationes) comme le Calcium, le Magnésium et le Potassium, les protégeant du lessivage. Une CEC plus élevée signifie que le sol peut stocker plus de nutriments.",
     backButton: "Retour",
     nextButton: "Suivant",
     dataActionsButton: "Actions sur les Données",
@@ -828,6 +834,7 @@ const translations = {
     addSpringFertilizerDesc: "Entrez la composition pour calculer le taux de l'engrais de printemps.",
     springFertilizerHeader: "Composition et Taux de l'Engrais de Démarrage",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Autocalcul",
     autoCalculateTooltip: "Cliquez pour revenir au taux calculé automatiquement en fonction de la composition de l'engrais et des besoins de la culture.",
     springFertilizerRateTooltip: "Le taux est calculé automatiquement pour couvrir 50% du besoin en potassium (K₂O) aux premiers stades de croissance, ce qui est essentiel pour le développement du système racinaire et la résilience globale de la plante. Vous pouvez ajuster cette valeur manuellement.",
@@ -1001,6 +1008,7 @@ const translations = {
     addSpringFertilizerDesc: "Көктемгі тыңайтқыш мөлшерін есептеу үшін құрамын енгізіңіз.",
     springFertilizerHeader: "Бастапқы тыңайтқыштың құрамы мен мөлшері",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Автоматты есептеу",
     autoCalculateTooltip: "Тыңайтқыш құрамы мен дақыл қажеттіліктері негізінде автоматты түрде есептелген мөлшерге оралу үшін басыңыз.",
     springFertilizerRateTooltip: "Мөлшер өсудің бастапқы кезеңдерінде калий (K₂O) қажеттілігінің 50% -ын жабу үшін автоматты түрде есептеледі, бұл тамыр жүйесінің дамуы мен өсімдіктің жалпы төзімділігі үшін маңызды. Бұл мәнді қолмен реттеуге болады.",
@@ -1173,6 +1181,7 @@ const translations = {
     addSpringFertilizerDesc: "Ingiza muundo ili kukokotoa kiwango cha mbolea ya masika.",
     springFertilizerHeader: "Muundo na Kiwango cha Mbolea ya Kuanzia",
     yaraMilaButton: "YaraMila CROPCARE",
+    rosafertButton: "ROSAFERT 12-12-17",
     autoCalculateButton: "Kokotoa Kiotomatiki",
     autoCalculateTooltip: "Bofya kurudi kwenye kiwango kilichokokotolewa kiotomatiki kulingana na muundo wa mbolea na mahitaji ya zao.",
     springFertilizerRateTooltip: "Kiwango kinakokotolewa kiotomatiki ili kufidia 50% ya hitaji la potasiamu (K₂O) katika hatua za mwanzo za ukuaji, ambayo ni muhimu kwa ukuaji wa mfumo wa mizizi na ustahimilivu wa jumla wa mmea. Unaweza kurekebisha thamani hii mwenyewe.",
@@ -1245,20 +1254,19 @@ const translations = {
     month_4: "Mei", month_5: "Juni", month_6: "Julai", month_7: "Agosti",
     month_8: "Septemba", month_9: "Oktoba", month_10: "Novemba", month_11: "Desemba",
   },
-};
+} as const;
 
-export type Language = keyof typeof translations;
 export type TranslationKey = keyof typeof translations['en'];
 
-// A simple template replacement function
-const replaceTemplate = (str: string, replacements: Record<string, string | number>): string => {
-    return str.replace(/\{(\w+)\}/g, (_, key) => String(replacements[key] ?? `{${key}}`));
-};
-
-export const t = (key: TranslationKey, lang: Language, replacements?: Record<string, string | number>): string => {
-    const translation = translations[lang]?.[key] || translations['en']?.[key] || key;
-    if (replacements) {
-        return replaceTemplate(translation, replacements);
-    }
-    return translation;
-};
+export function t(key: TranslationKey, lang: Language, params?: Record<string, string | number>): string {
+  const dict = translations[lang] || translations['en'];
+  let text = (dict as any)[key] || (translations['en'] as any)[key] || key;
+  
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      text = text.replace(`{${k}}`, String(v));
+    });
+  }
+  
+  return text;
+}

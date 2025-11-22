@@ -151,6 +151,14 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         setIsRateManuallySet(false);
     };
     
+    const handleRosafertClick = () => {
+        setSpringFertilizer({
+            enabled: true,
+            n: '12', p: '12', k: '17', ca: '4.3', mg: '2',
+        });
+        setIsRateManuallySet(false);
+    };
+
     const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSpringFertilizerRate(value === '' ? null : parseFloat(value));
@@ -220,9 +228,14 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">{t('springFertilizerHeader', lang)}</h4>
                         {!readOnly && (
-                            <button type="button" onClick={handleYaraMilaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними YaraMila CROPCARE 11-11-21">
-                                {t('yaraMilaButton', lang)}
-                            </button>
+                            <div className="flex flex-wrap gap-2">
+                                <button type="button" onClick={handleYaraMilaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними YaraMila CROPCARE 11-11-21">
+                                    {t('yaraMilaButton', lang)}
+                                </button>
+                                <button type="button" onClick={handleRosafertClick} className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-emerald-200 transition-colors flex-shrink-0" title="Заповнити поля даними ROSAFERT 12-12-17">
+                                    {t('rosafertButton', lang)}
+                                </button>
+                            </div>
                         )}
                      </div>
 
