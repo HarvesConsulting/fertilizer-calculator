@@ -1,5 +1,26 @@
+
 import { FERTIGATION_SCHEDULES } from '../components/FertigationSchedules';
 import type { NutrientNeeds, CultureParams, SpringFertilizer } from '../types';
+
+// Fertilizer content percentages for fertigation
+const FERTILIZER_CONTENTS = {
+    NITROGEN_IN_AMMONIUM_NITRATE: 34, // N
+    NITROGEN_IN_UREA: 46,             // N
+    P2O5_IN_PHOSPHORIC_ACID: 68,      // P2O5 (approximate for commercial grade)
+    K2O_IN_POTASSIUM_SULFATE: 52,     // K2O
+    CAO_IN_CALCIUM_NITRATE: 26,       // CaO
+    MGO_IN_MAGNESIUM_SULFATE: 16,     // MgO
+    NITROGEN_IN_CALCIUM_NITRATE_PERCENT: 0.15 // 15.5% N typically, using 0.15 for calculation ratio relative to CaO weight if needed, but here logic is different
+};
+
+// Nitrogen content in Calcium Nitrate relative to total weight is approx 15.5%
+// But in our logic we calculate N supplied based on Calcium Nitrate amount determined by CaO need.
+// Calcium Nitrate (15.5-0-0 + 26.5 CaO).
+// Ratio N/CaO = 15.5 / 26.5 ≈ 0.58. 
+// The previous code used `totalCalciumNitrate * 0.15`. Let's verify.
+// If we have 100kg Calcium Nitrate -> 26kg CaO and 15.5kg N.
+// Code was: `const nitrogenFromCalciumNitrate = totalCalciumNitrate * 0.15;` 
+// This assumes 15% Nitrogen in Calcium Nitrate.
 
 interface FertigationPlanInputs {
     initialNeeds: NutrientNeeds[];
@@ -60,17 +81,32 @@ export const calculateFertigationPlan = ({
         return acc;
     }, { N: 0, P: 0, K: 0, Ca: 0, Mg: 0 });
 
-    const totalPotassiumSulfate = adjustedTotalsActive.K > 0 ? (adjustedTotalsActive.K / 52) * 100 : 0;
-    const totalCalciumNitrate = adjustedTotalsActive.Ca > 0 ? (adjustedTotalsActive.Ca / 26) * 100 : 0;
-    const totalMagnesiumSulfate = adjustedTotalsActive.Mg > 0 ? (adjustedTotalsActive.Mg / 16) * 100 : 0;
-    const totalPhosphoricAcid = adjustedTotalsActive.P > 0 ? (adjustedTotalsActive.P / 68) * 100 : 0;
+    const totalPotassiumSulfate = adjustedTotalsActive.K > 0 
+        ? (adjustedTotalsActive.K / FERTILIZER_CONTENTS.K2O_IN_POTASSIUM_SULFATE) * 100 
+        : 0;
+        
+    const totalCalciumNitrate = adjustedTotalsActive.Ca > 0 
+        ? (adjustedTotalsActive.Ca / FERTILIZER_CONTENTS.CAO_IN_CALCIUM_NITRATE) * 100 
+        : 0;
+        
+    const totalMagnesiumSulfate = adjustedTotalsActive.Mg > 0 
+        ? (adjustedTotalsActive.Mg / FERTILIZER_CONTENTS.MGO_IN_MAGNESIUM_SULFATE) * 100 
+        : 0;
+        
+    const totalPhosphoricAcid = adjustedTotalsActive.P > 0 
+        ? (adjustedTotalsActive.P / FERTILIZER_CONTENTS.P2O5_IN_PHOSPHORIC_ACID) * 100 
+        : 0;
 
-    const nitrogenFromCalciumNitrate = totalCalciumNitrate * 0.15;
+    // Calculate Nitrogen supplied by Calcium Nitrate (typically ~15.5% N)
+    const nitrogenFromCalciumNitrate = totalCalciumNitrate * 0.155;
+    
     const remainingNitrogenNeed = adjustedTotalsActive.N - nitrogenFromCalciumNitrate;
 
     let totalNitrogenFertilizer = 0;
     if (remainingNitrogenNeed > 0) {
-        const nitrogenContent = nitrogenFertilizer === 'ammonium-nitrate' ? 34 : 46;
+        const nitrogenContent = nitrogenFertilizer === 'ammonium-nitrate' 
+            ? FERTILIZER_CONTENTS.NITROGEN_IN_AMMONIUM_NITRATE 
+            : FERTILIZER_CONTENTS.NITROGEN_IN_UREA;
         totalNitrogenFertilizer = (remainingNitrogenNeed / nitrogenContent) * 100;
     }
     

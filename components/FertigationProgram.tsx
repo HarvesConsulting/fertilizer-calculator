@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { FERTIGATION_SCHEDULES } from './FertigationSchedules';
 import { FERTIGATION_CULTURES } from '../constants';
@@ -89,7 +90,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         const kPercentage = parseFloat(springFertilizer.k);
         const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
         if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
-            const rate = (initialKNeed * 0.5 / kPercentage) * 100;
+            const rate = (initialKNeed * 0.8 / kPercentage) * 100;
             return Math.round(rate);
         }
         return null;
