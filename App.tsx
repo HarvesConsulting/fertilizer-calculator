@@ -12,6 +12,7 @@ import { Logo } from './components/Logo';
 import { generateTxtReport, generateXlsxReport } from './utils/reportGenerator';
 import { t, Language } from './i18n';
 import { SaveConfirmationModal } from './components/SaveConfirmationModal';
+import { calculateNutrientNeeds } from './utils/nutrientCalculations';
 
 const INITIAL_FORM_DATA: FormData = {
     culture: '',
@@ -234,66 +235,15 @@ function App() {
         setCurrentStep(prev => prev - 1);
     };
     
-    const runCalculation = (formData: FormData): CalculationResults | null => {
-        const numericData = Object.entries(formData)
-            .filter(([key]) => !['culture', 'amendment', 'fieldName', 'sowingDate'].includes(key))
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: parseFloat(value as string) }), {} as Record<string, number>);
-
-        const params = CULTURE_PARAMS[formData.culture];
-        if (!params) return null;
-
-        let phosphorusRate = 0;
-        if (numericData.phosphorus > 30) phosphorusRate = 50;
-        else if (numericData.phosphorus > 20) phosphorusRate = 100;
-        else if (numericData.phosphorus > 10) phosphorusRate = 150;
-        else if (numericData.phosphorus >= 5) phosphorusRate = 200;
-        else phosphorusRate = 250;
-
-        const potassiumNeed = Math.max(0, (110 + 2.5 * numericData.cec) - numericData.potassium);
-        const calciumRate = Math.max(0, (130 * numericData.cec) - numericData.calcium);
-        const magnesiumRate = Math.max(0, (10 * numericData.cec) - numericData.magnesium);
-
-        const basicNeeds: NutrientNeeds[] = [
-            { element: 'P2O5', norm: phosphorusRate },
-            { element: 'K2O', norm: potassiumNeed },
-            { element: 'CaO', norm: calciumRate },
-            { element: 'MgO', norm: magnesiumRate },
-            { element: 'Меліорант', norm: 0 },
-        ];
-
-        const nitrogenRate = (params.nitrogenFactor * numericData.plannedYield) - (numericData.nitrogenAnalysis * 3);
-        const waterSolublePhosphorusRate = Math.max(0, phosphorusRate * 0.2);
-        
-        const kRange = params.potassiumRanges.find(r => numericData.potassium >= r.min && numericData.potassium <= r.max);
-        const solublePotassiumNeed = kRange ? kRange.value : 0;
-        
-        const solubleCalciumNeed = solublePotassiumNeed * params.calciumFactor;
-        const solubleMagnesiumNeed = solublePotassiumNeed * params.magnesiumFactor;
-        
-        const fertigationNeeds: NutrientNeeds[] = [
-            { element: 'N', norm: Math.max(0, nitrogenRate) },
-            { element: 'P2O5', norm: waterSolublePhosphorusRate },
-            { element: 'K2O', norm: solublePotassiumNeed },
-            { element: 'CaO', norm: solubleCalciumNeed },
-            { element: 'MgO', norm: solubleMagnesiumNeed },
-        ];
-
-        return {
-            culture: formData.culture,
-            basic: basicNeeds.map(n => ({...n, norm: Math.round(n.norm)})),
-            fertigation: fertigationNeeds.map(n => ({...n, norm: Math.round(n.norm)})),
-        };
-    };
-
     const handleCalculate = () => { // For single mode
-        const calculatedResults = runCalculation(currentFormData);
+        const calculatedResults = calculateNutrientNeeds(currentFormData);
         setResults(calculatedResults);
         setGroupResults([]);
         setCurrentStep(3);
     };
 
     const handleCalculateAll = () => { // For group mode
-        const allResults = analyses.map(formData => runCalculation(formData));
+        const allResults = analyses.map(formData => calculateNutrientNeeds(formData));
         setGroupResults(allResults);
         setGroupFertilizerSelections(analyses.map(() => ({ ...INITIAL_FERTILIZER_SELECTIONS })));
         setResults(null);
