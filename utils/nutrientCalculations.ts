@@ -22,7 +22,7 @@ export const calculateNutrientNeeds = (formData: FormData): CalculationResults |
     // Potassium, Calcium, Magnesium: Formula based on CEC (ЄКО)
     const potassiumNeed = Math.max(0, (110 + 2.5 * numericData.cec) - numericData.potassium);
     const calciumRate = Math.max(0, (130 * numericData.cec) - numericData.calcium);
-    const magnesiumRate = Math.max(0, (10 * numericData.cec) - numericData.magnesium);
+    const magnesiumRate = Math.max(0, (8 * numericData.cec) - numericData.magnesium);
 
     const basicNeeds: NutrientNeeds[] = [
         { element: 'P2O5', norm: phosphorusRate },
