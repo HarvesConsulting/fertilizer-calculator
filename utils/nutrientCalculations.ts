@@ -37,8 +37,9 @@ export const calculateNutrientNeeds = (formData: FormData): CalculationResults |
     // Nitrogen: Based on yield factor minus soil nitrogen reserve
     const nitrogenRate = (params.nitrogenFactor * numericData.plannedYield) - (numericData.nitrogenAnalysis * 3);
     
-    // Water soluble Phosphorus: 20% of basic need
-    const waterSolublePhosphorusRate = Math.max(0, phosphorusRate * 0.2);
+    // Water soluble Phosphorus: Fixed rate of 30 kg/ha of Orthophosphoric acid (68% P2O5)
+    // 30 kg * 0.68 = 20.4 kg a.i./ha
+    const waterSolublePhosphorusRate = 20.4;
     
     // Potassium for fertigation: Lookup table based on soil content ranges defined in constants.ts
     const kRange = params.potassiumRanges.find(r => numericData.potassium >= r.min && numericData.potassium <= r.max);
@@ -59,6 +60,11 @@ export const calculateNutrientNeeds = (formData: FormData): CalculationResults |
     return {
         culture: formData.culture,
         basic: basicNeeds.map(n => ({...n, norm: Math.round(n.norm)})),
-        fertigation: fertigationNeeds.map(n => ({...n, norm: Math.round(n.norm)})),
+        fertigation: fertigationNeeds.map(n => ({
+            ...n, 
+            // For P2O5, keep one decimal place to ensure 30kg acid calc is precise (20.4 -> 30).
+            // For others, round to integer.
+            norm: n.element === 'P2O5' ? Number(n.norm.toFixed(1)) : Math.round(n.norm)
+        })),
     };
 };
