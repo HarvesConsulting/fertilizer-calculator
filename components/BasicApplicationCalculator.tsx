@@ -1,3 +1,4 @@
+
 import React, { useMemo, useEffect } from 'react';
 import type { FormData, NutrientNeeds, BasicFertilizerSelections, ComplexFertilizer } from '../types';
 import { SIMPLE_FERTILIZERS, AMENDMENTS, AMENDMENT_EFFECTS } from '../constants';
@@ -251,6 +252,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
             n: '16', p2o5: '16', k2o: '16', cao: '', mg: '',
         });
     };
+
+    const handleChickenManureClick = () => {
+        onComplexFertilizerChange({
+            ...complexFertilizer,
+            n: '2', p2o5: '2', k2o: '1', cao: '2.4', mg: '0.2',
+        });
+    };
     
     const amendmentTooltipText = t('amendmentTooltip', lang);
     
@@ -292,9 +300,14 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">{t('complexFertilizerHeader', lang)}</h4>
                         {!readOnly && (
-                            <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними Нітроамофоски (16-16-16)">
-                                {t('nitroammophoskaButton', lang)}
-                            </button>
+                            <div className="flex flex-wrap gap-2">
+                                <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors flex-shrink-0" title="Заповнити поля даними Нітроамофоски (16-16-16)">
+                                    {t('nitroammophoskaButton', lang)}
+                                </button>
+                                <button type="button" onClick={handleChickenManureClick} className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-amber-200 transition-colors flex-shrink-0" title="Заповнити поля даними курячого посліду (2-2-1-2.4-0.2)">
+                                    {t('chickenManureButton', lang)}
+                                </button>
+                            </div>
                         )}
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">

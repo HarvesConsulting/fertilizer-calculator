@@ -1,3 +1,4 @@
+
 import type { FormData, CalculationResults, CultureParams, ComplexFertilizer, SpringFertilizer, BasicFertilizerSelections } from '../types';
 import { calculateFertigationPlan } from './fertigationCalculator';
 import { AMENDMENTS, FERTIGATION_CULTURES, SIMPLE_FERTILIZERS, AMENDMENT_EFFECTS, CULTURES } from '../constants';
@@ -39,6 +40,21 @@ const getWeekDateRangeText = (sowingDateStr: string, week: number): string => {
         return '';
     }
 }
+
+/**
+ * Helper to get a human-friendly name for a complex fertilizer based on its NPK
+ */
+const getIdentifiedComplexName = (n: string, p: string, k: string, ca: string, mg: string, lang: Language): string | null => {
+    const clear = (val: string) => parseFloat(val || '0').toString();
+    const [cN, cP, cK, cCa, cMg] = [clear(n), clear(p), clear(k), clear(ca), clear(mg)];
+
+    if (cN === '16' && cP === '16' && cK === '16') return t('nitroammophoskaButton', lang);
+    if (cN === '2' && cP === '2' && cK === '1') return t('chickenManureButton', lang);
+    if (cN === '11' && cP === '11' && cK === '21') return t('yaraMilaButton', lang);
+    if (cN === '12' && cP === '12' && cK === '17') return t('rosafertButton', lang);
+    
+    return null;
+};
 
 const reportStrings = {
   en: {
@@ -114,22 +130,44 @@ const reportStrings = {
     urea: "Карбамід",
     phosphoricAcid: "Ортофосф. к-та",
     potassiumSulfate: "Сульфат калію",
-    calciumNitrate: "Нітрат кальцію",
+    calciumNitrate: "Нітрат каліцію",
     magnesiumSulfate: "Сульфат магнію",
     totalHeader: "РАЗОМ:",
     disclaimer: "Розрахунок носить рекомендаційний характер.",
   },
 };
 
+/**
+ * Adds branding header to the AOA array
+ */
+const addCorporateHeader = (aoa: any[][], title: string) => {
+    aoa.push(["HarvestConsulting"]);
+    aoa.push(["Лашин Олександр Володимирович"]);
+    aoa.push(["м. Нова Каховка | lashyn.aleksandr@gmail.com"]);
+    aoa.push([]); // Spacer
+    aoa.push([title.toUpperCase()]);
+    aoa.push([]); // Spacer
+};
+
+const getMergesForHeader = (startRow: number) => [
+    { s: { r: startRow, c: 0 }, e: { r: startRow, c: 6 } },     // Branding spans more columns
+    { s: { r: startRow + 1, c: 0 }, e: { r: startRow + 1, c: 6 } }, // Owner
+    { s: { r: startRow + 2, c: 0 }, e: { r: startRow + 2, c: 6 } }, // Info
+    { s: { r: startRow + 4, c: 0 }, e: { r: startRow + 4, c: 6 } }  // Title
+];
 
 export const generateTxtReport = (data: ReportData): string => {
     const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, springFertilizerRate, lang } = data;
     
-    const s = reportStrings[lang];
+    const s = reportStrings[lang] || reportStrings['en'];
     const fieldArea = parseFloat(formData.fieldArea || '1') || 1;
     const cultureName = CULTURES.find(c => c.key === formData.culture)?.name[lang] || formData.culture;
     
     let report = `==================================================\n`;
+    report += `   HarvestConsulting\n`;
+    report += `   Лашин Олександр Володимирович\n`;
+    report += `   lashyn.aleksandr@gmail.com\n`;
+    report += `==================================================\n\n`;
     report += `   ${s.reportTitle}\n`;
     report += `==================================================\n\n`;
 
@@ -161,7 +199,10 @@ export const generateTxtReport = (data: ReportData): string => {
         if (complexFertilizer && complexFertilizer.enabled && parseFloat(complexFertilizer.rate) > 0) {
             const rate = parseFloat(complexFertilizer.rate);
             const totalComplex = (rate * fieldArea).toFixed(1);
-            report += `${s.complexFertilizer}:\n`;
+            const identifiedName = getIdentifiedComplexName(complexFertilizer.n, complexFertilizer.p2o5, complexFertilizer.k2o, complexFertilizer.cao, complexFertilizer.mg, lang);
+            const label = identifiedName ? `${identifiedName} (${s.complexFertilizer})` : s.complexFertilizer;
+            
+            report += `${label}:\n`;
             report += `  - ${s.composition}: N:${complexFertilizer.n}% P₂O₅:${complexFertilizer.p2o5}% K₂O:${complexFertilizer.k2o}% CaO:${complexFertilizer.cao}% MgO:${complexFertilizer.mg}%\n`;
             report += `  - ${s.applicationRate}: ${rate} kg/ha (${s.total}: ${totalComplex} kg)\n\n`;
             
@@ -239,7 +280,10 @@ export const generateTxtReport = (data: ReportData): string => {
 
             if (springFertilizer.enabled && springFertilizerRate && springFertilizerRate > 0) {
                  const totalSpring = (springFertilizerRate * fieldArea).toFixed(1);
-                 report += `${s.springFertilizer}:\n`;
+                 const identifiedName = getIdentifiedComplexName(springFertilizer.n, springFertilizer.p, springFertilizer.k, springFertilizer.ca, springFertilizer.mg, lang);
+                 const label = identifiedName ? `${identifiedName} (${s.springFertilizer})` : s.springFertilizer;
+
+                 report += `${label}:\n`;
                  report += `  - ${s.composition}: N:${springFertilizer.n}% P:${springFertilizer.p}% K:${springFertilizer.k}% Ca:${springFertilizer.ca}% Mg:${springFertilizer.mg}%\n`;
                  report += `  - ${s.calculatedRate}: ${springFertilizerRate.toFixed(1)} kg/ha (${s.total}: ${totalSpring} kg)\n\n`;
             }
@@ -319,11 +363,17 @@ const generateSummarySheet = (reports: ReportData[], lang: Language) => {
         
         // --- Pre-season Fertilizers ---
         if (complexFertilizer && complexFertilizer.enabled && parseFloat(complexFertilizer.rate) > 0) {
-             const name = `${t('complexFertilizer', lang)} N${complexFertilizer.n}-P${complexFertilizer.p2o5}-K${complexFertilizer.k2o}`;
+             const identifiedName = getIdentifiedComplexName(complexFertilizer.n, complexFertilizer.p2o5, complexFertilizer.k2o, complexFertilizer.cao, complexFertilizer.mg, lang);
+             const name = identifiedName 
+                ? `${identifiedName} (N${complexFertilizer.n}-P${complexFertilizer.p2o5}-K${complexFertilizer.k2o})`
+                : `${t('complexFertilizer', lang)} N${complexFertilizer.n}-P${complexFertilizer.p2o5}-K${complexFertilizer.k2o}`;
              addValueToProcurement(preSeasonTotals, name, parseFloat(complexFertilizer.rate) * fieldArea);
         }
         if (springFertilizer && springFertilizer.enabled && springFertilizerRate && springFertilizerRate > 0) {
-            const name = `${t('springFertilizer', lang)} N${springFertilizer.n}-P${springFertilizer.p}-K${springFertilizer.k}`;
+            const identifiedName = getIdentifiedComplexName(springFertilizer.n, springFertilizer.p, springFertilizer.k, springFertilizer.ca, springFertilizer.mg, lang);
+            const name = identifiedName
+                ? `${identifiedName} (N${springFertilizer.n}-P${springFertilizer.p}-K${springFertilizer.k})`
+                : `${t('springFertilizer', lang)} N${springFertilizer.n}-P${springFertilizer.p}-K${springFertilizer.k}`;
             addValueToProcurement(preSeasonTotals, name, springFertilizerRate * fieldArea);
         }
         if(selectedAmendment) {
@@ -412,34 +462,42 @@ const generateSummarySheet = (reports: ReportData[], lang: Language) => {
         return row;
     });
 
-    const wsSummary = XLSX.utils.aoa_to_sheet([]);
-    XLSX.utils.sheet_add_aoa(wsSummary, [[t('preSeasonFertilizersHeader', lang)]], { origin: "A1" });
-    XLSX.utils.sheet_add_json(wsSummary, preSeasonSheetData, { origin: "A2", skipHeader: false });
+    let aoa: any[][] = [];
+    addCorporateHeader(aoa, t('summarySheet', lang));
+    const headerRowsCount = aoa.length;
     
-    const nextRow = preSeasonSheetData.length + 5;
-    XLSX.utils.sheet_add_aoa(wsSummary, [[t('monthlyNeedsHeader', lang)]], { origin: `A${nextRow}` });
-    XLSX.utils.sheet_add_json(wsSummary, monthlySheetData, { origin: `A${nextRow + 1}`, skipHeader: false });
+    const wsSummary = XLSX.utils.aoa_to_sheet(aoa);
     
-    const summaryColsWidths = [
-        { wch: 40 }, // Fertilizer Name
+    XLSX.utils.sheet_add_aoa(wsSummary, [[t('preSeasonFertilizersHeader', lang)]], { origin: `A${headerRowsCount + 1}` });
+    XLSX.utils.sheet_add_json(wsSummary, preSeasonSheetData, { origin: `A${headerRowsCount + 2}`, skipHeader: false });
+    
+    const nextSectionRow = headerRowsCount + preSeasonSheetData.length + 6;
+    XLSX.utils.sheet_add_aoa(wsSummary, [[t('monthlyNeedsHeader', lang)]], { origin: `A${nextSectionRow}` });
+    XLSX.utils.sheet_add_json(wsSummary, monthlySheetData, { origin: `A${nextSectionRow + 1}`, skipHeader: false });
+    
+    wsSummary['!cols'] = [
+        { wch: 45 }, // Fertilizer Name
         ...allMonths.map(() => ({ wch: 15 })),
-        { wch: 18 } // Total
+        { wch: 20 } // Total
     ];
-    wsSummary['!cols'] = summaryColsWidths;
+    
+    wsSummary['!merges'] = getMergesForHeader(0);
 
     return wsSummary;
 };
 
 const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
     let aoa: any[][] = [];
+    addCorporateHeader(aoa, t('detailsSheet', lang));
+    
+    const merges = getMergesForHeader(0);
 
     reports.forEach((report, index) => {
         const { formData, results, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, springFertilizerRate } = report;
         const cultureName = CULTURES.find(c => c.key === formData.culture)?.name[lang] || formData.culture;
-        const fieldArea = parseFloat(formData.fieldArea) || 1;
 
         if (index > 0) {
-            aoa.push([]); 
+            aoa.push([], ["------------------------------------------------------------------------------------------------"]); 
         }
 
         aoa.push([t('reportFor', lang, { culture: formData.fieldName || cultureName })]);
@@ -453,16 +511,19 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
         // --- Basic Application ---
         if (report.calculationType === 'basic' || report.calculationType === 'full') {
             aoa.push([t('basicApplicationSection', lang)]);
-            aoa.push([t('fertilizerTypeHeader', lang), t('fertilizerNameCompositionHeader', lang), `${t('applicationRate', lang)} (kg/ha)`]);
+            aoa.push([t('fertilizerTypeHeader', lang), t('fertilizerNameCompositionHeader', lang), `${t('applicationRate', lang)} (kg/ha)`, `${t('totalLabel', lang)} (kg)`]);
             
             let finalBasicNeeds = [...results.basic];
+            const fieldArea = parseFloat(formData.fieldArea) || 1;
 
             if (complexFertilizer && complexFertilizer.enabled && parseFloat(complexFertilizer.rate) > 0) {
                 const comp = complexFertilizer;
+                const identifiedName = getIdentifiedComplexName(comp.n, comp.p2o5, comp.k2o, comp.cao, comp.mg, lang);
+                const baseLabel = identifiedName ? `${identifiedName} (${t('complexFertilizer', lang)})` : t('complexFertilizer', lang);
                 const compName = `N:${comp.n} P:${comp.p2o5} K:${comp.k2o} Ca:${comp.cao} Mg:${comp.mg}`;
-                aoa.push([t('complexFertilizer', lang), compName, parseFloat(comp.rate)]);
-
                 const rate = parseFloat(comp.rate);
+                aoa.push([baseLabel, compName, rate, rate * fieldArea]);
+
                 const supplied = {
                     'P2O5': rate * (parseFloat(comp.p2o5 || '0') / 100), 'K2O': rate * (parseFloat(comp.k2o || '0') / 100),
                     'CaO': rate * (parseFloat(comp.cao || '0') / 100), 'MgO': rate * (parseFloat(comp.mg || '0') / 100),
@@ -474,7 +535,7 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
             if (ph <= 6.8 && selectedAmendment) {
                 const amendmentRateKg = Math.round((7 - ph) * 5) * 1000;
                 const name = AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment;
-                aoa.push([t('amendmentLabel', lang), name, amendmentRateKg]);
+                aoa.push([t('amendmentLabel', lang), name, amendmentRateKg, amendmentRateKg * fieldArea]);
             }
             
             finalBasicNeeds.filter(n => n.norm > 0).forEach(need => {
@@ -483,7 +544,7 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
                     const fert = SIMPLE_FERTILIZERS[need.element as keyof typeof SIMPLE_FERTILIZERS]?.find(f => f.value.toString() === selection.selectedFertilizer);
                     if (fert) {
                         const physRate = (need.norm / fert.value) * 100;
-                        aoa.push([`${t('fertilizerLabel', lang)} (${need.element})`, fert.label[lang], physRate.toFixed(1)]);
+                        aoa.push([`${t('fertilizerLabel', lang)} (${need.element})`, fert.label[lang], parseFloat(physRate.toFixed(1)), parseFloat((physRate * fieldArea).toFixed(1))]);
                     }
                 }
             });
@@ -492,12 +553,15 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
 
         // --- Fertigation Program ---
         if (report.calculationType === 'fertigation' || report.calculationType === 'full') {
+            const fieldArea = parseFloat(formData.fieldArea) || 1;
             aoa.push([t('fertigationProgramSection', lang)]);
             
             if (springFertilizer.enabled && springFertilizerRate && springFertilizerRate > 0) {
                 const sf = springFertilizer;
+                const identifiedName = getIdentifiedComplexName(sf.n, sf.p, sf.k, sf.ca, sf.mg, lang);
+                const baseLabel = identifiedName ? `${identifiedName} (${t('springFertilizer', lang)})` : t('springFertilizer', lang);
                 const sfName = `N:${sf.n} P:${sf.p} K:${sf.k} Ca:${sf.ca} Mg:${sf.mg}`;
-                aoa.push([t('springFertilizer', lang), sfName, springFertilizerRate]);
+                aoa.push([baseLabel, sfName, springFertilizerRate, springFertilizerRate * fieldArea]);
             }
             
             const cultureKey = Object.keys(FERTIGATION_CULTURES).find(key => FERTIGATION_CULTURES[key as keyof typeof FERTIGATION_CULTURES].startsWith(results.culture));
@@ -509,34 +573,42 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
                     t('phosphoricAcid', lang), t('potassiumSulfate', lang),
                     t('calciumNitrate', lang), t('magnesiumSulfate', lang),
                 ];
-                aoa.push([t('week', lang), t('dateRangeHeader', lang), ...fertNames]);
+                aoa.push([t('week', lang), t('dateRangeHeader', lang), ...fertNames.map(n => `${n} (kg/ha)`)]);
 
                 weeklyPlan.forEach(week => {
                     aoa.push([
                         week.week,
                         getWeekDateRangeText(formData.sowingDate, week.week),
-                        week.nitrogen > 0 ? week.nitrogen.toFixed(1) : '',
-                        week.phosphorus > 0 ? week.phosphorus.toFixed(1) : '',
-                        week.potassium > 0 ? week.potassium.toFixed(1) : '',
-                        week.calcium > 0 ? week.calcium.toFixed(1) : '',
-                        week.magnesium > 0 ? week.magnesium.toFixed(1) : '',
+                        week.nitrogen > 0 ? parseFloat(week.nitrogen.toFixed(1)) : '',
+                        week.phosphorus > 0 ? parseFloat(week.phosphorus.toFixed(1)) : '',
+                        week.potassium > 0 ? parseFloat(week.potassium.toFixed(1)) : '',
+                        week.calcium > 0 ? parseFloat(week.calcium.toFixed(1)) : '',
+                        week.magnesium > 0 ? parseFloat(week.magnesium.toFixed(1)) : '',
                     ]);
                 });
                 
                 aoa.push([
                     t('totalLabel', lang), '', 
-                    totals.nitrogen.toFixed(1), totals.phosphorus.toFixed(1),
-                    totals.potassium.toFixed(1), totals.calcium.toFixed(1),
-                    totals.magnesium.toFixed(1)
+                    parseFloat(totals.nitrogen.toFixed(1)), parseFloat(totals.phosphorus.toFixed(1)),
+                    parseFloat(totals.potassium.toFixed(1)), parseFloat(totals.calcium.toFixed(1)),
+                    parseFloat(totals.magnesium.toFixed(1))
                 ]);
             }
         }
     });
 
     const wsDetails = XLSX.utils.aoa_to_sheet(aoa);
+    // Adjusted widths to fit long headers like "Ортофосфорна к-та (kg/ha)"
     wsDetails['!cols'] = [
-        { wch: 30 }, { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
+        { wch: 35 }, // Type / Week
+        { wch: 45 }, // Name / Composition / Date Range
+        { wch: 25 }, // Fert 1
+        { wch: 25 }, // Fert 2
+        { wch: 25 }, // Fert 3
+        { wch: 25 }, // Fert 4
+        { wch: 25 }  // Fert 5
     ];
+    wsDetails['!merges'] = merges;
     return wsDetails;
 };
 
@@ -552,7 +624,7 @@ export const generateXlsxReport = (reports: ReportData[], lang: Language) => {
         const wsDetails = generateDetailsSheet(reports, lang);
         XLSX.utils.book_append_sheet(wb, wsDetails, t('detailsSheet', lang));
 
-        XLSX.writeFile(wb, "fertilizer_calculations.xlsx");
+        XLSX.writeFile(wb, "harvest_consulting_calculations.xlsx");
     } catch (error) {
         console.error("Failed to generate XLSX report", error);
         alert("An error occurred while generating the XLSX file.");
