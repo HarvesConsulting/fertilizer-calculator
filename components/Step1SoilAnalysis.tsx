@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { FormData } from '../types';
 import { StyledFormField } from './StyledFormField';
@@ -16,6 +17,12 @@ const DataActionsIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m12 0a2 2 0 100-4m0 4a2 2 0 110-4m-6 0a2 2 0 100-4m0 4a2 2 0 110-4" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a2 2 0 100-4m0 4a2 2 0 110-4" />
+    </svg>
+);
+
+const RememberIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
     </svg>
 );
 
@@ -82,11 +89,6 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
             label: t('loadDataAction', lang),
             onClick: handleLoadData,
             iconType: 'upload'
-        },
-        {
-            label: t('saveDataAction', lang),
-            onClick: handleSaveData,
-            iconType: 'save'
         }
     ];
 
@@ -110,20 +112,29 @@ export const Step1SoilAnalysis: React.FC<Step1Props> = ({ onNext, onBack, data, 
                 />
             </div>
 
-             <div className="flex justify-between items-center pt-8 border-t mt-8">
-                <div className="flex items-center gap-4">
+             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t mt-8">
+                <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
                      <button
                         type="button"
                         onClick={onBack}
-                        className="bg-slate-300 text-slate-800 font-bold py-3 px-6 sm:px-10 rounded-lg hover:bg-slate-400 transition duration-300"
+                        className="bg-slate-300 text-slate-800 font-bold py-3 px-6 rounded-lg hover:bg-slate-400 transition duration-300 w-full sm:w-auto"
                     >
                         {t('backButton', lang)}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSaveData}
+                        className="flex items-center justify-center gap-2 bg-emerald-100 text-emerald-800 font-bold py-3 px-6 rounded-lg hover:bg-emerald-200 transition duration-300 w-full sm:w-auto shadow-sm"
+                        title={t('saveDataAction', lang)}
+                    >
+                        <RememberIcon />
+                        <span>{t('rememberAnalysis', lang)}</span>
                     </button>
                     <DropdownButton actions={dataActions} buttonLabel={t('dataActionsButton', lang)} buttonIcon={<DataActionsIcon />} />
                 </div>
                 <button
                     type="submit"
-                    className="bg-indigo-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
+                    className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                 >
                     {t('nextButton', lang)}
                 </button>

@@ -43,6 +43,7 @@ const translations = {
     dataActionsButton: "Data Actions",
     loadDataAction: "Load Saved",
     saveDataAction: "Remember Inputs",
+    rememberAnalysis: "Remember Analysis",
     dataSavedSuccess: "Soil analysis data saved!",
     dataSaveError: "Failed to save data.",
     dataLoadedSuccess: "Saved data loaded.",
@@ -71,6 +72,8 @@ const translations = {
     // Step 4
     resultsTitle: 'Calculation Results for "{cultureName}"',
     saveReportButton: "Save Report",
+    saveToHistory: "Save to History",
+    saveToHistorySuccess: "Report saved to history!",
     saveTxtAction: "Save as TXT",
     saveJsonAction: "Save Report (JSON)",
     saveAllTxtAction: "Save All (TXT)",
@@ -101,7 +104,7 @@ const translations = {
     applicationRate: "Application Rate (phys. weight)",
     totalLabel: "Total:",
     chooseFertilizer: "choose fertilizer",
-    chooseAmendment: "choose enmienda",
+    chooseAmendment: "choose amendment",
     element: "Element",
     amendmentTooltip: "For soil pH 6.8 or lower, applying amendments (lime, defecate) is recommended to de-acidify and improve nutrient availability for plants.",
     // Fertigation
@@ -184,8 +187,9 @@ const translations = {
     fertigationProgramSection: "2. Fertigation Program",
     fertilizerTypeHeader: "Type of Fertilizer",
     fertilizerNameCompositionHeader: "Name / Composition",
-    dateRangeHeader: "Date Range",
+    // Added week key to fix reportGenerator.ts error
     week: "Week",
+    dateRangeHeader: "Date Range",
     phosphoricAcid: "Orthophosphoric Acid",
     potassiumSulfate: "Potassium Sulfate",
     calciumNitrate: "Calcium Nitrate",
@@ -235,6 +239,7 @@ const translations = {
     dataActionsButton: "Дії з даними",
     loadDataAction: "Завантажити збережені",
     saveDataAction: "Запам'ятати введення",
+    rememberAnalysis: "Запам'ятати аналіз",
     dataSavedSuccess: "Дані аналізу ґрунту збережено!",
     dataSaveError: "Не вдалося зберегти дані.",
     dataLoadedSuccess: "Збережені дані завантажено.",
@@ -263,6 +268,8 @@ const translations = {
     // Step 4
     resultsTitle: 'Результати розрахунку для "{cultureName}"',
     saveReportButton: "Зберегти звіт",
+    saveToHistory: "Зберегти в історію",
+    saveToHistorySuccess: "Звіт збережено в історію!",
     saveTxtAction: "Зберегти в TXT",
     saveJsonAction: "Зберегти звіт (JSON)",
     saveAllTxtAction: "Зберегти все (TXT)",
@@ -376,8 +383,9 @@ const translations = {
     fertigationProgramSection: "2. Програма фертигації",
     fertilizerTypeHeader: "Тип добрива",
     fertilizerNameCompositionHeader: "Назва / Склад",
-    dateRangeHeader: "Діапазон дат",
+    // Added week key to fix reportGenerator.ts error
     week: "Тиждень",
+    dateRangeHeader: "Діапазон дат",
     phosphoricAcid: "Ортофосфорна к-та",
     potassiumSulfate: "Сульфат калію",
     calciumNitrate: "Нітрат каліцію",
@@ -423,6 +431,7 @@ const translations = {
     dataActionsButton: "Acciones de Datos",
     loadDataAction: "Cargar Guardados",
     saveDataAction: "Recordar Entradas",
+    rememberAnalysis: "Recordar Análisis",
     dataSavedSuccess: "¡Datos de análisis de suelo guardados!",
     dataSaveError: "Error al guardar los datos.",
     dataLoadedSuccess: "Datos guardados cargados.",
@@ -448,6 +457,8 @@ const translations = {
     fullProgramDesc: "Mostrar tanto la aplicación de fondo como el programa de fertirrigación juntos.",
     resultsTitle: 'Resultados del Cálculo para "{cultureName}"',
     saveReportButton: "Guardar Informe",
+    saveToHistory: "Guardar en historial",
+    saveToHistorySuccess: "¡Informe guardado en el historial!",
     saveTxtAction: "Guardar como TXT",
     saveJsonAction: "Guardar Informe (JSON)",
     saveAllTxtAction: "Guardar Todo (TXT)",
@@ -458,6 +469,7 @@ const translations = {
     saveXlsxButton: "Guardar ({count}) en XLSX",
     continueButton: "Continuar",
     newCalculationButton: "Nuevo Cálculo",
+    // Basic Application
     basicApplicationHeader: "Aplicación de Fondo",
     basicApplicationNotNeeded: "No se requiere aplicación de fondo según los cálculos.",
     composition: "Composición",
@@ -480,6 +492,7 @@ const translations = {
     chooseAmendment: "elija enmienda",
     element: "Elemento",
     amendmentTooltip: "Para un pH del suelo de 6.8 o inferior, se recomienda aplicar enmiendas (cal, defecado) para desacidificar y mejorar la disponibilidad de nutrientes para las plantas.",
+    // Fertigation
     fertigationProgramHeader: "Programa de Fertirrigación",
     fertigationNotNeeded: "No se requiere fertirrigación según los cálculos.",
     noScheduleWarningTitle: "Advertencia",
@@ -499,9 +512,11 @@ const translations = {
     weeklyPlanHeader: "Plan Semanal de Aplicación de Fertilizantes (peso físico, kg/ha)",
     compatibilityTableButton: "Tabla de Compatibilidad",
     totalForSeasonHeader: "Cantidad Total por Temporada",
+    // Chart
     chartYAxisLabel: "kg/ha",
     chartXAxisLabel: "Semana / Rango de Fechas",
     chartWeekLabel: "Semana",
+    // Reports List
     noReportsTitle: "No Hay Informes Guardados",
     noReportsDesc: "Cree su primer cálculo o cargue un informe existente.",
     startNewCalculation: "Iniciar Nuevo Cálculo",
@@ -519,21 +534,27 @@ const translations = {
     reportLoadSkippedAll: "Todos los informes de este archivo ya existen en la lista.",
     reportLoadError: "Error al cargar el informe. El archivo puede estar dañado o en el formato incorrecto.",
     reportLoadFileError: "Error al leer el archivo.",
+    // Report Detail
     reportFor: 'Informe para "{culture}"',
     backToList: "Volver a la Lista de Informes",
     savedAt: "Guardado",
     inputData: "Datos de Entrada",
     soilAnalysis: "Análisis de Suelo",
+    // Compatibility Modal
     compatibilityModalTitle: "Tabla de Compatibilidad de Fertilizantes",
     compatibilityModalClose: "Cerrar modal",
     compatibilityModalDesc: "La tabla muestra la posibilidad de mezclar fertilizantes en una solución de tanque. Los fertilizantes incompatibles deben aplicarse por separado para evitar la precipitación y la obstrucción del sistema de riego por goteo.",
     closeButton: "Entendido",
+    // Error
     calculationError: "Error de Cálculo",
     calculationErrorDesc: "No se pudo realizar el cálculo para este análisis. Por favor, verifique los datos de entrada.",
+    // Group analysis
     analysisTab: "Análisis #{index}",
     addAnalysis: "Añadir",
     addAnalysisTooltip: "Añadir nuevo análisis",
+    // Save report
     reportSaveError: "No hay datos para guardar el informe.",
+    // Save Confirmation Modal
     saveModalTitle: "Confirmar Guardado",
     saveModalDesc: "Seleccione los análisis que desea incluir en el archivo XLSX.",
     saveModalSelectAll: "Seleccionar Todo",
@@ -551,12 +572,9 @@ const translations = {
     fertigationProgramSection: "2. Programa de Fertirrigación",
     fertilizerTypeHeader: "Tipo de Fertilizante",
     fertilizerNameCompositionHeader: "Nombre / Composición",
-    dateRangeHeader: "Rango de Fechas",
+    // Added week key to fix reportGenerator.ts error
     week: "Semana",
-    phosphoricAcid: "Ácido Ortofosfórico",
-    potassiumSulfate: "Sulfato de Potasio",
-    calciumNitrate: "Nitrato de Calcio",
-    magnesiumSulfate: "Sulfato de Magnesio",
+    dateRangeHeader: "Rango de Fechas",
     month_0: "Enero", month_1: "Febrero", month_2: "Marzo", month_3: "Abril",
     month_4: "Mayo", month_5: "Junio", month_6: "Julio", month_7: "Agosto",
     month_8: "Septiembre", month_9: "Octubre", month_10: "Noviembre", month_11: "Diciembre",

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
@@ -14,7 +15,8 @@ interface Step4Props {
     type: 'basic' | 'fertigation' | 'full';
     formData: FormData;
     cultureParams: CultureParams;
-    onSave: () => void;
+    onSaveToHistory: () => void;
+    onSaveDownload: () => void;
     springFertilizer: SpringFertilizer;
     setSpringFertilizer: React.Dispatch<React.SetStateAction<SpringFertilizer>>;
     nitrogenFertilizer: string;
@@ -46,6 +48,12 @@ const SaveReportIcon = () => (
     </svg>
 );
 
+const HistoryIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
 export const Step4Results: React.FC<Step4Props> = ({ 
     onReset, 
     onBack,
@@ -53,7 +61,8 @@ export const Step4Results: React.FC<Step4Props> = ({
     type, 
     formData, 
     cultureParams,
-    onSave,
+    onSaveToHistory,
+    onSaveDownload,
     springFertilizer,
     setSpringFertilizer,
     nitrogenFertilizer,
@@ -115,7 +124,7 @@ export const Step4Results: React.FC<Step4Props> = ({
         },
         {
             label: t('saveJsonAction', lang),
-            onClick: onSave,
+            onClick: onSaveDownload,
             iconType: 'json',
         }
     ];
@@ -191,19 +200,23 @@ export const Step4Results: React.FC<Step4Props> = ({
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                    {isGroupMode ? (
                         <>
-                            {!isRecorded && onRecord && (
+                            {onRecord && (
                                 <button
                                     onClick={onRecord}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-emerald-700 transition-colors duration-300"
+                                    className={`w-full sm:w-auto flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors duration-300 ${
+                                        isRecorded 
+                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
+                                        : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-md'
+                                    }`}
                                 >
                                     <SaveReportIcon />
-                                    <span>{t('recordButton', lang)}</span>
+                                    <span>{isRecorded ? t('recordedButton', lang) : t('recordButton', lang)}</span>
                                 </button>
                             )}
-                            {isRecorded && onContinue && (
+                            {onContinue && (
                                  <button
                                     onClick={onContinue}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -211,22 +224,31 @@ export const Step4Results: React.FC<Step4Props> = ({
                                     <span>{t('continueButton', lang)}</span>
                                 </button>
                             )}
-                            {hasRecordings && (
+                            {onOpenSaveModal && (
                                 <button
                                     onClick={onOpenSaveModal}
                                     className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-lg text-lg"
                                 >
                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                    <span>{t('saveXlsxButton', lang, { count: recordedIndices.size })}</span>
+                                    <span>{t('saveXlsxButton', lang, { count: recordedIndices?.size || 0 })}</span>
                                 </button>
                             )}
                         </>
                     ) : (
-                        <DropdownButton 
-                            actions={saveActions} 
-                            buttonLabel={t('saveReportButton', lang)}
-                            buttonIcon={<SaveReportIcon />}
-                        />
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <button
+                                onClick={onSaveToHistory}
+                                className="flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md"
+                            >
+                                <HistoryIcon />
+                                <span>{t('saveToHistory', lang)}</span>
+                            </button>
+                            <DropdownButton 
+                                actions={saveActions} 
+                                buttonLabel={t('saveReportButton', lang)}
+                                buttonIcon={<SaveReportIcon />}
+                            />
+                        </div>
                     )}
                 </div>
             </div>
