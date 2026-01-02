@@ -164,6 +164,14 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         });
     };
 
+    const handleDiammophoskaClick = () => {
+        onComplexFertilizerChange({
+            ...complexFertilizer,
+            n: '9', p2o5: '25', k2o: '25', cao: '', mg: '',
+            enabled: true,
+        });
+    };
+
     const finalNeeds = useMemo(() => {
         const rate = parseFloat(complexFertilizer.rate);
         if (!complexFertilizer.enabled || !rate || isNaN(rate) || rate <= 0) return displayNeeds;
@@ -223,6 +231,7 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                             <div className="flex flex-wrap gap-2">
                                 <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors">{t('nitroammophoskaButton', lang)}</button>
                                 <button type="button" onClick={handleChickenManureClick} className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-amber-200 transition-colors">{t('chickenManureButton', lang)}</button>
+                                <button type="button" onClick={handleDiammophoskaClick} className="bg-orange-100 text-orange-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-orange-200 transition-colors">{t('diammophoskaButton', lang)}</button>
                             </div>
                         )}
                     </div>

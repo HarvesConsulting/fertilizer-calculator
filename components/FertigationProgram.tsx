@@ -159,6 +159,14 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         setIsRateManuallySet(false);
     };
 
+    const handleDiammophoskaClick = () => {
+        setSpringFertilizer({
+            enabled: true,
+            n: '9', p: '25', k: '25', ca: '0', mg: '0',
+        });
+        setIsRateManuallySet(false);
+    };
+
     const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSpringFertilizerRate(value === '' ? null : parseFloat(value));
@@ -234,6 +242,9 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                                 </button>
                                 <button type="button" onClick={handleRosafertClick} className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-emerald-200 transition-colors flex-shrink-0" title="Заповнити поля даними ROSAFERT 12-12-17">
                                     {t('rosafertButton', lang)}
+                                </button>
+                                <button type="button" onClick={handleDiammophoskaClick} className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-amber-200 transition-colors flex-shrink-0" title="Заповнити поля даними Діамофоска 9-25-25">
+                                    {t('diammophoskaButton', lang)}
                                 </button>
                             </div>
                         )}

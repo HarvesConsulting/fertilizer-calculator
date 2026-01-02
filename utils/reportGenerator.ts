@@ -36,6 +36,7 @@ const getIdentifiedComplexName = (n: string, p: string, k: string, ca: string, m
     if (cN === '2' && cP === '2' && cK === '1') return t('chickenManureButton', lang);
     if (cN === '11' && cP === '11' && cK === '21') return t('yaraMilaButton', lang);
     if (cN === '12' && cP === '12' && cK === '17') return t('rosafertButton', lang);
+    if (cN === '9' && cP === '25' && cK === '25') return t('diammophoskaButton', lang);
     return null;
 };
 
@@ -65,8 +66,7 @@ const getMergesForHeader = (startRow: number) => [
 ];
 
 export const generateTxtReport = (data: ReportData): string => {
-    const { formData, results, calculationType, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, springFertilizerRate, lang } = data;
-    const area = parseFloat(formData.fieldArea || '1') || 1;
+    const { formData, results, calculationType, complexFertilizer, lang } = data;
     const cultureName = CULTURES.find(c => c.key === formData.culture)?.name[lang] || formData.culture;
     let report = `==================================================\n   HarvestConsulting\n==================================================\n\n   ${t('resultsTitle', lang, { cultureName })}\n\n`;
     if (calculationType !== 'fertigation') {
@@ -90,26 +90,53 @@ const generateSummarySheet = (reports: ReportData[], lang: Language) => {
     reports.forEach(report => {
         const { formData, results, cultureParams, springFertilizer, nitrogenFertilizer, complexFertilizer, basicFertilizers, selectedAmendment, springFertilizerRate } = report;
         const area = parseFloat(formData.fieldArea) || 1;
+        
         if (complexFertilizer?.enabled && parseFloat(complexFertilizer.rate) > 0) {
             addValueToProcurement(preSeasonTotals, getNormalizedFertName(complexFertilizer.n, complexFertilizer.p2o5, complexFertilizer.k2o, complexFertilizer.cao, complexFertilizer.mg, t('complexFertilizer', lang), lang), parseFloat(complexFertilizer.rate) * area);
         }
         if (springFertilizer?.enabled && springFertilizerRate && springFertilizerRate > 0) {
             addValueToProcurement(preSeasonTotals, getNormalizedFertName(springFertilizer.n, springFertilizer.p, springFertilizer.k, springFertilizer.ca, springFertilizer.mg, t('springFertilizer', lang), lang), springFertilizerRate * area);
         }
-        if (selectedAmendment && parseFloat(formData.ph) <= 6.8) {
-            addValueToProcurement(preSeasonTotals, AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment, Math.round((7 - parseFloat(formData.ph)) * 5) * 1000 * area);
-        }
+
         let basicNeeds = [...results.basic];
+        
+        // Offset Amendment nutrients (Ca/Mg)
+        if (selectedAmendment && parseFloat(formData.ph) <= 6.8) {
+            const phVal = parseFloat(formData.ph);
+            const amendmentRateTons = Math.round((7 - phVal) * 5);
+            const totalAmendmentKg = amendmentRateTons * 1000 * area;
+            addValueToProcurement(preSeasonTotals, AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment, totalAmendmentKg);
+            
+            const effect = AMENDMENT_EFFECTS[selectedAmendment as keyof typeof AMENDMENT_EFFECTS];
+            if (effect) {
+                const caSupplied = effect.calcium * amendmentRateTons;
+                const mgSupplied = effect.magnesium * amendmentRateTons;
+                basicNeeds = basicNeeds.map(n => {
+                    if (n.element === 'CaO') return { ...n, norm: Math.max(0, n.norm - caSupplied) };
+                    if (n.element === 'MgO') return { ...n, norm: Math.max(0, n.norm - mgSupplied) };
+                    return n;
+                });
+            }
+        }
+
+        // Offset Complex Fertilizer nutrients
         if (complexFertilizer?.enabled && parseFloat(complexFertilizer.rate) > 0) {
             const r = parseFloat(complexFertilizer.rate);
-            const sup = { 'P2O5': r * (parseFloat(complexFertilizer.p2o5||'0')/100), 'K2O': r * (parseFloat(complexFertilizer.k2o||'0')/100), 'CaO': r * (parseFloat(complexFertilizer.cao||'0')/100), 'MgO': r * (parseFloat(complexFertilizer.mg||'0')/100) };
+            const sup = { 
+                'P2O5': r * (parseFloat(complexFertilizer.p2o5||'0')/100), 
+                'K2O': r * (parseFloat(complexFertilizer.k2o||'0')/100), 
+                'CaO': r * (parseFloat(complexFertilizer.cao||'0')/100), 
+                'MgO': r * (parseFloat(complexFertilizer.mg||'0')/100) 
+            };
             basicNeeds = basicNeeds.map(n => ({ ...n, norm: Math.max(0, n.norm - (sup[n.element as keyof typeof sup] || 0)) }));
         }
+
         Object.keys(basicFertilizers).forEach(el => {
             const fert = SIMPLE_FERTILIZERS[el]?.find(f => f.value.toString() === basicFertilizers[el]?.selectedFertilizer);
             const n = basicNeeds.find(n => n.element === el)?.norm || 0;
             if (fert && n > 0) addValueToProcurement(preSeasonTotals, fert.label[lang], (n / fert.value) * 100 * area);
         });
+
         const cKey = Object.keys(FERTIGATION_CULTURES).find(k => FERTIGATION_CULTURES[k].startsWith(results.culture));
         if (cKey) {
             const { weeklyPlan } = calculateFertigationPlan({ initialNeeds: results.fertigation, cultureKey: cKey, cultureParams, springFertilizer, nitrogenFertilizer, manualRate: springFertilizerRate });
@@ -127,7 +154,6 @@ const generateSummarySheet = (reports: ReportData[], lang: Language) => {
         }
     });
 
-    // Fix variable shadowing: renamed 'n' to 'name' and 't' to 'totalVal' so they don't shadow the translation function 't'.
     const preData = Object.entries(preSeasonTotals).map(([name, totalVal]) => ({ 
         [t('fertilizerNameHeader', lang)]: name, 
         [t('totalNeededKgHeader', lang)]: parseFloat(totalVal.toFixed(1)) 
@@ -166,20 +192,46 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
         if (idx > 0) aoa.push([], ["------------------------------------------------------------------------------------------------"]);
         aoa.push([t('reportFor', lang, { culture: formData.fieldName || results.culture })]);
         aoa.push([`${t('cultureLabel', lang)}: ${results.culture}`, `${t('fieldAreaLabel', lang)}: ${area} ha`, `${t('sowingDateLabel', lang)}: ${formData.sowingDate || '-'}`]);
+        
         if (report.calculationType !== 'fertigation') {
             aoa.push([], [t('basicApplicationSection', lang)], [t('fertilizerTypeHeader', lang), t('fertilizerNameCompositionHeader', lang), `${t('applicationRate', lang)} (kg/ha)`, `${t('totalLabel', lang)} (kg)`]);
+            
             let needs = [...results.basic];
+            
+            // 1. Amendment Handling with nutrient offset
+            if (selectedAmendment && parseFloat(formData.ph) <= 6.8) {
+                const phVal = parseFloat(formData.ph);
+                const amendmentRateTons = Math.round((7 - phVal) * 5);
+                const r = amendmentRateTons * 1000;
+                aoa.push([t('amendmentLabel', lang), AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment, r, r * area]);
+                
+                const effect = AMENDMENT_EFFECTS[selectedAmendment as keyof typeof AMENDMENT_EFFECTS];
+                if (effect) {
+                    const caSupplied = effect.calcium * amendmentRateTons;
+                    const mgSupplied = effect.magnesium * amendmentRateTons;
+                    needs = needs.map(n => {
+                        if (n.element === 'CaO') return { ...n, norm: Math.max(0, n.norm - caSupplied) };
+                        if (n.element === 'MgO') return { ...n, norm: Math.max(0, n.norm - mgSupplied) };
+                        return n;
+                    });
+                }
+            }
+
+            // 2. Complex Fertilizer Handling
             if (complexFertilizer?.enabled && parseFloat(complexFertilizer.rate) > 0) {
                 const n = getNormalizedFertName(complexFertilizer.n, complexFertilizer.p2o5, complexFertilizer.k2o, complexFertilizer.cao, complexFertilizer.mg, t('complexFertilizer', lang), lang);
                 const r = parseFloat(complexFertilizer.rate);
                 aoa.push([t('complexFertilizer', lang), n, r, r * area]);
-                const s = { 'P2O5': r * (parseFloat(complexFertilizer.p2o5||'0')/100), 'K2O': r * (parseFloat(complexFertilizer.k2o||'0')/100), 'CaO': r * (parseFloat(complexFertilizer.cao||'0')/100), 'MgO': r * (parseFloat(complexFertilizer.mg||'0')/100) };
+                const s = { 
+                    'P2O5': r * (parseFloat(complexFertilizer.p2o5||'0')/100), 
+                    'K2O': r * (parseFloat(complexFertilizer.k2o||'0')/100), 
+                    'CaO': r * (parseFloat(complexFertilizer.cao||'0')/100), 
+                    'MgO': r * (parseFloat(complexFertilizer.mg||'0')/100) 
+                };
                 needs = needs.map(n => ({ ...n, norm: Math.max(0, n.norm - (s[n.element as keyof typeof s] || 0)) }));
             }
-            if (selectedAmendment && parseFloat(formData.ph) <= 6.8) {
-                const r = Math.round((7 - parseFloat(formData.ph)) * 5) * 1000;
-                aoa.push([t('amendmentLabel', lang), AMENDMENTS.find(a => a.value === selectedAmendment)?.label[lang] || selectedAmendment, r, r * area]);
-            }
+            
+            // 3. Simple Fertilizers (Remaining needs)
             needs.filter(n => n.element !== 'Меліорант' && n.norm > 0).forEach(n => {
                 const f = SIMPLE_FERTILIZERS[n.element]?.find(f => f.value.toString() === basicFertilizers[n.element]?.selectedFertilizer);
                 if (f) {
@@ -190,6 +242,7 @@ const generateDetailsSheet = (reports: ReportData[], lang: Language) => {
                 }
             });
         }
+
         if (report.calculationType !== 'basic') {
             aoa.push([], [t('fertigationProgramSection', lang)]);
             if (springFertilizer?.enabled && springFertilizerRate && springFertilizerRate > 0) {
