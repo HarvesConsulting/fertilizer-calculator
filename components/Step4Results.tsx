@@ -118,14 +118,14 @@ export const Step4Results: React.FC<Step4Props> = ({
 
     const saveActions: DropdownAction[] = [
         {
+            label: isGroupMode ? t('saveAllJsonAction', lang) : t('saveJsonAction', lang),
+            onClick: onSaveDownload,
+            iconType: 'json',
+        },
+        {
             label: t('saveTxtAction', lang),
             onClick: handleSaveTxt,
             iconType: 'txt',
-        },
-        {
-            label: t('saveJsonAction', lang),
-            onClick: onSaveDownload,
-            iconType: 'json',
         }
     ];
 
@@ -199,7 +199,7 @@ export const Step4Results: React.FC<Step4Props> = ({
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                    {isGroupMode ? (
-                        <>
+                        <div className="flex flex-col sm:flex-row gap-4 w-full">
                             {onRecord && (
                                 <button
                                     onClick={onRecord}
@@ -213,17 +213,11 @@ export const Step4Results: React.FC<Step4Props> = ({
                                     <span>{isRecorded ? t('recordedButton', lang) : t('recordButton', lang)}</span>
                                 </button>
                             )}
-                            {onContinue && (
-                                 <button
-                                    onClick={onContinue}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>{t('continueButton', lang)}</span>
-                                </button>
-                            )}
+                            <DropdownButton 
+                                actions={saveActions} 
+                                buttonLabel={t('saveReportButton', lang)}
+                                buttonIcon={<SaveReportIcon />}
+                            />
                             {onOpenSaveModal && (
                                 <button
                                     onClick={onOpenSaveModal}
@@ -238,7 +232,7 @@ export const Step4Results: React.FC<Step4Props> = ({
                                     <span>{t('saveXlsxButton', lang, { count: recordedIndices?.size || 0 })}</span>
                                 </button>
                             )}
-                        </>
+                        </div>
                     ) : (
                         <div className="flex flex-col sm:flex-row gap-4">
                             <button

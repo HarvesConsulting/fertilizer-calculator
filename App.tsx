@@ -57,6 +57,17 @@ interface FertilizerSelections {
   springFertilizerRate: number | null;
 }
 
+// Project structure for saving/loading full state
+interface AgroProject {
+    version: string;
+    type: 'project';
+    mode: 'single' | 'group';
+    analyses: FormData[];
+    activeAnalysisIndex: number;
+    calculationType: 'basic' | 'fertigation' | 'full' | null;
+    selections: FertilizerSelections[]; // Array matching analyses
+}
+
 function App() {
     const [mainView, setMainView] = useState<'landing' | 'calculator' | 'reports'>('landing');
     const [analysisMode, setAnalysisMode] = useState<'single' | 'group' | null>(null);
@@ -131,11 +142,10 @@ function App() {
         const allResults = analyses.map(f => calculateNutrientNeeds(f));
         setGroupResults(allResults);
         
-        // Preserve existing selections instead of overwriting all
         setGroupFertilizerSelections(prev => {
             return analyses.map((_, i) => {
-                if (prev[i]) return prev[i]; // Keep existing if present
-                return createInitialSelections(); // Create NEW independent object
+                if (prev[i]) return prev[i];
+                return createInitialSelections();
             });
         });
         
@@ -179,6 +189,85 @@ function App() {
         };
         setReports(prev => [newReport, ...prev]);
         alert(t('saveToHistorySuccess', language));
+    };
+
+    const handleSaveDownload = () => {
+        if (!calculationType) return;
+
+        // Create the unified project structure
+        const project: AgroProject = {
+            version: '1.0',
+            type: 'project',
+            mode: analysisMode || 'single',
+            analyses: analyses,
+            activeAnalysisIndex: activeAnalysisIndex,
+            calculationType: calculationType,
+            selections: analysisMode === 'group' 
+                ? groupFertilizerSelections 
+                : [{
+                    springFertilizer,
+                    nitrogenFertilizer,
+                    basicFertilizers,
+                    selectedAmendment,
+                    complexFertilizer,
+                    springFertilizerRate,
+                }]
+        };
+
+        const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const fileName = currentFormData.fieldName ? `${currentFormData.fieldName}_` : '';
+        const projectPrefix = analysisMode === 'group' ? 'agro_group_session' : `agro_project_${fileName}${currentFormData.culture}`;
+        
+        a.href = url;
+        a.download = `${projectPrefix}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleEditReport = (report: SavedReport) => {
+        setMainView('calculator');
+        setAnalysisMode('single');
+        setAnalyses([report.formData]);
+        setActiveAnalysisIndex(0);
+        setResults(report.results);
+        setCalculationType(report.calculationType);
+        setSpringFertilizer(report.springFertilizer);
+        setNitrogenFertilizer(report.nitrogenFertilizer);
+        setBasicFertilizers(report.basicFertilizers);
+        setSelectedAmendment(report.selectedAmendment);
+        setComplexFertilizer(report.complexFertilizer || createInitialComplexFertilizer());
+        setSpringFertilizerRate(report.springFertilizerRate ?? null);
+        setCurrentStep(4);
+        setSelectedReport(null);
+    };
+
+    const handleLoadProject = (project: AgroProject) => {
+        setMainView('calculator');
+        setAnalysisMode(project.mode);
+        setAnalyses(project.analyses);
+        setActiveAnalysisIndex(project.activeAnalysisIndex);
+        setCalculationType(project.calculationType);
+        
+        if (project.mode === 'single') {
+            const sel = project.selections[0];
+            setSpringFertilizer(sel.springFertilizer);
+            setNitrogenFertilizer(sel.nitrogenFertilizer);
+            setBasicFertilizers(sel.basicFertilizers);
+            setSelectedAmendment(sel.selectedAmendment);
+            setComplexFertilizer(sel.complexFertilizer);
+            setSpringFertilizerRate(sel.springFertilizerRate);
+            setResults(calculateNutrientNeeds(project.analyses[0]));
+        } else {
+            setGroupFertilizerSelections(project.selections);
+            const allResults = project.analyses.map(f => calculateNutrientNeeds(f));
+            setGroupResults(allResults);
+            setRecordedIndices(new Set(project.analyses.map((_, i) => i)));
+        }
+        
+        setCurrentStep(4);
+        setSelectedReport(null);
     };
 
     const handleRecordCalculation = () => {
@@ -254,8 +343,15 @@ function App() {
                     reader.onload = e => {
                         try {
                             const data = JSON.parse(e.target?.result as string);
-                            setReports(prev => [...(Array.isArray(data) ? data : [data]), ...prev]);
-                            alert(t('reportLoadSuccessOne', language));
+                            // Differentiate between a Project (restorable session) and a simple Report
+                            if (data.type === 'project') {
+                                handleLoadProject(data as AgroProject);
+                            } else if (!Array.isArray(data) && data.formData && data.results) {
+                                handleEditReport(data as SavedReport);
+                            } else {
+                                setReports(prev => [...(Array.isArray(data) ? data : [data]), ...prev]);
+                                alert(t('reportLoadSuccessOne', language));
+                            }
                         } catch (err) { alert(t('reportLoadError', language)); }
                     };
                     reader.readAsText(file);
@@ -315,7 +411,7 @@ function App() {
                             <Step4Results 
                                 onReset={handleReset} onBack={handleBack} results={(analysisMode === 'single' ? results : groupResults[activeAnalysisIndex])!}
                                 type={calculationType!} formData={currentFormData} cultureParams={CULTURE_PARAMS[currentFormData.culture]}
-                                onSaveToHistory={handleSaveToHistory} onSaveDownload={() => {}} 
+                                onSaveToHistory={handleSaveToHistory} onSaveDownload={handleSaveDownload} 
                                 springFertilizer={analysisMode === 'single' ? springFertilizer : (groupFertilizerSelections[activeAnalysisIndex]?.springFertilizer || createInitialSpringFertilizer())}
                                 setSpringFertilizer={analysisMode === 'single' ? setSpringFertilizer : (val) => setGroupFertilizerSelections(prev => { const next = [...prev]; next[activeAnalysisIndex].springFertilizer = typeof val === 'function' ? (val as any)(next[activeAnalysisIndex].springFertilizer) : val; return next; })}
                                 nitrogenFertilizer={analysisMode === 'single' ? nitrogenFertilizer : (groupFertilizerSelections[activeAnalysisIndex]?.nitrogenFertilizer || 'ammonium-nitrate')}
@@ -337,7 +433,7 @@ function App() {
             )}
 
             {mainView === 'reports' && (
-                selectedReport ? <ReportDetail report={selectedReport} onBack={() => setSelectedReport(null)} lang={language} /> :
+                selectedReport ? <ReportDetail report={selectedReport} onBack={() => setSelectedReport(null)} onEdit={handleEditReport} lang={language} /> :
                 <ReportsList reports={reports} onView={setSelectedReport} onDelete={id => setReports(reports.filter(r => r.id !== id))} onNewCalculation={handleReset} onLoadReport={() => reportInputRef.current?.click()} lang={language} />
             )}
             

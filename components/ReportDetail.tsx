@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import type { SavedReport, ComplexFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
@@ -8,6 +9,7 @@ import { Language, t } from '../i18n';
 interface ReportDetailProps {
     report: SavedReport;
     onBack: () => void;
+    onEdit: (report: SavedReport) => void;
     lang: Language;
 }
 
@@ -24,7 +26,7 @@ const defaultComplexFertilizer: ComplexFertilizer = {
     n: '', p2o5: '', k2o: '', cao: '', mg: '', rate: '', enabled: false
 };
 
-export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang }) => {
+export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, onEdit, lang }) => {
     const { formData, results, calculationType, springFertilizer, nitrogenFertilizer, complexFertilizer } = report;
     const cultureParams = CULTURE_PARAMS[formData.culture];
 
@@ -39,16 +41,28 @@ export const ReportDetail: React.FC<ReportDetailProps> = ({ report, onBack, lang
 
     return (
         <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg space-y-10">
-            <div>
+            <div className="flex justify-between items-center flex-wrap gap-4">
                 <button
                     onClick={onBack}
-                    className="mb-6 bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition flex items-center gap-2"
+                    className="bg-slate-200 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition flex items-center gap-2"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     {t('backToList', lang)}
                 </button>
+                <button
+                    onClick={() => onEdit(report)}
+                    className="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 shadow-md"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    {t('editButton', lang)}
+                </button>
+            </div>
+
+            <div>
                 <h2 className="text-3xl font-bold text-center text-slate-800">
                     {t('reportFor', lang, { culture: cultureName })}
                 </h2>
