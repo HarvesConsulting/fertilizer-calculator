@@ -108,8 +108,9 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
         });
     }, [needs, amendment, needsAmendment, formData.ph]);
 
-    const elementsWithNeedCount = useMemo(() => {
-        return needs.filter(n => n.element !== 'Меліорант' && n.norm > 0).length;
+    // Check if there are any nutrient needs (except amendment) to decide whether to show complex fertilizer option
+    const hasNutrientNeeds = useMemo(() => {
+        return needs.some(n => n.element !== 'Меліорант' && n.norm > 0);
     }, [needs]);
     
     useEffect(() => {
@@ -210,7 +211,9 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
     return (
         <div>
             <h3 className="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">{t('basicApplicationHeader', lang)}</h3>
-            {elementsWithNeedCount >= 2 && (
+            
+            {/* Always show the complex fertilizer option if there is any nutrient need */}
+            {hasNutrientNeeds && (
                  <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50">
                     <div className="relative flex items-start">
                         <div className="flex h-6 items-center">
@@ -223,15 +226,16 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                     </div>
                  </div>
             )}
+            
             {complexFertilizer.enabled && (
-                <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4">
+                <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4 shadow-inner">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">{t('complexFertilizerHeader', lang)}</h4>
                         {!readOnly && (
                             <div className="flex flex-wrap gap-2">
-                                <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors">{t('nitroammophoskaButton', lang)}</button>
-                                <button type="button" onClick={handleChickenManureClick} className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-amber-200 transition-colors">{t('chickenManureButton', lang)}</button>
-                                <button type="button" onClick={handleDiammophoskaClick} className="bg-orange-100 text-orange-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-orange-200 transition-colors">{t('diammophoskaButton', lang)}</button>
+                                <button type="button" onClick={handleNitroammophoskaClick} className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-indigo-200 transition-colors shadow-sm">{t('nitroammophoskaButton', lang)}</button>
+                                <button type="button" onClick={handleChickenManureClick} className="bg-amber-100 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-amber-200 transition-colors shadow-sm">{t('chickenManureButton', lang)}</button>
+                                <button type="button" onClick={handleDiammophoskaClick} className="bg-orange-100 text-orange-700 text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-orange-200 transition-colors shadow-sm">{t('diammophoskaButton', lang)}</button>
                             </div>
                         )}
                     </div>
@@ -288,6 +292,13 @@ export const BasicApplicationCalculator: React.FC<BasicApplicationCalculatorProp
                                     </select>
                                 </td>
                                  <td className="py-4 px-6 whitespace-nowrap text-sm text-indigo-600 font-semibold">{amendment && `${(Math.round((7 - parseFloat(ph)) * 5) * 1000 * fieldArea).toFixed(0)} kg`}</td>
+                            </tr>
+                        )}
+                        {nutrientNeeds.length === 0 && !needsAmendment && (
+                             <tr>
+                                <td colSpan={4} className="py-10 text-center text-slate-500 italic">
+                                    {t('basicApplicationNotNeeded', lang)}
+                                </td>
                             </tr>
                         )}
                     </tbody>

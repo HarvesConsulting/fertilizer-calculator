@@ -20,7 +20,7 @@ const createInitialComplexFertilizer = (): ComplexFertilizer => ({
 });
 
 const createInitialSpringFertilizer = (): SpringFertilizer => ({
-    n: '', p: '', k: '', ca: '', mg: '', enabled: false
+    n: '', p: '', k: '', ca: '', mg: '', enabled: false, kCompensation: 50
 });
 
 const createInitialSelections = (): FertilizerSelections => ({

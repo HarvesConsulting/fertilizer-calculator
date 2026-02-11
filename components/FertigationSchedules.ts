@@ -278,4 +278,16 @@ export const FERTIGATION_SCHEDULES: Record<string, Schedule> = {
             ...Array(2).fill({ N: 0, P: 0, K: 0.1, Ca: 0.1, Mg: 0.1 })
         ]
     },
+    sweetcorn: {
+        weeks: [1, 2, 3, 4, 5, 6, 7, 8],
+        distribution: [
+            { N: 0, P: 0, K: 0, Ca: 0, Mg: 0 },
+            { N: 0.2, P: 0.25, K: 0.05, Ca: 0.05, Mg: 0.05 },
+            { N: 0.3, P: 0.25, K: 0.05, Ca: 0.05, Mg: 0.05 },
+            { N: 0.3, P: 0.25, K: 0.1, Ca: 0.1, Mg: 0.1 },
+            { N: 0.2, P: 0.25, K: 0.1, Ca: 0.1, Mg: 0.1 },
+            { N: 0, P: 0, K: 0.2, Ca: 0.2, Mg: 0.2 },
+            { N: 0, P: 0, K: 0.25, Ca: 0.25, Mg: 0.25 }, { N: 0, P: 0, K: 0.25, Ca: 0.25, Mg: 0.25 }
+        ]
+    },
 };

@@ -1,3 +1,4 @@
+
 export interface NutrientNeeds {
     element: string;
     norm: number;
@@ -55,6 +56,7 @@ export interface SpringFertilizer {
     ca: string;
     mg: string;
     enabled: boolean;
+    kCompensation?: number;
 }
 
 export interface SavedReport {

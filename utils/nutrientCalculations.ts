@@ -1,3 +1,4 @@
+
 import type { FormData, CalculationResults, NutrientNeeds } from '../types';
 import { CULTURE_PARAMS } from '../constants';
 
@@ -13,7 +14,7 @@ export const calculateNutrientNeeds = (formData: FormData): CalculationResults |
     
     // Phosphorus: Step-based logic dependent on soil content
     let phosphorusRate = 0;
-    if (numericData.phosphorus > 30) phosphorusRate = 50;
+    if (numericData.phosphorus > 30) phosphorusRate = 0; // Set to 0 if > 30 mg/kg (previously was 50)
     else if (numericData.phosphorus > 20) phosphorusRate = 100;
     else if (numericData.phosphorus > 10) phosphorusRate = 150;
     else if (numericData.phosphorus >= 5) phosphorusRate = 200;

@@ -28,7 +28,7 @@ interface FertigationProgramProps {
 
 const NutrientInput: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; disabled?: boolean; }> = ({ label, name, value, onChange, disabled }) => (
     <div>
-        <label htmlFor={name} className="block text-sm font-medium text-slate-700">{label}</label>
+        <label htmlFor={name} className="block text-sm font-medium text-slate-700 text-center">{label}</label>
         <div className="mt-1 relative rounded-md shadow-sm">
             <input
                 type="number"
@@ -36,7 +36,7 @@ const NutrientInput: React.FC<{ label: string; name: string; value: string; onCh
                 id={name}
                 value={value}
                 onChange={onChange}
-                className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100"
+                className="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-md text-center focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100"
                 placeholder="0"
                 min="0"
                 step="0.1"
@@ -70,7 +70,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     
     useEffect(() => {
         if (!readOnly && !isGroupMode) {
-            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false });
+            setSpringFertilizer({ n: '', p: '', k: '', ca: '', mg: '', enabled: false, kCompensation: 50 });
             setNitrogenFertilizer('ammonium-nitrate');
             setSpringFertilizerRate(null);
             setIsRateManuallySet(false);
@@ -89,12 +89,13 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
     const calculatedRate = useMemo(() => {
         const kPercentage = parseFloat(springFertilizer.k);
         const initialKNeed = initialNeeds.find(n => n.element === 'K2O')?.norm ?? 0;
+        const compensation = springFertilizer.kCompensation ?? 50;
         if (springFertilizer.enabled && kPercentage && kPercentage > 0 && initialKNeed > 0) {
-            const rate = (initialKNeed * 0.5 / kPercentage) * 100;
+            const rate = (initialKNeed * (compensation / 100) / kPercentage) * 100;
             return Math.round(rate);
         }
         return null;
-    }, [springFertilizer.enabled, springFertilizer.k, initialNeeds]);
+    }, [springFertilizer.enabled, springFertilizer.k, initialNeeds, springFertilizer.kCompensation]);
     
     useEffect(() => {
         if (!readOnly && !isRateManuallySet) {
@@ -131,39 +132,47 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         const isEnabled = e.target.checked;
         setSpringFertilizer(prev => {
              if (isEnabled) {
-                return { ...prev, enabled: true };
+                return { ...prev, enabled: true, kCompensation: prev.kCompensation || 50 };
             }
-            return { n: '', p: '', k: '', ca: '', mg: '', enabled: false };
+            return { n: '', p: '', k: '', ca: '', mg: '', enabled: false, kCompensation: 50 };
         });
         setIsRateManuallySet(false);
     };
     
     const handleFertilizerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setSpringFertilizer(prev => ({ ...prev, [name]: value }));
+        if (name === 'kCompensation') {
+            setSpringFertilizer(prev => ({ ...prev, kCompensation: parseFloat(value) || 0 }));
+            setIsRateManuallySet(false);
+        } else {
+            setSpringFertilizer(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleYaraMilaClick = () => {
-        setSpringFertilizer({
+        setSpringFertilizer(prev => ({
+            ...prev,
             enabled: true,
             n: '11', p: '11', k: '21', ca: '0', mg: '2.6',
-        });
+        }));
         setIsRateManuallySet(false);
     };
     
     const handleRosafertClick = () => {
-        setSpringFertilizer({
+        setSpringFertilizer(prev => ({
+            ...prev,
             enabled: true,
             n: '12', p: '12', k: '17', ca: '4.3', mg: '2',
-        });
+        }));
         setIsRateManuallySet(false);
     };
 
     const handleDiammophoskaClick = () => {
-        setSpringFertilizer({
+        setSpringFertilizer(prev => ({
+            ...prev,
             enabled: true,
             n: '9', p: '25', k: '25', ca: '0', mg: '0',
-        });
+        }));
         setIsRateManuallySet(false);
     };
 
@@ -209,7 +218,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
         chartLabels[4] = 'Magnesium sulfate';
     }
 
-    const rateTooltipText = t('springFertilizerRateTooltip', lang);
+    const rateTooltipText = t('springFertilizerRateTooltip', lang, { percent: springFertilizer.kCompensation || 50 });
 
     return (
         <div>
@@ -232,7 +241,7 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
             </div>
 
             {springFertilizer.enabled && (
-                <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4">
+                <div className="mb-8 p-4 border rounded-lg bg-slate-50 space-y-4 shadow-inner">
                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 className="text-lg font-semibold text-slate-800">{t('springFertilizerHeader', lang)}</h4>
                         {!readOnly && (
@@ -250,12 +259,36 @@ export const FertigationProgram: React.FC<FertigationProgramProps> = ({
                         )}
                      </div>
 
-                     <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                         <NutrientInput label={`${t('nitrogenAnalysisLabel', lang)} (N)`} name="n" value={springFertilizer.n} onChange={handleFertilizerChange} disabled={readOnly} />
-                         <NutrientInput label={`${t('phosphorusLabel', lang)} (P₂O₅)`} name="p" value={springFertilizer.p} onChange={handleFertilizerChange} disabled={readOnly} />
-                         <NutrientInput label={`${t('potassiumLabel', lang)} (K₂O)`} name="k" value={springFertilizer.k} onChange={handleFertilizerChange} disabled={readOnly} />
-                         <NutrientInput label={`${t('calciumLabel', lang)} (CaO)`} name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} disabled={readOnly} />
-                         <NutrientInput label={`${t('magnesiumLabel', lang)} (MgO)`} name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
+                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                         <NutrientInput label={t('nitrogenAnalysisLabel', lang)} name="n" value={springFertilizer.n} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label={t('phosphorusLabel', lang)} name="p" value={springFertilizer.p} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label={t('potassiumLabel', lang)} name="k" value={springFertilizer.k} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label={t('calciumLabel', lang)} name="ca" value={springFertilizer.ca} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <NutrientInput label={t('magnesiumLabel', lang)} name="mg" value={springFertilizer.mg} onChange={handleFertilizerChange} disabled={readOnly} />
+                         <div className="relative group">
+                            <label htmlFor="kCompensation" className="block text-sm font-medium text-slate-700 text-center flex items-center justify-center gap-1">
+                                {t('kCompensationLabel', lang)}
+                                <Tooltip text={t('kCompensationTooltip', lang)}><InfoIcon className="h-4 w-4" /></Tooltip>
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                                <input
+                                    type="number"
+                                    name="kCompensation"
+                                    id="kCompensation"
+                                    value={springFertilizer.kCompensation ?? 50}
+                                    onChange={handleFertilizerChange}
+                                    className="w-full pl-3 pr-8 py-2 border border-indigo-300 bg-indigo-50/50 rounded-md text-center font-semibold text-indigo-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-100"
+                                    placeholder="50"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    disabled={readOnly}
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span className="text-indigo-500 sm:text-sm">%</span>
+                                </div>
+                            </div>
+                        </div>
                      </div>
                      <div className="pt-2">
                          <div className="bg-indigo-100/60 p-3 rounded-lg">

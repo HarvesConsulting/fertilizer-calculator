@@ -1,3 +1,4 @@
+
 import type { CultureParams } from './types';
 import type { Language } from './i18n';
 
@@ -34,7 +35,7 @@ export const CULTURES: Culture[] = [
     { key: "Капуста брюссельська", name: { uk: "Капуста брюссельська", en: "Brussels Sprouts", es: "Coles de Bruselas", pt: "Couve de Bruxelas", fr: "Choux de Bruxelles", kk: "Брюссель қырыққабаты", sw: "Chipukizi za Brussels" } },
     { key: "Капуста кале(кейл)", name: { uk: "Капуста кале(кейл)", en: "Kale", es: "Col rizada", pt: "Couve", fr: "Chou frisé", kk: "Кейл", sw: "Kale" } },
     { key: "Кукурудза солодка", name: { uk: "Кукурудза солодка", en: "Sweet Corn", es: "Maíz Dulce", pt: "Milho Doce", fr: "Maïs Doux", kk: "Тәтті жүгері", sw: "Mahindi Matamu" } },
-    { key: "Часник", name: { uk: "Часник", en: "Garlic", es: "Ajo", pt: "Alho", fr: "Ail", kk: "Сарымсақ", sw: "Kitunguu saumu" } },
+    { key: "Часник", name: { uk: "Часник", en: "Garlic", es: "Ajo", pt: "Alho", fr: "Ail", kk: "Ail", sw: "Kitunguu saumu" } },
     { key: "Морква", name: { uk: "Морква", en: "Carrot", es: "Zanahoria", pt: "Cenoura", fr: "Carotte", kk: "Сәбіз", sw: "Karoti" } },
     { key: "Буряк столовий", name: { uk: "Буряк столовий", en: "Beetroot", es: "Remolacha", pt: "Beterraba", fr: "Betterave", kk: "Қызылша", sw: "Beetroot" } },
     { key: "Картопля", name: { uk: "Картопля", en: "Potato", es: "Patata", pt: "Batata", fr: "Pomme de terre", kk: "Картоп", sw: "Kiazi" } },
@@ -226,7 +227,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.4,
     },
     "Кукурудза солодка": {
-        nitrogenFactor: 3.5,
+        nitrogenFactor: 4.0,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -234,8 +235,8 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
             { min: 60, max: 120, value: 125 },
             { min: 0, max: 59, value: 150 },
         ],
-        calciumFactor: 0.9,
-        magnesiumFactor: 0.4,
+        calciumFactor: 0.65,
+        magnesiumFactor: 0.16,
     },
     "Часник": {
         nitrogenFactor: 8.0,
@@ -371,6 +372,7 @@ export const FERTIGATION_CULTURES: Record<string, string> = {
     celery: "Селера коренева",
     leek: "Цибуля порей",
     Brussels: "Капуста брюссельська",
+    sweetcorn: "Кукурудза солодка",
 };
 
 export const SIMPLE_FERTILIZERS: Record<string, SimpleFertilizer[]> = {

@@ -32,7 +32,8 @@ interface Step4Props {
     isGroupMode: boolean;
     onSaveAllTxt: () => void;
     lang: Language;
-    // New optional props for group mode
+    // Optional props for group mode
+    // Added onRecord to fix TypeScript error in App.tsx
     onRecord?: () => void;
     onOpenSaveModal?: () => void;
     onContinue?: () => void;
@@ -51,6 +52,12 @@ const SaveReportIcon = () => (
 const HistoryIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
+const PlusIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
     </svg>
 );
 
@@ -78,6 +85,7 @@ export const Step4Results: React.FC<Step4Props> = ({
     isGroupMode,
     onSaveAllTxt,
     lang,
+    // Destructure onRecord and other group mode props
     onRecord,
     onOpenSaveModal,
     onContinue,
@@ -130,9 +138,9 @@ export const Step4Results: React.FC<Step4Props> = ({
     ];
 
     const cultureName = CULTURES.find(c => c.key === results.culture)?.name[lang] || results.culture;
-    
-    const isRecorded = isGroupMode && recordedIndices?.has(activeAnalysisIndex!);
     const hasRecordings = isGroupMode && recordedIndices && recordedIndices.size > 0;
+    // Added isRecorded logic to show current record status in group mode
+    const isRecorded = isGroupMode && recordedIndices && activeAnalysisIndex !== undefined && recordedIndices.has(activeAnalysisIndex);
 
     return (
         <div className="space-y-10">
@@ -200,17 +208,35 @@ export const Step4Results: React.FC<Step4Props> = ({
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                    {isGroupMode ? (
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
+                            {/* Added Record button to allow user to toggle calculation inclusion in final report */}
                             {onRecord && (
                                 <button
                                     onClick={onRecord}
                                     className={`w-full sm:w-auto flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors duration-300 ${
                                         isRecorded 
-                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
-                                        : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-md ring-4 ring-emerald-500/20'
+                                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' 
+                                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                                     }`}
                                 >
-                                    <SaveReportIcon />
+                                    {isRecorded ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    )}
                                     <span>{isRecorded ? t('recordedButton', lang) : t('recordButton', lang)}</span>
+                                </button>
+                            )}
+                            {onContinue && (
+                                <button
+                                    onClick={onContinue}
+                                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-lg hover:bg-slate-300 transition-colors duration-300"
+                                >
+                                    <PlusIcon />
+                                    <span>{t('continueButton', lang)}</span>
                                 </button>
                             )}
                             <DropdownButton 
