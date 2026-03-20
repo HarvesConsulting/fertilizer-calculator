@@ -3,7 +3,7 @@ import React from 'react';
 import type { CalculationResults, FormData, CultureParams, BasicFertilizerSelections, ComplexFertilizer, SpringFertilizer } from '../types';
 import { BasicApplicationCalculator } from './BasicApplicationCalculator';
 import { FertigationProgram } from './FertigationProgram';
-import { generateTxtReport } from '../utils/reportGenerator';
+import { generateTxtReport, generateXlsxReport, ReportData } from '../utils/reportGenerator';
 import { DropdownButton, DropdownAction } from './SaveButtonDropdown';
 import { Language, t } from '../i18n';
 import { CULTURES } from '../constants';
@@ -124,11 +124,33 @@ export const Step4Results: React.FC<Step4Props> = ({
         URL.revokeObjectURL(url);
     };
 
+    const handleSaveXlsx = () => {
+        const reportData: ReportData = {
+            formData,
+            results,
+            calculationType: type,
+            cultureParams,
+            springFertilizer,
+            nitrogenFertilizer,
+            complexFertilizer,
+            basicFertilizers,
+            selectedAmendment,
+            springFertilizerRate,
+            lang,
+        };
+        generateXlsxReport([reportData], lang);
+    };
+
     const saveActions: DropdownAction[] = [
         {
             label: isGroupMode ? t('saveAllJsonAction', lang) : t('saveJsonAction', lang),
             onClick: onSaveDownload,
             iconType: 'json',
+        },
+        {
+            label: t('saveXlsxAction', lang),
+            onClick: handleSaveXlsx,
+            iconType: 'xlsx',
         },
         {
             label: t('saveTxtAction', lang),

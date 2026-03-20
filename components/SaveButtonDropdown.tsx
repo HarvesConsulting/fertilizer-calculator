@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 export interface DropdownAction {
     label: string;
     onClick: () => void;
-    iconType?: 'txt' | 'json' | 'upload' | 'save';
+    iconType?: 'txt' | 'json' | 'upload' | 'save' | 'xlsx';
 }
 
 interface DropdownButtonProps {
@@ -24,6 +24,12 @@ const JsonIcon = () => (
     </svg>
 );
 
+const XlsxIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 2v-6m-8-4h5l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z" />
+    </svg>
+);
+
 const UploadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -39,6 +45,7 @@ const SaveIcon = () => (
 const ICONS: Record<string, React.ReactNode> = {
     'txt': <TxtIcon />,
     'json': <JsonIcon />,
+    'xlsx': <XlsxIcon />,
     'upload': <UploadIcon />,
     'save': <SaveIcon />,
 };
