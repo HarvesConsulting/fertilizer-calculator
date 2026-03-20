@@ -28,7 +28,7 @@ export const CULTURES: Culture[] = [
     { key: "Кавун", name: { uk: "Кавун", en: "Watermelon", es: "Sandía", pt: "Melancia", fr: "Pastèque", kk: "Қарбыз", sw: "Tikiti maji" } },
     { key: "Диня", name: { uk: "Диня", en: "Melon", es: "Melón", pt: "Melão", fr: "Melon", kk: "Қауын", sw: "Tikiti" } },
     { key: "Гарбуз", name: { uk: "Гарбуз", en: "Pumpkin", es: "Calabaza", pt: "Abóbora", fr: "Citrouille", kk: "Асқабақ", sw: "Boga" } },
-    { key: "Капуста білоголова", name: { uk: "Капуста білоголова", en: "White Cabbage", es: "Repollo Blanco", pt: "Repolho Branco", fr: "Chou Blanc", kk: "Ақ қауданды қырыққабат", sw: "Kabeji Nyeupe" } },
+    { key: "Капуста білоголова", name: { uk: "Капуста білоголова", en: "White Cabbage", es: "Repollo Blanco", pt: "Repolho Branco", fr: "Chou Blanc", kk: "Ақ қауданди қырыққабат", sw: "Kabeji Nyeupe" } },
     { key: "Капуста цвітна", name: { uk: "Капуста цвітна", en: "Cauliflower", es: "Coliflor", pt: "Couve-flor", fr: "Chou-fleur", kk: "Гүлді қырыққабат", sw: "Koliflawa" } },
     { key: "Капуста броколі", name: { uk: "Капуста броколі", en: "Broccoli", es: "Brócoli", pt: "Brócolis", fr: "Brocoli", kk: "Брокколи", sw: "Brokoli" } },
     { key: "Капуста кольрабі", name: { uk: "Капуста кольрабі", en: "Kohlrabi", es: "Colinabo", pt: "Couve-rábano", fr: "Chou-rave", kk: "Кольраби", sw: "Kolirabi" } },
@@ -59,7 +59,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Перець": {
-        nitrogenFactor: 2.0,
+        nitrogenFactor: 3.2,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -71,7 +71,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Баклажан": {
-        nitrogenFactor: 2.0,
+        nitrogenFactor: 3.2,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -83,7 +83,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Цибуля ріпчаста": {
-        nitrogenFactor: 2.2,
+        nitrogenFactor: 2.6,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -95,7 +95,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Огірок": {
-        nitrogenFactor: 1.5,
+        nitrogenFactor: 2.2,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 40 },
@@ -107,7 +107,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.16,
     },
      "Кабачок": {
-        nitrogenFactor: 1.2,
+        nitrogenFactor: 1.8,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -119,7 +119,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.16,
     },
     "Кавун": {
-        nitrogenFactor: 1.2,
+        nitrogenFactor: 2.8,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -131,7 +131,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.16,
     },
     "Диня": {
-        nitrogenFactor: 1.2,
+        nitrogenFactor: 2.8,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -143,7 +143,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.16,
     },
     "Гарбуз": {
-        nitrogenFactor: 1.2,
+        nitrogenFactor: 2.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -155,7 +155,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.16,
     },
     "Капуста білоголова": {
-        nitrogenFactor: 1.75,
+        nitrogenFactor: 3.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -227,7 +227,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.4,
     },
     "Кукурудза солодка": {
-        nitrogenFactor: 4.0,
+        nitrogenFactor: 2.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -251,7 +251,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Морква": {
-        nitrogenFactor: 1.7,
+        nitrogenFactor: 2.2,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 50 },
@@ -263,7 +263,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Буряк столовий": {
-        nitrogenFactor: 1.5,
+        nitrogenFactor: 2.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 40 },
@@ -275,7 +275,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Картопля": {
-        nitrogenFactor: 3.0,
+        nitrogenFactor: 3.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 100 },
@@ -311,7 +311,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.4,
     },
     "Селера коренева": {
-        nitrogenFactor: 1.5,
+        nitrogenFactor: 2.5,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 100 },
@@ -323,7 +323,7 @@ export const CULTURE_PARAMS: Record<string, CultureParams> = {
         magnesiumFactor: 0.25,
     },
     "Цибуля порей": {
-        nitrogenFactor: 2.2,
+        nitrogenFactor: 2.8,
         potassiumRanges: [
             { min: 251, max: Infinity, value: 0 },
             { min: 201, max: 250, value: 100 },
@@ -378,7 +378,7 @@ export const FERTIGATION_CULTURES: Record<string, string> = {
 export const SIMPLE_FERTILIZERS: Record<string, SimpleFertilizer[]> = {
     'P2O5': [
         { label: { uk: 'Суперфосфат', en: 'Superphosphate', es: 'Superfosfato', pt: 'Superfosfato', fr: 'Superphosphate', kk: 'Суперфосфат', sw: 'Superfosfati' }, value: 19 },
-        { label: { uk: 'Подвійний суперфосфат', en: 'Double superphosphate', es: 'Superfosfato doble', pt: 'Superfosfato duplo', fr: 'Superphosphate double', kk: 'Қос суперфосфат', sw: 'Superfosfati maradufu' }, value: 46 },
+        { label: { uk: 'Подвійний суперфосфат', en: 'Double superphosphate', es: 'Double superphosphate', pt: 'Superfosfato duplo', fr: 'Superphosphate double', kk: 'Қос суперфосфат', sw: 'Superfosfati maradufu' }, value: 46 },
         { label: { uk: 'Амофос', en: 'Ammonium phosphate', es: 'Fosfato de amonio', pt: 'Fosfato de amônio', fr: 'Phosphate d\'ammonium', kk: 'Аммофос', sw: 'Fosfati ya Amonia' }, value: 52 },
     ],
     'K2O': [
